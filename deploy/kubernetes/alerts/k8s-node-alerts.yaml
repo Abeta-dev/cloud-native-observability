@@ -1,0 +1,61 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: k8s-infrastructure-alerts
+  namespace: monitoring
+  labels:
+    role: alert-rules
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: k8s.infrastructure
+      rules:
+        - alert: KubeNodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Kubernetes node is not ready"
+            description: "Node {{ $labels.node }} has been unready for more than 5 minutes."
+            runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubenodenotready"
+
+        - alert: KubeNodeMemoryPressure
+          expr: kube_node_status_condition{condition="MemoryPressure",status="true"} == 1
+          for: 3m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node is experiencing memory pressure"
+            description: "Node {{ $labels.node }} has memory pressure condition active."
+            runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubenodememorypressure"
+
+        - alert: KubeNodeDiskPressure
+          expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+          for: 3m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node is experiencing disk pressure"
+            description: "Node {{ $labels.node }} has low available disk space (<10% free)."
+            runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubenodediskpressure"
+
+        - alert: KubePodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total[5m]) * 60 > 2
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pod is CrashLooping"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{ $labels.container }} is restarting frequently (>2 restarts/min)."
+            runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubepodcrashlooping"
+
+        - alert: KubeDeploymentReplicasMismatch
+          expr: kube_deployment_status_replicas_available != kube_deployment_spec_replicas
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Deployment available replicas mismatch"
+            description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has fewer replicas available than desired for >10 minutes."
+            runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubedeploymentreplicasmismatch"
