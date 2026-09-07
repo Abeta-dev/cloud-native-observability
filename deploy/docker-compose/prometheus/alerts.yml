@@ -1,0 +1,57 @@
+# =============================================================================
+# Prometheus Alerting Rules: Golden Signals & Microservice Health
+# =============================================================================
+groups:
+  - name: golden-signals.alerts
+    rules:
+      # -------------------------------------------------------------------------
+      # 1. Health / Availability: Service Down
+      # -------------------------------------------------------------------------
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service instance {{ $labels.instance }} is down"
+          description: "Service target {{ $labels.instance }} of job {{ $labels.job }} has been unreachable for more than 1 minute."
+          runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#servicedown"
+
+      # -------------------------------------------------------------------------
+      # 2. Errors: High Error Rate (> 1% 5xx over 5 minutes)
+      # -------------------------------------------------------------------------
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (service, instance) / sum(rate(http_requests_total[5m])) by (service, instance) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate detected"
+          description: "HTTP 5xx error rate exceeds 1% (0.01) over the last 5 minutes on {{ $labels.service }} ({{ $labels.instance }})."
+          runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#higherrorrate"
+
+      # -------------------------------------------------------------------------
+      # 3. Latency: High P99 Duration (> 1.0s over 5 minutes)
+      # -------------------------------------------------------------------------
+      - alert: HighLatencyP99
+        expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 1.0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High P99 latency breach"
+          description: "P99 HTTP request duration for service {{ $labels.service }} exceeds 1.0s over the last 5 minutes."
+          runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#highlatencyp99"
+
+      # -------------------------------------------------------------------------
+      # 4. Saturation: Worker Pool Queue Near Full (> 85% capacity)
+      # -------------------------------------------------------------------------
+      - alert: WorkerpoolQueueNearFull
+        expr: workerpool_queue_depth / workerpool_queue_capacity > 0.85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Worker pool queue near full capacity"
+          description: "Worker pool queue depth exceeds 85% of total capacity on instance {{ $labels.instance }}."
+          runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#workerpoolqueuenearfull"
