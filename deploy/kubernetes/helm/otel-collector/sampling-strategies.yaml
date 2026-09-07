@@ -1,0 +1,61 @@
+# OpenTelemetry Collector - Multi-Strategy Sampling Configurations
+# Choose the sampling architecture that matches your traffic profile and cost budget.
+
+# -----------------------------------------------------------------------------
+# Strategy 1: Probabilistic Head-Based Sampling (Lowest CPU Overhead)
+# Decides whether to keep a trace at the moment it enters the collector.
+# Best for: High-volume homogenous APIs where random uniform sampling is sufficient.
+# -----------------------------------------------------------------------------
+strategy_probabilistic:
+  processors:
+    probabilistic_sampler:
+      sampling_percentage: 10.0 # Retain 10% of all traces
+
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, k8sattributes, probabilistic_sampler, batch]
+        exporters: [otlp/tempo]
+
+# -----------------------------------------------------------------------------
+# Strategy 2: Tail-Based Multi-Rule Sampling (Recommended for Production)
+# Waits for the entire trace to complete, then inspects errors, duration, and metadata.
+# Guarantees 100% retention of broken and slow traces while pruning successful routine calls.
+# -----------------------------------------------------------------------------
+strategy_tail_based:
+  processors:
+    tail_sampling:
+      decision_wait: 10s
+      num_traces: 10000
+      expected_new_traces_per_sec: 2000
+      policies:
+        # Rule A: Keep 100% of all traces containing an error (HTTP 5xx, gRPC error, or unhandled panic)
+        - name: retain-all-errors
+          type: status_code
+          status_code: { status_codes: [ERROR] }
+
+        # Rule B: Keep 100% of slow requests where overall duration exceeds 500ms
+        - name: retain-high-latency
+          type: latency
+          latency: { threshold_ms: 500 }
+
+        # Rule C: Keep 100% of synthetic monitoring and critical business transactions
+        - name: retain-critical-routes
+          type: string_attribute
+          string_attribute:
+            key: "http.target"
+            values: ["/api/v1/checkout", "/api/v1/payments"]
+            enabled_regex_matching: false
+
+        # Rule D: Uniformly sample only 5% of healthy, fast, routine background calls
+        - name: sample-healthy-baseline
+          type: probabilistic
+          probabilistic: { sampling_percentage: 5.0 }
+
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, k8sattributes, tail_sampling, batch]
+        exporters: [otlp/tempo]
