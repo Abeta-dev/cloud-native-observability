@@ -1,0 +1,63 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ["alertname", "cluster", "service", "namespace"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: "slack-warnings"
+  routes:
+    # Critical incidents page the on-call engineer immediately via PagerDuty
+    - matchers:
+        - severity = "critical"
+      receiver: "pagerduty-high-urgency"
+      continue: true
+
+    - matchers:
+        - severity = "critical"
+      receiver: "slack-critical"
+
+    # Warnings route to Slack engineering channel
+    - matchers:
+        - severity = "warning"
+      receiver: "slack-warnings"
+
+inhibit_rules:
+  # Inhibit warning alerts if a critical alert is already active on the same target
+  - target_matchers:
+      - severity = "warning"
+    source_matchers:
+      - severity = "critical"
+    equal: ["alertname", "cluster", "service", "namespace"]
+
+receivers:
+  - name: "slack-warnings"
+    slack_configs:
+      - channel: "#alerts-warning"
+        send_resolved: true
+        api_url_file: /etc/alertmanager/secrets/slack-webhook-url
+        title: "[WARNING] {{ .CommonLabels.alertname }} ({{ .CommonLabels.service }})"
+        text: >-
+          *Summary*: {{ .CommonAnnotations.summary }}
+          *Description*: {{ .CommonAnnotations.description }}
+          *Namespace*: {{ .CommonLabels.namespace }}
+
+  - name: "slack-critical"
+    slack_configs:
+      - channel: "#alerts-critical"
+        send_resolved: true
+        api_url_file: /etc/alertmanager/secrets/slack-webhook-url
+        title: "🚨 [CRITICAL] {{ .CommonLabels.alertname }} ({{ .CommonLabels.service }})"
+        text: >-
+          *Summary*: {{ .CommonAnnotations.summary }}
+          *Description*: {{ .CommonAnnotations.description }}
+          *Runbook*: {{ .CommonAnnotations.runbook_url }}
+
+  - name: "pagerduty-high-urgency"
+    pagerduty_configs:
+      - routing_key_file: /etc/alertmanager/secrets/pagerduty-routing-key
+        severity: "critical"
+        description: "{{ .CommonLabels.alertname }}: {{ .CommonAnnotations.summary }}"
+        client: "Prometheus Alertmanager"
+        client_url: "{{ .CommonAnnotations.runbook_url }}"
