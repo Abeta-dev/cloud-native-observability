@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki-distributed
+  namespace: argocd
+  labels:
+    tier: observability
+    component: logs
+spec:
+  project: default
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: loki
+    targetRevision: 5.43.3
+    helm:
+      valueFiles:
+        - https://raw.githubusercontent.com/umesh0492/cloud-native-observability/v0.1.0/deploy/kubernetes/helm/loki/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
