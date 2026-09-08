@@ -1,0 +1,20 @@
+# Environment & Project Naming
+environment  = "prod"
+aws_region   = "us-east-1"
+project_name = "cloud-native-obs"
+
+# Observability Storage Retention
+enable_cloud_storage = "true"
+trace_retention_days = 30
+log_retention_days   = 90
+
+# Kubernetes Target
+kubernetes_namespace = "monitoring"
+
+# Grafana Observability as Code
+grafana_url  = "http://localhost:3000"
+grafana_auth = "admin:admin" # Use Service Account Token in Production (e.g. glsa_...)
+
+# Incident Response Integration
+pagerduty_service_key = "" # "pd-integration-key-here"
+slack_webhook_url     = "" # "https://hooks.slack.com/services/T00/B00/XXXX"
