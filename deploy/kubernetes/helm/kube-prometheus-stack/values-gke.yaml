@@ -1,0 +1,37 @@
+# GCP GKE Overlay for kube-prometheus-stack
+prometheus:
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard-rwo
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 500Gi
+    serviceAccount:
+      create: true
+      annotations:
+        iam.gke.io/gcp-service-account: prometheus-sa@my-gcp-project.iam.gserviceaccount.com
+    thanos:
+      version: v0.34.1
+      objectStorageConfig:
+        existingSecret:
+          name: thanos-gcs-secret
+          key: thanos.yaml
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard-rwo
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+grafana:
+  persistence:
+    storageClassName: standard-rwo
+    size: 50Gi

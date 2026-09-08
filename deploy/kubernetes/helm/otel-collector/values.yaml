@@ -1,0 +1,91 @@
+# OpenTelemetry Collector Values
+mode: "daemonset"
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: 0.98.0
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+config:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  processors:
+    memory_limiter:
+      check_interval: 1s
+      limit_percentage: 75
+      spike_limit_percentage: 20
+    batch:
+      timeout: 1s
+      send_batch_size: 1024
+    k8sattributes:
+      auth_type: "serviceAccount"
+      passthrough: false
+      extract:
+        metadata:
+          - k8s.pod.name
+          - k8s.pod.uid
+          - k8s.deployment.name
+          - k8s.namespace.name
+          - k8s.node.name
+
+  connectors:
+    spanmetrics:
+      histogram:
+        unit: ms
+        explicit:
+          buckets: [2ms, 4ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s]
+      dimensions:
+        - name: http.status_code
+        - name: http.method
+        - name: http.route
+      dimensions_cache_size: 1000
+      aggregation_temporality: "AGGREGATION_TEMPORALITY_CUMULATIVE"
+      metrics_flush_interval: 15s
+
+    servicegraph:
+      latency_histogram_buckets: [2ms, 4ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s]
+      dimensions:
+        - http.method
+      store:
+        ttl: 2s
+        max_items: 1000
+
+  exporters:
+    otlp/tempo:
+      endpoint: tempo-distributor.tracing.svc.cluster.local:4317
+      tls:
+        insecure: true
+    prometheus:
+      endpoint: 0.0.0.0:8889
+      namespace: traces_spanmetrics
+
+  service:
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, k8sattributes, batch]
+        exporters: [otlp/tempo, spanmetrics, servicegraph]
+      metrics:
+        receivers: [spanmetrics, servicegraph]
+        processors: [memory_limiter, batch]
+        exporters: [prometheus]
+
+ports:
+  prometheus:
+    enabled: true
+    containerPort: 8889
+    servicePort: 8889
+    protocol: TCP
