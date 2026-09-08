@@ -1,0 +1,40 @@
+# AWS EKS Overlay for kube-prometheus-stack
+prometheus:
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 500Gi
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/prometheus-s3-backup-role
+    thanos:
+      version: v0.34.1
+      objectStorageConfig:
+        existingSecret:
+          name: thanos-objstore-secret
+          key: thanos.yaml
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+grafana:
+  persistence:
+    storageClassName: gp3
+    size: 50Gi
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/grafana-athena-cloudwatch-role

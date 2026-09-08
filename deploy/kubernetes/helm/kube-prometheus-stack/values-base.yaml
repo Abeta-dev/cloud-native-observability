@@ -1,0 +1,150 @@
+# Production Base Values for kube-prometheus-stack
+defaultRules:
+  create: true
+  rules:
+    alertmanager: true
+    etcd: false # Managed by cloud provider in EKS/GKE
+    general: true
+    k8s: true
+    kubeApiserver: true
+    kubeApiserverAvailability: true
+    kubePrometheusNodeAlerting: true
+    kubePrometheusNodeRecording: true
+    kubeScheduler: false
+    kubeStateMetrics: true
+    kubelet: true
+    node: true
+    network: true
+    prometheus: true
+    prometheusOperator: true
+
+alertmanager:
+  enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ["alertname", "cluster", "service", "namespace"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: "slack-warnings"
+      routes:
+        - matchers:
+            - severity = "critical"
+          receiver: "pagerduty-high-urgency"
+          continue: true
+        - matchers:
+            - severity = "critical"
+          receiver: "slack-critical"
+        - matchers:
+            - severity = "warning"
+          receiver: "slack-warnings"
+    inhibit_rules:
+      - target_matchers:
+          - severity = "warning"
+        source_matchers:
+          - severity = "critical"
+        equal: ["alertname", "cluster", "service", "namespace"]
+    receivers:
+      - name: "slack-warnings"
+        slack_configs:
+          - channel: "#alerts-warning"
+            send_resolved: true
+            api_url_file: /etc/alertmanager/secrets/alertmanager-secrets/slack-webhook-url
+            title: "[WARNING] {{ .CommonLabels.alertname }} ({{ .CommonLabels.service }})"
+            text: >-
+              *Summary*: {{ .CommonAnnotations.summary }}
+              *Description*: {{ .CommonAnnotations.description }}
+              *Namespace*: {{ .CommonLabels.namespace }}
+      - name: "slack-critical"
+        slack_configs:
+          - channel: "#alerts-critical"
+            send_resolved: true
+            api_url_file: /etc/alertmanager/secrets/alertmanager-secrets/slack-webhook-url
+            title: "🚨 [CRITICAL] {{ .CommonLabels.alertname }} ({{ .CommonLabels.service }})"
+            text: >-
+              *Summary*: {{ .CommonAnnotations.summary }}
+              *Description*: {{ .CommonAnnotations.description }}
+              *Runbook*: {{ .CommonAnnotations.runbook_url }}
+      - name: "pagerduty-high-urgency"
+        pagerduty_configs:
+          - routing_key_file: /etc/alertmanager/secrets/alertmanager-secrets/pagerduty-routing-key
+            severity: "critical"
+            description: "{{ .CommonLabels.alertname }}: {{ .CommonAnnotations.summary }}"
+            client: "Prometheus Alertmanager"
+            client_url: "{{ .CommonAnnotations.runbook_url }}"
+  alertmanagerSpec:
+    replicas: 2
+    retention: 120h
+    secrets:
+      - alertmanager-secrets
+    storage:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+grafana:
+  enabled: true
+  replicas: 2
+  # Admin credentials secret (provisioned via deploy/kubernetes/secrets/grafana-admin-credentials.yaml
+  # or Terraform kubernetes_secret.grafana_admin resource to prevent CreateContainerConfigError)
+  admin:
+    existingSecret: "grafana-admin-credentials"
+    userKey: "admin-user"
+    passwordKey: "admin-password"
+  persistence:
+    enabled: true
+    size: 20Gi
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: "/var/lib/grafana/dashboards/default"
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    replicas: 2
+    scrapeInterval: 15s
+    evaluationInterval: 15s
+    retention: 30d
+    retentionSize: "200Gi"
+    enableAdminAPI: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    resources:
+      requests:
+        cpu: 1000m
+        memory: 4Gi
+      limits:
+        cpu: 4000m
+        memory: 16Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 250Gi

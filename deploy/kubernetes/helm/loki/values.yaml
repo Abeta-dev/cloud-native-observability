@@ -1,0 +1,77 @@
+# Production Values for Grafana Loki
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 3
+  storage:
+    type: s3
+    bucketNames:
+      chunks: "cno-loki-chunks-prod"
+      ruler: "cno-loki-ruler-prod"
+      admin: "cno-loki-admin-prod"
+    s3:
+      region: "us-east-1"
+  schemaConfig:
+    configs:
+      - from: 2024-01-01
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  limits_config:
+    retention_period: 30d
+    enforce_metric_name: false
+    reject_old_samples: true
+    reject_old_samples_max_age: 168h
+    ingestion_rate_mb: 32
+    ingestion_burst_size_mb: 64
+
+read:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+write:
+  replicas: 3
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+backend:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+promtail:
+  enabled: true
+  config:
+    snippets:
+      extraScrapeConfigs: |
+        - job_name: kubernetes-pods-json
+          pipeline_stages:
+            - docker: {}
+            - json:
+                expressions:
+                  trace_id: trace_id
+                  level: level
+                  msg: msg
+            - labels:
+                level:
+            - structured_metadata:
+                trace_id:
