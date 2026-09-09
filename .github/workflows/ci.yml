@@ -1,0 +1,107 @@
+name: Observability Platform CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  docs-match-tree:
+    name: Validate Docs & Version Synchronization
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Verify Version & Documentation Synchronization
+        run: ./scripts/check_version.sh
+
+  validate-configs:
+    name: Validate Observability Manifests, Alerts & IaC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install promtool and amtool
+        run: |
+          PROM_VERSION="2.51.0"
+          curl -fsSL "https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz" | tar -xz -C /tmp
+          echo "/tmp/prometheus-${PROM_VERSION}.linux-amd64" >> $GITHUB_PATH
+
+          AM_VERSION="0.27.0"
+          curl -fsSL "https://github.com/prometheus/alertmanager/releases/download/v${AM_VERSION}/alertmanager-${AM_VERSION}.linux-amd64.tar.gz" | tar -xz -C /tmp
+          echo "/tmp/alertmanager-${AM_VERSION}.linux-amd64" >> $GITHUB_PATH
+
+      - name: Validate Prometheus Alert Rules with Promtool
+        run: |
+          if command -v promtool >/dev/null 2>&1; then
+            echo "Validating Docker Compose Prometheus alert rules..."
+            promtool check rules deploy/docker-compose/prometheus/alerts.yml
+            echo "Validating Kubernetes PrometheusRule alerts (slo-alerts)..."
+            sed -n '/^spec:/,$p' deploy/kubernetes/alerts/slo-alerts.yaml | sed '1d' | sed 's/^  //' | promtool check rules /dev/stdin
+            echo "Validating Kubernetes PrometheusRule alerts (k8s-node-alerts)..."
+            sed -n '/^spec:/,$p' deploy/kubernetes/alerts/k8s-node-alerts.yaml | sed '1d' | sed 's/^  //' | promtool check rules /dev/stdin
+          else
+            echo "promtool not available, skipping rules check"
+          fi
+
+      - name: Validate Alertmanager Configuration
+        run: |
+          echo "Validating Alertmanager configuration with amtool..."
+          amtool check-config deploy/kubernetes/alerts/alertmanager.yaml
+
+      - name: Validate Prometheus Server Config
+        run: |
+          if command -v promtool >/dev/null 2>&1; then
+            echo "Validating Prometheus scrape configuration..."
+            promtool check config deploy/docker-compose/prometheus/prometheus.yml
+          else
+            echo "promtool not available, skipping config check"
+          fi
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Validate Terraform Configuration
+        run: |
+          echo "Validating Terraform modules and syntax..."
+          terraform -chdir=deploy/terraform init -backend=false
+          terraform -chdir=deploy/terraform validate
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.2
+
+      - name: Lint Helm Configurations
+        run: |
+          echo "Validating Helm configurations..."
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+          helm repo update
+          helm template test-kps prometheus-community/kube-prometheus-stack --version 58.7.1 -f deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml > /dev/null
+          helm template test-tempo grafana/tempo-distributed --version 1.9.1 -f deploy/kubernetes/helm/tempo/values.yaml > /dev/null
+          helm template test-loki grafana/loki --version 5.43.3 -f deploy/kubernetes/helm/loki/values.yaml > /dev/null
+
+      - name: Validate Kubernetes Manifests with Kubeconform
+        run: |
+          KUBECONFORM_VERSION="v0.6.4"
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar -xz -C /tmp
+          /tmp/kubeconform -summary -ignore-missing-schemas deploy/kubernetes/alerts/slo-alerts.yaml deploy/kubernetes/secrets/ deploy/kubernetes/argocd/apps/
+
+      - name: Validate Docker Compose Configuration
+        run: |
+          docker compose -f deploy/docker-compose/docker-compose.yml config --quiet
+
+      - name: Lint YAML & Kubernetes Manifests
+        run: |
+          pip install yamllint
+          python3 -m yamllint .
