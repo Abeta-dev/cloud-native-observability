@@ -201,7 +201,7 @@ kubectl apply -f deploy/kubernetes/argocd/app-of-apps.yaml
 
 ArgoCD automatically reconciles and manages:
 - `kube-prometheus-stack` (Prometheus Operator, Alertmanager, Node Exporter)
-- `loki-distributed` (Scalable TSDB log storage with S3/GCS)
+- `loki` (Scalable TSDB log storage with S3/GCS)
 - `tempo-distributed` (Scalable trace storage with S3/GCS)
 - `opentelemetry-collector` (DaemonSet with `k8sattributes` processor)
 

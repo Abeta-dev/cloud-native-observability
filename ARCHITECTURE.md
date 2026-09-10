@@ -91,7 +91,7 @@ All Kubernetes workloads in this repository are managed via the **App-of-Apps pa
 - Root application: [`deploy/kubernetes/argocd/app-of-apps.yaml`](deploy/kubernetes/argocd/app-of-apps.yaml)
 - Declarative child applications:
   - `kube-prometheus-stack` (Monitoring namespace)
-  - `loki-distributed` (Logging namespace)
+  - `loki` (Logging namespace)
   - `tempo-distributed` (Tracing namespace)
   - `opentelemetry-collector` (OpenTelemetry namespace)
 - **Self-Healing**: Out-of-band drifts are automatically corrected by ArgoCD reconciliation loops.
