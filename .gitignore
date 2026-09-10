@@ -24,6 +24,7 @@ deploy/docker-compose/data/
 bin/
 dist/
 tmp/
+graphify-out/
 
 # Kubernetes applied secrets (ignore custom secret files while tracking safe default manifests & templates)
 deploy/kubernetes/secrets/*.yaml

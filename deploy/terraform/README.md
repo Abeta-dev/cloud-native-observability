@@ -28,7 +28,7 @@ Production-ready Terraform modules and infrastructure compositions for provision
 | :--- | :--- |
 | **Multi-Environment Promotion** | Promotes identical dashboards, alert rules, and contact points from `dev` → `staging` → `prod` without manual drift. |
 | **Audit & Compliance (SOC2 / ISO 27001)** | Mandates that all Alert Rules, PagerDuty on-call escalation, and SLO thresholds undergo Git review, PR approvals, and cryptographic commit signing. |
-| **Disaster Recovery (RTO < 5m)** | Rebuilds monitoring cluster, metrics pipelines, dashboards, and alerting rules from zero in minutes if an AWS region or Kubernetes cluster fails. |
+| **Deterministic Disaster Recovery** | Rebuilds monitoring cluster, metrics pipelines, dashboards, and alerting rules from zero via declarative code if an AWS region or Kubernetes cluster fails. |
 | **Microservice Fleet Self-Service** | Allows platform teams to provide reusable Terraform modules so feature teams declare their own SLIs, SLOs, and alert rules alongside their service code. |
 
 ---

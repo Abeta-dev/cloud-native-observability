@@ -227,7 +227,7 @@ terraform plan
 terraform apply
 ```
 
-Read the full [Terraform Observability Guide](docs/TERRAFORM_GUIDE.md) for architectural trade-offs, drift detection, and zero-trust secrets management.
+Read the full [Terraform Observability Guide](docs/TERRAFORM_GUIDE.md) for architectural trade-offs, drift detection, and secrets management.
 
 ---
 

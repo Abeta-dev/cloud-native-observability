@@ -18,7 +18,7 @@ Traditional observability architectures suffer from the **"ClickOps Paradox"**:
 - **Peer-Reviewed Changes**: Every alert threshold modification requires a Pull Request review.
 - **Speculative Plan Verification**: CI automatically generates a `terraform plan` to prevent accidental deletion of critical production alerts.
 - **Environment Symmetry**: `dev`, `staging`, and `prod` share identical dashboard layouts and alert logic.
-- **Instant Disaster Recovery**: Full telemetry reconstitution in under 3 minutes.
+- **Rapid Disaster Recovery**: Telemetry dashboard definitions, alert rules, and bucket lifecycle policies can be reconstituted deterministically via declarative IaC (recovery time depends on cluster provisioning, DNS, and Helm chart rollout).
 
 ---
 
@@ -138,9 +138,9 @@ resource "grafana_rule_group" "golden_signal_rules" {
 
 ---
 
-## 5. Secrets Management & Zero-Trust Security
+## 5. Secrets Management & Credentials Injection
 
-Never commit plain-text credentials (`grafana_auth`, `pagerduty_service_key`, `slack_webhook_url`) to version control.
+Never commit plain-text production credentials (`grafana_auth`, `pagerduty_service_key`, `slack_webhook_url`) to version control. In development and local sandbox setups, safe default manifests or placeholder variables are provided; for production deployments, credentials should be injected via environment variables (`TF_VAR_*`) or an external secrets store.
 
 ### Recommended Secret Injection Patterns
 1. **Environment Variables**:
