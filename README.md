@@ -11,7 +11,7 @@
 [![ArgoCD](https://img.shields.io/badge/GitOps-ArgoCD-ef6b48.svg?logo=argo&logoColor=white)](https://argo-cd.readthedocs.io)
 [![Terraform](https://img.shields.io/badge/IaC-Terraform_1.5+-7b42bc.svg?logo=terraform&logoColor=white)](deploy/terraform)
 
-An enterprise-grade, GitOps-ready **Cloud-Native Observability Platform** implementing the modern **LGTM Stack** (Loki, Grafana, Tempo, Mimir/Prometheus) unified with **OpenTelemetry (OTel)**, automated **Google SRE multi-window burn-rate SLO alerting**, production **incident runbooks**, and **trace-to-log cross-telemetry correlation**.
+An enterprise-grade, GitOps-ready **Cloud-Native Observability Platform** implementing the modern **LGTM Stack** (Loki, Grafana, Tempo, Prometheus / Thanos) unified with **OpenTelemetry (OTel)**, automated **Google SRE multi-window burn-rate SLO alerting**, production **incident runbooks**, and **trace-to-log cross-telemetry correlation**.
 
 ---
 

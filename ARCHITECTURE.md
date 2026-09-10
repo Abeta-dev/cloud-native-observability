@@ -1,6 +1,6 @@
 # Enterprise Cloud-Native Observability Architecture
 
-This document specifies the end-to-end architecture of the **Cloud-Native Observability Platform**, built on the **LGTM Stack** (Loki, Grafana, Tempo, Prometheus/Mimir) and **OpenTelemetry (OTel)**.
+This document specifies the end-to-end architecture of the **Cloud-Native Observability Platform**, built on the **LGTM Stack** (Loki, Grafana, Tempo, Prometheus / Thanos) and **OpenTelemetry (OTel)**.
 
 ---
 
