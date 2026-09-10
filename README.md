@@ -104,9 +104,8 @@ The platform automatically provisions production-grade Grafana dashboards with z
    - Real-time ingestion uptime for Prometheus, Loki, Tempo, and OTel Collector.
    - Global HTTP request throughput (RPS).
    - Ingestion memory footprint across backends.
-2. **Microservice APM & RED Metrics** (`microservice-apm.json`):
-   - Rate, Errors, and Duration (RED) metrics.
-   - Outbound Circuit Breaker state indicator (Closed / Half-Open / Open).
+2. **Microservice APM & Resilience Dashboard** (`microservice-apm.json`):
+   - Outbound Circuit Breaker request throughput, failure rates, and state indicator (Closed / Half-Open / Open).
    - Worker pool task velocities (Submitted vs Completed vs Dropped).
    - Cache hit ratio percentages.
 3. **Logs Explorer & Error Streams** (`logs-explorer.json`):

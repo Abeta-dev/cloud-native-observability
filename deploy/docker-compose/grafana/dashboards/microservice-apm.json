@@ -11,7 +11,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "id": 1,
-      "title": "RED Metrics (Rate, Errors, Duration)",
+      "title": "Circuit Breaker Metrics",
       "type": "row"
     },
     {
@@ -40,7 +40,7 @@
       "targets": [
         { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "sum(rate(app_circuit_breaker_requests_total[1m])) or vector(0)", "instant": true, "refId": "A" }
       ],
-      "title": "Total Request Rate (RPS)",
+      "title": "Circuit Breaker Request Rate (RPS)",
       "type": "stat"
     },
     {
