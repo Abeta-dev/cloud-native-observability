@@ -74,7 +74,6 @@ Telemetry dimensionality and operational notification metadata are cleanly parti
 The telemetry pipeline uses OpenTelemetry Collector and Tempo to synthesize RED metrics from distributed trace spans:
 - `traces_spanmetrics_calls_total`
 - `traces_spanmetrics_duration_milliseconds_bucket`
-- `traces_service_graph_request_total`
 
 This enables automatic service dependency topology mapping and latency histogram analysis across all services without custom metric code.
 

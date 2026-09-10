@@ -161,7 +161,6 @@ Distributed traces ingested via OpenTelemetry Collector and Grafana Tempo are au
 1. **Span-to-Metric Synthesis**: The OpenTelemetry pipeline extracts telemetry from raw OTLP spans to generate Prometheus metrics:
    - `traces_spanmetrics_calls_total`: Counter tracking total invocations partitioned by `service.name`, `span.name`, and `status.code`.
    - `traces_spanmetrics_duration_milliseconds_bucket`: Latency histogram capturing duration distributions across configurable buckets (e.g. 2ms to 10s).
-   - `traces_service_graph_request_total`: Generates real-time service topology maps tracking inter-service caller-callee relationships, latency, and error counts.
 2. **Prometheus Scraping & Federation**: Prometheus scrapes these span-derived metrics via the Collector's Prometheus exporter on port `:8889` (`/metrics`), feeding Grafana APM dashboards and service maps directly from distributed traces.
 
 ---
