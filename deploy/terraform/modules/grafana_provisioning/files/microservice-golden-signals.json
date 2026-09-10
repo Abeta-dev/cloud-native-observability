@@ -112,12 +112,12 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "(sum(rate(http_requests_total{status=~\"[45]..\"}[1m])) / sum(rate(http_requests_total[1m]))) * 100",
+          "expr": "(sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))) * 100",
           "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Error Rate (%)",
+      "title": "5xx Error Rate (%)",
       "type": "stat"
     },
     {

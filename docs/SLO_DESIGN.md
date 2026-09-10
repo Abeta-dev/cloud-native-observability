@@ -68,3 +68,34 @@ and
 The dual `and` clause guarantees that:
 1. The 1-hour window confirms significant budget consumption.
 2. The 5-minute window confirms that the incident is **still actively happening right now** (preventing pages for incidents that already resolved).
+
+---
+
+## 5. Canonical Availability SLI & 4xx vs. 5xx Harmonization
+
+To guarantee complete consistency and prevent alert thrashing, our platform enforces **one canonical definition** for the Service Availability SLI across all three observability layers:
+
+### Canonical Mathematical Definition
+
+$$\text{SLI}_{\text{availability}} = 1 - \frac{\sum \text{rate}(http\_requests\_total\{status=\sim"5.."\}[\text{window}])}{\sum \text{rate}(http\_requests\_total[\text{window}])}$$
+
+The corresponding Error Rate SLI evaluates:
+
+$$\text{Error Rate} = \frac{\sum \text{rate}(http\_requests\_total\{status=\sim"5.."\}[\text{window}])}{\sum \text{rate}(http\_requests\_total[\text{window}])}$$
+
+### Explicit Exclusion of 4xx Client Errors
+
+4xx HTTP status codes (`400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `422 Unprocessable Entity`, etc.) represent **client-side faults**, such as malformed requests, invalid credentials, or endpoint probing by security scanners. Including 4xx errors in the service availability error budget introduces severe operational failures:
+1. **False-Positive Paging**: Malicious vulnerability scanners or client-side typos immediately trigger critical on-call pages even though the service backend is 100% healthy.
+2. **Artificial Budget Exhaustion**: High-volume public APIs would rapidly exhaust their monthly error budgets due to bad third-party client integrations.
+
+Therefore, the Availability SLI strictly restricts the numerator to **HTTP 5xx server errors** (`status=~"5.."`), measuring genuine platform unreliability (`500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable`, `504 Gateway Timeout`).
+
+### Cross-Layer Harmonization Matrix
+
+| Layer | Configuration Path | Rule / Panel Name | Metric Expression | Window |
+|---|---|---|---|:---:|
+| **Layer 1: Local Sandbox** | `deploy/docker-compose/prometheus/alerts.yml` | `HighErrorRate` | `sum(rate(http_requests_total{status=~"5.."}[5m])) by (service, instance) / sum(rate(http_requests_total[5m])) by (service, instance) > 0.01` | 5m |
+| **Layer 2: Production GitOps** | `deploy/kubernetes/alerts/slo-alerts.yaml` | `slo.availability.recording` & `burnrate` | `sum(rate(http_requests_total{status=~"5.."}[5m])) by (service, namespace) / sum(rate(http_requests_total[5m])) by (service, namespace)` | 5m / 30m / 1h / 6h / 3d |
+| **Layer 3: Observability as Code** | `deploy/terraform/modules/grafana_provisioning/alerts.tf` | `HighErrorRateP1` & Dashboard | `(sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) * 100` | 5m |
+
