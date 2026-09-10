@@ -6,6 +6,8 @@ metadata:
   labels:
     tier: observability
     component: collector
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:

@@ -6,6 +6,8 @@ metadata:
   labels:
     tier: observability
     component: tracing
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
