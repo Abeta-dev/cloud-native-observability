@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
 
       - name: Verify Version & Documentation Synchronization
         run: ./scripts/check_version.sh
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
 
       - name: Install promtool and amtool
         run: |
@@ -74,14 +74,14 @@ jobs:
           fi
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v3.1.2
         with:
           terraform_version: 1.7.5
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v4
+        uses: terraform-linters/setup-tflint@v4.1.1
         with:
-          tflint_version: latest
+          tflint_version: v0.51.1
 
       - name: Validate Terraform Formatting and Syntax
         run: |
@@ -105,7 +105,7 @@ jobs:
           echo "/tmp" >> $GITHUB_PATH
 
       - name: Setup Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v4.2.0
         with:
           version: v3.14.2
 
@@ -140,7 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.7
 
       - name: Run End-to-End Telemetry Smoke Test
         run: bash ./scripts/smoke_test.sh

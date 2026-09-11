@@ -1,9 +1,9 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.24.4-alpine AS builder
 WORKDIR /app
 COPY main.go .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o demo-app main.go
 
-FROM alpine:3.19
+FROM alpine:3.19.1
 RUN apk --no-cache add ca-certificates curl
 WORKDIR /root/
 COPY --from=builder /app/demo-app .
