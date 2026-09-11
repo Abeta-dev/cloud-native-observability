@@ -78,11 +78,25 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Validate Terraform Configuration
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: Validate Terraform Formatting and Syntax
         run: |
+          echo "Checking Terraform formatting..."
+          terraform -chdir=deploy/terraform fmt -check -recursive
           echo "Validating Terraform modules and syntax..."
           terraform -chdir=deploy/terraform init -backend=false
           terraform -chdir=deploy/terraform validate
+
+      - name: Lint Terraform with TFLint
+        run: |
+          echo "Running TFLint..."
+          cd deploy/terraform
+          tflint --init
+          tflint --recursive
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
