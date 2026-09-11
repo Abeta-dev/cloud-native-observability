@@ -106,3 +106,14 @@ jobs:
         run: |
           pip install yamllint
           python3 -m yamllint .
+
+  smoke-test:
+    name: Telemetry End-to-End Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run End-to-End Telemetry Smoke Test
+        run: bash ./scripts/smoke_test.sh
+
