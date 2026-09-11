@@ -98,6 +98,12 @@ jobs:
           tflint --init
           tflint --recursive
 
+      - name: Install Kubeconform
+        run: |
+          KUBECONFORM_VERSION="v0.6.4"
+          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar -xz -C /tmp
+          echo "/tmp" >> $GITHUB_PATH
+
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
@@ -110,16 +116,15 @@ jobs:
           helm repo add grafana https://grafana.github.io/helm-charts
           helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
           helm repo update
-          helm template test-kps prometheus-community/kube-prometheus-stack --version 58.7.1 -f deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml > /dev/null
-          helm template test-tempo grafana/tempo-distributed --version 1.9.1 -f deploy/kubernetes/helm/tempo/values.yaml > /dev/null
-          helm template test-loki grafana/loki --version 5.43.3 -f deploy/kubernetes/helm/loki/values.yaml > /dev/null
-          helm template test-otel open-telemetry/opentelemetry-collector --version 0.88.0 -f deploy/kubernetes/helm/otel-collector/values.yaml > /dev/null
+          helm template test-kps prometheus-community/kube-prometheus-stack --version 58.7.1 -f deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml | kubeconform -strict -ignore-missing-schemas
+          helm template test-tempo grafana/tempo-distributed --version 1.9.1 -f deploy/kubernetes/helm/tempo/values.yaml | kubeconform -strict -ignore-missing-schemas
+          helm template test-loki grafana/loki --version 5.43.3 -f deploy/kubernetes/helm/loki/values.yaml | kubeconform -strict -ignore-missing-schemas
+          helm template test-otel open-telemetry/opentelemetry-collector --version 0.88.0 -f deploy/kubernetes/helm/otel-collector/values.yaml | kubeconform -strict -ignore-missing-schemas
 
       - name: Validate Kubernetes Manifests with Kubeconform
         run: |
-          KUBECONFORM_VERSION="v0.6.4"
-          curl -fsSL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar -xz -C /tmp
-          /tmp/kubeconform -summary -ignore-missing-schemas deploy/kubernetes/alerts/ deploy/kubernetes/secrets/ deploy/kubernetes/argocd/
+          echo "Validating Kubernetes manifests with Kubeconform..."
+          kubeconform -summary -strict -ignore-missing-schemas deploy/kubernetes/alerts/k8s-node-alerts.yaml deploy/kubernetes/alerts/slo-alerts.yaml deploy/kubernetes/alerts/alertmanager.yaml deploy/kubernetes/secrets/ deploy/kubernetes/argocd/
 
       - name: Validate Docker Compose Configuration
         run: |

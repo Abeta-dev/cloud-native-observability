@@ -52,6 +52,19 @@ sync_crd_to_rules("deploy/kubernetes/alerts/slo-alerts.yaml", "deploy/kubernetes
 print("✅ Synced Kubernetes PrometheusRule manifests with pure Prometheus rule definitions.")
 EOF
 
+# 2. Validate Kubernetes alert manifests with Kubeconform
+KUBECONFORM_BIN="kubeconform"
+if ! command -v kubeconform >/dev/null 2>&1; then
+  if [ -x "/tmp/kubeconform" ]; then
+    KUBECONFORM_BIN="/tmp/kubeconform"
+  fi
+fi
+
+if command -v "${KUBECONFORM_BIN}" >/dev/null 2>&1 || [ -x "${KUBECONFORM_BIN}" ]; then
+  echo "Validating Kubernetes alert manifests with Kubeconform..."
+  "${KUBECONFORM_BIN}" -strict -ignore-missing-schemas deploy/kubernetes/alerts/k8s-node-alerts.yaml deploy/kubernetes/alerts/slo-alerts.yaml
+fi
+
 TEST_FILES=(
   "deploy/kubernetes/alerts/tests/k8s-node-alerts-test.yaml"
   "deploy/kubernetes/alerts/tests/slo-alerts-test.yaml"
