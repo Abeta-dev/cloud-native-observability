@@ -8,10 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- demo-app: Deduplicated worker pool queue metrics, standardizing on `app_workerpool_queue_depth` and `app_workerpool_queue_capacity` with consistent `app_workerpool_*` metric prefixing across demo-app, Prometheus alert rules, Grafana dashboards, and runbooks.
 - kubernetes: Relocated unwired cloud-specific overlays (`values-eks.yaml`, `values-gke.yaml`) from `deploy/kubernetes/helm/kube-prometheus-stack/` to `deploy/kubernetes/examples/overlays/` with explicit `TEMPLATE ONLY - NOT WIRED IN BASE` headers detailing cloud prerequisites (EBS CSI/PD StorageClasses, AWS IRSA / GCP Workload Identity, and Thanos secrets).
 - otel-collector: Clarified OpenTelemetry sampling strategy overlay contracts in `sampling-strategies.yaml` and `docs/SAMPLING_STRATEGIES.md`, introducing modular Helm overlays (`values-sampling-probabilistic.yaml`, `values-sampling-tail.yaml`) with a dual-pipeline pattern protecting 100% Golden Signals metrics while reducing Tempo trace storage costs.
 
 ### Added
+- ci: Promoted yamllint rules `line-length`, `truthy`, and `comments-indentation` to error level and fixed all violations.
+- ci: Enhanced manifest validation by piping rendered Helm templates through `kubeconform -strict -ignore-missing-schemas` and covering `k8s-node-alerts.yaml` in manifest verification.
+- deps: Pinned all GitHub Actions (`actions/checkout@v4.1.7`, `hashicorp/setup-terraform@v3.1.2`, `terraform-linters/setup-tflint@v4.1.1`, `azure/setup-helm@v4.2.0`), TFLint version (`v0.51.1`), and demo-app Dockerfile base images (`golang:1.24.4-alpine`, `alpine:3.19.1`) to explicit minor/patch versions.
 - secrets: Added `deploy/kubernetes/secrets/thanos-objstore-secret.yaml.example` template for S3 and GCS Thanos object storage credentials.
 - docs: Added `deploy/kubernetes/examples/overlays/README.md` documenting cloud overlay prerequisites, IAM identity mappings, and Helm deployment steps.
 
