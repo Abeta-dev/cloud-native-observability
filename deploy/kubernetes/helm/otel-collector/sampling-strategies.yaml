@@ -127,8 +127,8 @@ cloud_overlay_aws_xray_template:
 cloud_overlay_gcp_trace_template:
   config:
     exporters:
-      googlecloud:
-        # Authentication is automatically handled via GCP Workload Identity
+      # Authentication is automatically handled via GCP Workload Identity
+      googlecloud: {}
     service:
       pipelines:
         traces/gcp:

@@ -4,19 +4,20 @@ extends: default
 rules:
   line-length:
     max: 250
-    level: warning
+    level: error
     allow-non-breakable-words: true
     allow-non-breakable-inline-mappings: true
 
   document-start: disable
 
   truthy:
-    level: warning
+    level: error
     check-keys: false
 
   comments:
     min-spaces-from-content: 1
-  comments-indentation: disable
+  comments-indentation:
+    level: error
 
   empty-lines:
     max: 2
