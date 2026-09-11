@@ -16,7 +16,7 @@ spec:
     targetRevision: 0.88.0
     helm:
       valueFiles:
-        - https://raw.githubusercontent.com/umesh0492/cloud-native-observability/v0.1.0/deploy/kubernetes/helm/otel-collector/values.yaml
+        - https://raw.githubusercontent.com/umesh0492/cloud-native-observability/v0.2.0/deploy/kubernetes/helm/otel-collector/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: opentelemetry

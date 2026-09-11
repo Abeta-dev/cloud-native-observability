@@ -33,14 +33,16 @@ module "storage" {
 module "kubernetes_stack" {
   source = "./modules/kubernetes_stack"
 
-  namespace                 = var.kubernetes_namespace
-  environment               = var.environment
-  aws_region                = var.aws_region
-  tempo_s3_bucket           = var.enable_cloud_storage == "true" ? module.storage[0].tempo_bucket_name : ""
-  loki_s3_bucket            = var.enable_cloud_storage == "true" ? module.storage[0].loki_bucket_name : ""
-  grafana_admin_password    = var.grafana_admin_password
-  grafana_admin_secret_name = var.grafana_admin_secret_name
-  trace_retention_days      = var.trace_retention_days
+  namespace                          = var.kubernetes_namespace
+  environment                        = var.environment
+  aws_region                         = var.aws_region
+  tempo_s3_bucket                    = var.enable_cloud_storage == "true" ? module.storage[0].tempo_bucket_name : ""
+  loki_s3_bucket                     = var.enable_cloud_storage == "true" ? module.storage[0].loki_bucket_name : ""
+  grafana_admin_password             = var.grafana_admin_password
+  grafana_admin_secret_name          = var.grafana_admin_secret_name
+  alertmanager_slack_webhook_url     = var.slack_webhook_url
+  alertmanager_pagerduty_routing_key = var.pagerduty_service_key
+  trace_retention_days               = var.trace_retention_days
 }
 
 # 3. Grafana Observability as Code (Datasources, Dashboards, Alert Rules, PagerDuty/Slack)

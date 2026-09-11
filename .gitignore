@@ -26,6 +26,13 @@ dist/
 tmp/
 graphify-out/
 
+# Terraform local state and modules
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+
 # Kubernetes applied secrets (ignore custom secret files while tracking safe default manifests & templates)
 deploy/kubernetes/secrets/*.yaml
 !deploy/kubernetes/secrets/secrets.yaml

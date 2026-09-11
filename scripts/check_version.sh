@@ -78,6 +78,16 @@ if [ -n "$DOC_VER_MATCHES" ]; then
   done <<< "$DOC_VER_MATCHES"
 fi
 
+# Verify ArgoCD manifests match expected canonical version
+echo "📦 Verifying ArgoCD GitOps manifests synchronization..."
+ARGOCD_STALE=$(grep -rnE 'targetRevision: v[0-9]+\.[0-9]+\.[0-9]+|raw.githubusercontent.com/.*/v[0-9]+\.[0-9]+\.[0-9]+/' deploy/kubernetes/argocd/ 2>/dev/null | grep -v "v${EXPECTED_VER}" || true)
+if [ -n "$ARGOCD_STALE" ]; then
+  echo "❌ Error: Stale or mismatched version detected in ArgoCD GitOps manifests (expected v${EXPECTED_VER}):"
+  echo "$ARGOCD_STALE"
+  exit 1
+fi
+echo "   - All ArgoCD manifests synchronized to v${EXPECTED_VER} ✅"
+
 # ==============================================================================
 # Architecture & Claim Truthfulness Gate
 # ==============================================================================
@@ -143,6 +153,20 @@ DISALLOWED_DASHBOARD_METRICS=$(grep -inE '(traces_service_graph_request_total|fa
 if [ -n "$DISALLOWED_DASHBOARD_METRICS" ]; then
   echo "❌ Error: Disallowed or fake metric found in dashboard queries:"
   echo "$DISALLOWED_DASHBOARD_METRICS"
+  exit 1
+fi
+
+ALERT_FILES=()
+for af in deploy/terraform/modules/grafana_provisioning/alerts.tf \
+          deploy/kubernetes/alerts/*.yaml \
+          deploy/docker-compose/prometheus/alerts.yml; do
+  [ -f "$af" ] && ALERT_FILES+=("$af")
+done
+
+DISALLOWED_ALERT_METRICS=$(grep -inE '(traces_service_graph_request_total|fake_metric[a-zA-Z0-9_]*)' "${ALERT_FILES[@]}" 2>/dev/null || true)
+if [ -n "$DISALLOWED_ALERT_METRICS" ]; then
+  echo "❌ Error: Disallowed or fake metric found in alert definitions:"
+  echo "$DISALLOWED_ALERT_METRICS"
   exit 1
 fi
 
