@@ -78,124 +78,16 @@ resource "helm_release" "kube_prometheus_stack" {
   ]
 
   values = [
+    file("${path.module}/../../../kubernetes/helm/kube-prometheus-stack/values-base.yaml"),
     yamlencode({
-      prometheus = {
-        prometheusSpec = {
-          retention = "30d"
-          serviceMonitorSelectorNilUsesHelmValues = false
-          podMonitorSelectorNilUsesHelmValues     = false
-          storageSpec = {
-            volumeClaimTemplate = {
-              spec = {
-                accessModes = ["ReadWriteOnce"]
-                resources = {
-                  requests = {
-                    storage = "50Gi"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
       grafana = {
-        enabled = true
         admin = {
           existingSecret = var.grafana_admin_secret_name
-          userKey        = "admin-user"
-          passwordKey    = "admin-password"
         }
       }
       alertmanager = {
-        enabled = true
         alertmanagerSpec = {
-          replicas  = 2
           retention = var.alertmanager_retention
-          secrets   = ["alertmanager-secrets"]
-          storage = {
-            volumeClaimTemplate = {
-              spec = {
-                accessModes = ["ReadWriteOnce"]
-                resources = {
-                  requests = {
-                    storage = "20Gi"
-                  }
-                }
-              }
-            }
-          }
-        }
-        config = {
-          global = {
-            resolve_timeout = "5m"
-          }
-          route = {
-            group_by        = ["alertname", "cluster", "service", "namespace"]
-            group_wait      = "30s"
-            group_interval  = "5m"
-            repeat_interval = "4h"
-            receiver        = "slack-warnings"
-            routes = [
-              {
-                matchers = ["severity = critical"]
-                receiver = "pagerduty-high-urgency"
-                continue = true
-              },
-              {
-                matchers = ["severity = critical"]
-                receiver = "slack-critical"
-              },
-              {
-                matchers = ["severity = warning"]
-                receiver = "slack-warnings"
-              }
-            ]
-          }
-          inhibit_rules = [
-            {
-              target_matchers = ["severity = warning"]
-              source_matchers = ["severity = critical"]
-              equal           = ["alertname", "cluster", "service", "namespace"]
-            }
-          ]
-          receivers = [
-            {
-              name = "slack-warnings"
-              slack_configs = [
-                {
-                  channel       = "#alerts-warning"
-                  send_resolved = true
-                  api_url_file  = "/etc/alertmanager/secrets/alertmanager-secrets/slack-webhook-url"
-                  title         = "[WARNING] {{ .CommonLabels.alertname }} ({{ .CommonLabels.service }})"
-                  text          = "*Summary*: {{ .CommonAnnotations.summary }}\n*Description*: {{ .CommonAnnotations.description }}\n*Namespace*: {{ .CommonLabels.namespace }}"
-                }
-              ]
-            },
-            {
-              name = "slack-critical"
-              slack_configs = [
-                {
-                  channel       = "#alerts-critical"
-                  send_resolved = true
-                  api_url_file  = "/etc/alertmanager/secrets/alertmanager-secrets/slack-webhook-url"
-                  title         = "🚨 [CRITICAL] {{ .CommonLabels.alertname }} ({{ .CommonLabels.service }})"
-                  text          = "*Summary*: {{ .CommonAnnotations.summary }}\n*Description*: {{ .CommonAnnotations.description }}\n*Runbook*: {{ .CommonAnnotations.runbook_url }}"
-                }
-              ]
-            },
-            {
-              name = "pagerduty-high-urgency"
-              pagerduty_configs = [
-                {
-                  routing_key_file = "/etc/alertmanager/secrets/alertmanager-secrets/pagerduty-routing-key"
-                  severity         = "critical"
-                  description      = "{{ .CommonLabels.alertname }}: {{ .CommonAnnotations.summary }}"
-                  client           = "Prometheus Alertmanager"
-                  client_url       = "{{ .CommonAnnotations.runbook_url }}"
-                }
-              ]
-            }
-          ]
         }
       }
     })
@@ -240,9 +132,9 @@ resource "helm_release" "tempo" {
         replicas = 1
         config = {
           compaction = {
-            compaction_window        = "1h"
-            max_block_bytes          = 500000000
-            block_retention          = "${var.trace_retention_days * 24}h"
+            compaction_window         = "1h"
+            max_block_bytes           = 500000000
+            block_retention           = "${var.trace_retention_days * 24}h"
             compacted_block_retention = "2h"
           }
         }
