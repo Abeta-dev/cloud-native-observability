@@ -1,4 +1,6 @@
-# cloud-native-observability · v0.1.0
+# cloud-native-observability · v0.2.0
+
+> **Note on Repository History**: History reconstructed on 2026-09-11; see [CHANGELOG.md](CHANGELOG.md) for the real feature timeline.
 
 [![CI](https://github.com/umesh0492/cloud-native-observability/actions/workflows/ci.yml/badge.svg)](https://github.com/umesh0492/cloud-native-observability/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
