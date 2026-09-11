@@ -1,0 +1,95 @@
+rule_files:
+  - ../rules/slo-rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # ---------------------------------------------------------------------------
+  # Test 1: ServiceErrorBudgetBurnRateHigh1h (14.4x burn rate over 1h and 5m)
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'job:http_requests:error_rate_1h{service="demo-app", namespace="prod"}'
+        values: '0.025+0x10'
+      - series: 'job:http_requests:error_rate_5m{service="demo-app", namespace="prod"}'
+        values: '0.025+0x10'
+      - series: 'job:http_requests:error_rate_1h{service="demo-healthy", namespace="prod"}'
+        values: '0.0005+0x10'
+      - series: 'job:http_requests:error_rate_5m{service="demo-healthy", namespace="prod"}'
+        values: '0.0005+0x10'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: ServiceErrorBudgetBurnRateHigh1h
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: ServiceErrorBudgetBurnRateHigh1h
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              tier: slo
+              service: demo-app
+              namespace: prod
+            exp_annotations:
+              summary: "Critical 1h Error Budget Burn Rate (14.4x)"
+              description: "Service is burning error budget at 14.4x over 1 hour and 5 minutes (2% of monthly budget consumed in 1 hour). Requires immediate intervention."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnratehigh1h"
+
+  # ---------------------------------------------------------------------------
+  # Test 2: ServiceErrorBudgetBurnRateHigh6h (6x burn rate over 6h and 30m)
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'job:http_requests:error_rate_6h{service="demo-app", namespace="prod"}'
+        values: '0.01+0x25'
+      - series: 'job:http_requests:error_rate_30m{service="demo-app", namespace="prod"}'
+        values: '0.01+0x25'
+      - series: 'job:http_requests:error_rate_6h{service="demo-healthy", namespace="prod"}'
+        values: '0.0005+0x25'
+      - series: 'job:http_requests:error_rate_30m{service="demo-healthy", namespace="prod"}'
+        values: '0.0005+0x25'
+    alert_rule_test:
+      - eval_time: 14m
+        alertname: ServiceErrorBudgetBurnRateHigh6h
+        exp_alerts: []
+      - eval_time: 16m
+        alertname: ServiceErrorBudgetBurnRateHigh6h
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              tier: slo
+              service: demo-app
+              namespace: prod
+            exp_annotations:
+              summary: "High 6h Error Budget Burn Rate (6x)"
+              description: "Service is burning error budget at 6x over 6 hours (5% of monthly budget consumed in 6 hours)."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnratehigh6h"
+
+  # ---------------------------------------------------------------------------
+  # Test 3: ServiceErrorBudgetBurnRateSlow3d (1x burn rate over 3d and 6h)
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'job:http_requests:error_rate_3d{service="demo-app", namespace="prod"}'
+        values: '0.002+0x200'
+      - series: 'job:http_requests:error_rate_6h{service="demo-app", namespace="prod"}'
+        values: '0.002+0x200'
+      - series: 'job:http_requests:error_rate_3d{service="demo-healthy", namespace="prod"}'
+        values: '0.0002+0x200'
+      - series: 'job:http_requests:error_rate_6h{service="demo-healthy", namespace="prod"}'
+        values: '0.0002+0x200'
+    alert_rule_test:
+      - eval_time: 179m
+        alertname: ServiceErrorBudgetBurnRateSlow3d
+        exp_alerts: []
+      - eval_time: 181m
+        alertname: ServiceErrorBudgetBurnRateSlow3d
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              tier: slo
+              service: demo-app
+              namespace: prod
+            exp_annotations:
+              summary: "Slow 3-day Error Budget Burn Rate (1x)"
+              description: "Service is steadily consuming error budget over a 3-day window and 6-hour window. Create tracking ticket for service owners."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnrateslow3d"

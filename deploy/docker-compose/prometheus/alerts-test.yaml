@@ -1,0 +1,107 @@
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  # ---------------------------------------------------------------------------
+  # Test 1: ServiceDown Alert
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'up{job="demo-app", instance="cno-demo-app:8080"}'
+        values: '0+0x10'
+      - series: 'up{job="demo-app", instance="cno-demo-app-healthy:8080"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 0m
+        alertname: ServiceDown
+        exp_alerts: []
+      - eval_time: 1m
+        alertname: ServiceDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              instance: cno-demo-app:8080
+              job: demo-app
+            exp_annotations:
+              summary: "Service instance cno-demo-app:8080 is down"
+              description: "Service target cno-demo-app:8080 of job demo-app has been unreachable for more than 1 minute."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#servicedown"
+
+  # ---------------------------------------------------------------------------
+  # Test 2: HighErrorRate Alert (>1% 5xx over 5m)
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'http_requests_total{service="demo-app", instance="demo-app:8080", status="200"}'
+        values: '100+100x10'
+      - series: 'http_requests_total{service="demo-app", instance="demo-app:8080", status="500"}'
+        values: '10+10x10'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: HighErrorRate
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: HighErrorRate
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              service: demo-app
+              instance: demo-app:8080
+            exp_annotations:
+              summary: "High HTTP 5xx error rate detected"
+              description: "HTTP 5xx error rate exceeds 1% (0.01) over the last 5 minutes on demo-app (demo-app:8080)."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#higherrorrate"
+
+  # ---------------------------------------------------------------------------
+  # Test 3: HighLatencyP99 Alert (>1.0s P99)
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'http_request_duration_seconds_bucket{service="demo-app", le="0.5"}'
+        values: '10+10x10'
+      - series: 'http_request_duration_seconds_bucket{service="demo-app", le="1.0"}'
+        values: '20+20x10'
+      - series: 'http_request_duration_seconds_bucket{service="demo-app", le="2.5"}'
+        values: '100+100x10'
+      - series: 'http_request_duration_seconds_bucket{service="demo-app", le="+Inf"}'
+        values: '100+100x10'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: HighLatencyP99
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: HighLatencyP99
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              service: demo-app
+            exp_annotations:
+              summary: "High P99 latency breach"
+              description: "P99 HTTP request duration for service demo-app exceeds 1.0s over the last 5 minutes."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#highlatencyp99"
+
+  # ---------------------------------------------------------------------------
+  # Test 4: WorkerpoolQueueNearFull Alert (>85% capacity)
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'workerpool_queue_depth{instance="demo-app:8080"}'
+        values: '11+0x10'
+      - series: 'workerpool_queue_capacity{instance="demo-app:8080"}'
+        values: '12+0x10'
+    alert_rule_test:
+      - eval_time: 1m
+        alertname: WorkerpoolQueueNearFull
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: WorkerpoolQueueNearFull
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              instance: demo-app:8080
+            exp_annotations:
+              summary: "Worker pool queue near full capacity"
+              description: "Worker pool queue depth exceeds 85% of total capacity on instance demo-app:8080."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#workerpoolqueuenearfull"

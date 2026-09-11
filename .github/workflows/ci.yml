@@ -50,6 +50,15 @@ jobs:
             echo "promtool not available, skipping rules check"
           fi
 
+      - name: Run Promtool Unit Tests for Alert Rules
+        run: |
+          if command -v promtool >/dev/null 2>&1; then
+            echo "Running Promtool alert rules unit test suites..."
+            bash ./scripts/test_alerts.sh
+          else
+            echo "promtool not available, skipping rules unit tests"
+          fi
+
       - name: Validate Alertmanager Configuration
         run: |
           echo "Validating Alertmanager configuration with amtool..."

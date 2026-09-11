@@ -1,0 +1,136 @@
+rule_files:
+  - ../rules/k8s-node-rules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # ---------------------------------------------------------------------------
+  # Test 1: KubeNodeNotReady Alert
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'kube_node_status_condition{node="node-unready", condition="Ready", status="true"}'
+        values: '0+0x10'
+      - series: 'kube_node_status_condition{node="node-ready", condition="Ready", status="true"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: KubeNodeNotReady
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: KubeNodeNotReady
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              node: node-unready
+              condition: Ready
+              status: "true"
+            exp_annotations:
+              summary: "Kubernetes node is not ready"
+              description: "Node node-unready has been unready for more than 5 minutes."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubenodenotready"
+
+  # ---------------------------------------------------------------------------
+  # Test 2: KubeNodeMemoryPressure Alert
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'kube_node_status_condition{node="node-mem-pressure", condition="MemoryPressure", status="true"}'
+        values: '1+0x10'
+      - series: 'kube_node_status_condition{node="node-mem-healthy", condition="MemoryPressure", status="true"}'
+        values: '0+0x10'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: KubeNodeMemoryPressure
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: KubeNodeMemoryPressure
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              node: node-mem-pressure
+              condition: MemoryPressure
+              status: "true"
+            exp_annotations:
+              summary: "Node is experiencing memory pressure"
+              description: "Node node-mem-pressure has memory pressure condition active."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubenodememorypressure"
+
+  # ---------------------------------------------------------------------------
+  # Test 3: KubeNodeDiskPressure Alert
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'kube_node_status_condition{node="node-disk-pressure", condition="DiskPressure", status="true"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: KubeNodeDiskPressure
+        exp_alerts: []
+      - eval_time: 4m
+        alertname: KubeNodeDiskPressure
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              node: node-disk-pressure
+              condition: DiskPressure
+              status: "true"
+            exp_annotations:
+              summary: "Node is experiencing disk pressure"
+              description: "Node node-disk-pressure has low available disk space (<10% free)."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubenodediskpressure"
+
+  # ---------------------------------------------------------------------------
+  # Test 4: KubePodCrashLooping Alert
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_container_status_restarts_total{namespace="prod", pod="demo-app-crash", container="demo-app"}'
+        values: '0 10 20 30 40 50 60 70 80 90 100 110 120 130 140 150'
+      - series: 'kube_pod_container_status_restarts_total{namespace="prod", pod="demo-app-healthy", container="demo-app"}'
+        values: '0+0x15'
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: KubePodCrashLooping
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: KubePodCrashLooping
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              namespace: prod
+              pod: demo-app-crash
+              container: demo-app
+            exp_annotations:
+              summary: "Pod is CrashLooping"
+              description: "Pod prod/demo-app-crash container demo-app is restarting frequently (>2 restarts/min)."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubepodcrashlooping"
+
+  # ---------------------------------------------------------------------------
+  # Test 5: KubeDeploymentReplicasMismatch Alert
+  # ---------------------------------------------------------------------------
+  - interval: 1m
+    input_series:
+      - series: 'kube_deployment_status_replicas_available{namespace="prod", deployment="api-mismatch"}'
+        values: '1+0x20'
+      - series: 'kube_deployment_spec_replicas{namespace="prod", deployment="api-mismatch"}'
+        values: '3+0x20'
+      - series: 'kube_deployment_status_replicas_available{namespace="prod", deployment="api-healthy"}'
+        values: '3+0x20'
+      - series: 'kube_deployment_spec_replicas{namespace="prod", deployment="api-healthy"}'
+        values: '3+0x20'
+    alert_rule_test:
+      - eval_time: 9m
+        alertname: KubeDeploymentReplicasMismatch
+        exp_alerts: []
+      - eval_time: 11m
+        alertname: KubeDeploymentReplicasMismatch
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              namespace: prod
+              deployment: api-mismatch
+            exp_annotations:
+              summary: "Deployment available replicas mismatch"
+              description: "Deployment prod/api-mismatch has fewer replicas available than desired for >10 minutes."
+              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#kubedeploymentreplicasmismatch"
