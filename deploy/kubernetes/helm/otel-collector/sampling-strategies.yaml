@@ -1,61 +1,159 @@
+# ==============================================================================
 # OpenTelemetry Collector - Multi-Strategy Sampling Configurations
-# Choose the sampling architecture that matches your traffic profile and cost budget.
+# ==============================================================================
+# Choose the sampling architecture that matches your traffic profile, cost budget,
+# and deployment topology.
+#
+# OVERLAY ARCHITECTURE NOTICE:
+# In the OpenTelemetry Collector Helm chart, configurations are specified under
+# the 'config:' key. To apply these strategies cleanly without editing base values,
+# use the standalone overlay files:
+#   - Probabilistic: deploy/kubernetes/helm/otel-collector/values-sampling-probabilistic.yaml
+#   - Tail-Based:    deploy/kubernetes/helm/otel-collector/values-sampling-tail.yaml
+#
+# DUAL-PIPELINE METRIC PROTECTION:
+# In this platform, connectors ('spanmetrics' and 'servicegraph') derive Prometheus
+# Golden Signals metrics from traces. To ensure 100% accurate metric calculation
+# while reducing backend trace storage costs in Tempo, all sampling overlays use a
+# dual-pipeline pattern:
+#   1. 'traces':         Unsampled (100%) -> connectors (spanmetrics, servicegraph)
+#   2. 'traces/sampled': Sampled (10% or tail-filtered) -> otlp/tempo
+# ==============================================================================
 
-# -----------------------------------------------------------------------------
-# Strategy 1: Probabilistic Head-Based Sampling (Lowest CPU Overhead)
-# Decides whether to keep a trace at the moment it enters the collector.
+# ------------------------------------------------------------------------------
+# 1. WORKING IN-CLUSTER CONFIGURATIONS
+# ------------------------------------------------------------------------------
+
+# --- Strategy 1: Probabilistic Head-Based Sampling (Lowest CPU Overhead) ---
+# Decides whether to retain a trace at the moment it enters the collector.
 # Best for: High-volume homogenous APIs where random uniform sampling is sufficient.
-# -----------------------------------------------------------------------------
-strategy_probabilistic:
-  processors:
-    probabilistic_sampler:
-      sampling_percentage: 10.0 # Retain 10% of all traces
+# Standalone overlay: values-sampling-probabilistic.yaml
+working_in_cluster_probabilistic:
+  config:
+    processors:
+      probabilistic_sampler:
+        sampling_percentage: 10.0 # Retain 10% of routine traces
 
-  service:
-    pipelines:
-      traces:
-        receivers: [otlp]
-        processors: [memory_limiter, k8sattributes, probabilistic_sampler, batch]
-        exporters: [otlp/tempo]
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, batch]
+          exporters: [spanmetrics, servicegraph]
+        traces/sampled:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, probabilistic_sampler, batch]
+          exporters: [otlp/tempo]
 
-# -----------------------------------------------------------------------------
-# Strategy 2: Tail-Based Multi-Rule Sampling (Recommended for Production)
-# Waits for the entire trace to complete, then inspects errors, duration, and metadata.
+# --- Strategy 2: Tail-Based Multi-Rule Sampling (Recommended for Production) ---
+# Evaluates the complete trace after completion based on errors, duration, and route.
 # Guarantees 100% retention of broken and slow traces while pruning successful routine calls.
-# -----------------------------------------------------------------------------
-strategy_tail_based:
-  processors:
-    tail_sampling:
-      decision_wait: 10s
-      num_traces: 10000
-      expected_new_traces_per_sec: 2000
-      policies:
-        # Rule A: Keep 100% of all traces containing an error (HTTP 5xx, gRPC error, or unhandled panic)
-        - name: retain-all-errors
-          type: status_code
-          status_code: { status_codes: [ERROR] }
+# Standalone overlay: values-sampling-tail.yaml
+working_in_cluster_tail_based:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+  config:
+    processors:
+      tail_sampling:
+        decision_wait: 10s
+        num_traces: 10000
+        expected_new_traces_per_sec: 2000
+        policies:
+          # Rule A: Keep 100% of all traces containing an error (HTTP 5xx, gRPC error, or unhandled panic)
+          - name: retain-all-errors
+            type: status_code
+            status_code:
+              status_codes: [ERROR]
 
-        # Rule B: Keep 100% of slow requests where overall duration exceeds 500ms
-        - name: retain-high-latency
-          type: latency
-          latency: { threshold_ms: 500 }
+          # Rule B: Keep 100% of slow requests where overall duration exceeds 500ms
+          - name: retain-high-latency
+            type: latency
+            latency:
+              threshold_ms: 500
 
-        # Rule C: Keep 100% of synthetic monitoring and critical business transactions
-        - name: retain-critical-routes
-          type: string_attribute
-          string_attribute:
-            key: "http.target"
-            values: ["/api/v1/checkout", "/api/v1/payments"]
-            enabled_regex_matching: false
+          # Rule C: Keep 100% of critical transactional business routes
+          - name: retain-critical-routes
+            type: string_attribute
+            string_attribute:
+              key: "http.target"
+              values: ["/api/v1/checkout", "/api/v1/payments"]
+              enabled_regex_matching: false
 
-        # Rule D: Uniformly sample only 5% of healthy, fast, routine background calls
-        - name: sample-healthy-baseline
-          type: probabilistic
-          probabilistic: { sampling_percentage: 5.0 }
+          # Rule D: Uniformly sample only 5% of healthy, fast, routine background calls
+          - name: sample-healthy-baseline
+            type: probabilistic
+            probabilistic:
+              sampling_percentage: 5.0
 
-  service:
-    pipelines:
-      traces:
-        receivers: [otlp]
-        processors: [memory_limiter, k8sattributes, tail_sampling, batch]
-        exporters: [otlp/tempo]
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, batch]
+          exporters: [spanmetrics, servicegraph]
+        traces/sampled:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, tail_sampling, batch]
+          exporters: [otlp/tempo]
+
+# ------------------------------------------------------------------------------
+# 2. CLOUD-SPECIFIC SAMPLING OVERLAYS & TOPOLOGY CONSIDERATIONS
+# ------------------------------------------------------------------------------
+
+# --- Cloud Overlay A: AWS Cloud APM & X-Ray Integration ---
+# When forwarding traces to AWS X-Ray instead of or alongside in-cluster Tempo:
+# Requires: AWS IRSA role with 'xray:PutTraceSegments' and 'xray:PutTelemetryRecords'.
+cloud_overlay_aws_xray_template:
+  config:
+    exporters:
+      awsxray:
+        region: us-east-1
+        # In EKS, IRSA automatically injects AWS_ROLE_ARN and AWS_WEB_IDENTITY_TOKEN_FILE
+    service:
+      pipelines:
+        traces/aws:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, tail_sampling, batch]
+          exporters: [awsxray]
+
+# --- Cloud Overlay B: GCP Cloud Trace Integration ---
+# When forwarding traces to Google Cloud Trace:
+# Requires: Workload Identity binding with 'roles/cloudtrace.agent'.
+cloud_overlay_gcp_trace_template:
+  config:
+    exporters:
+      googlecloud:
+        # Authentication is automatically handled via GCP Workload Identity
+    service:
+      pipelines:
+        traces/gcp:
+          receivers: [otlp]
+          processors: [memory_limiter, k8sattributes, tail_sampling, batch]
+          exporters: [googlecloud]
+
+# --- Cloud Topology Note: Multi-Node DaemonSet vs 2-Tier Architecture ---
+# LIMITATION IN DAEMONSET MODE:
+# When running OpenTelemetry Collector as a DaemonSet, each node's collector only
+# sees spans emitted by local pods. If a distributed trace spans microservices on
+# different nodes, the tail sampler on Node A cannot inspect spans sent to Node B.
+#
+# CLOUD PRODUCTION RECOMMENDED TOPOLOGY:
+# For multi-node cloud clusters with complex distributed traces across nodes:
+# 1. DaemonSet Agent Layer: Runs on each node with 'loadbalancing' exporter, hashing
+#    traces by trace_id and routing them to the same collector gateway replica:
+#      exporters:
+#        loadbalancing:
+#          routing_key: "trace_id"
+#          protocol:
+#            otlp:
+#              insecure: true
+#          resolver:
+#            dns:
+#              hostname: otel-collector-gateway.opentelemetry.svc.cluster.local
+# 2. Gateway Layer (Deployment with HPA): Runs the tail_sampling processor on
+#    complete traces before exporting to Tempo or Cloud APM.

@@ -1,0 +1,63 @@
+# OpenTelemetry Collector - Tail-Based Multi-Rule Sampling Overlay
+# Apply on top of deploy/kubernetes/helm/otel-collector/values.yaml
+#
+# USAGE:
+#   helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
+#     -f deploy/kubernetes/helm/otel-collector/values.yaml \
+#     -f deploy/kubernetes/helm/otel-collector/values-sampling-tail.yaml
+
+# Increase memory buffer requests and limits to support decision_wait trace buffering
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+
+config:
+  processors:
+    tail_sampling:
+      decision_wait: 10s
+      num_traces: 10000
+      expected_new_traces_per_sec: 2000
+      policies:
+        # Rule A: Retain 100% of broken traces (HTTP 5xx, gRPC error, unhandled panics)
+        - name: retain-all-errors
+          type: status_code
+          status_code:
+            status_codes: [ERROR]
+
+        # Rule B: Retain 100% of slow requests exceeding latency threshold
+        - name: retain-high-latency
+          type: latency
+          latency:
+            threshold_ms: 500
+
+        # Rule C: Retain 100% of critical transactional endpoints
+        - name: retain-critical-routes
+          type: string_attribute
+          string_attribute:
+            key: "http.target"
+            values: ["/api/v1/checkout", "/api/v1/payments"]
+            enabled_regex_matching: false
+
+        # Rule D: Uniformly sample 5% baseline of healthy, routine background calls
+        - name: sample-healthy-baseline
+          type: probabilistic
+          probabilistic:
+            sampling_percentage: 5.0
+
+  service:
+    pipelines:
+      # Pipeline 1: 100% of spans flow to connectors for accurate Golden Signals metrics
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, k8sattributes, batch]
+        exporters: [spanmetrics, servicegraph]
+
+      # Pipeline 2: Tail-sampled traces flow to Tempo for storage
+      traces/sampled:
+        receivers: [otlp]
+        processors: [memory_limiter, k8sattributes, tail_sampling, batch]
+        exporters: [otlp/tempo]

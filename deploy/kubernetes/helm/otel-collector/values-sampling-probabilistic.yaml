@@ -1,0 +1,26 @@
+# OpenTelemetry Collector - Probabilistic Head-Based Sampling Overlay
+# Apply on top of deploy/kubernetes/helm/otel-collector/values.yaml
+#
+# USAGE:
+#   helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
+#     -f deploy/kubernetes/helm/otel-collector/values.yaml \
+#     -f deploy/kubernetes/helm/otel-collector/values-sampling-probabilistic.yaml
+
+config:
+  processors:
+    probabilistic_sampler:
+      sampling_percentage: 10.0 # Retain 10% of routine traces
+
+  service:
+    pipelines:
+      # Pipeline 1: 100% of spans flow to connectors for accurate Golden Signals metrics
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, k8sattributes, batch]
+        exporters: [spanmetrics, servicegraph]
+
+      # Pipeline 2: 10% sampled spans flow to Tempo for backend storage cost reduction
+      traces/sampled:
+        receivers: [otlp]
+        processors: [memory_limiter, k8sattributes, probabilistic_sampler, batch]
+        exporters: [otlp/tempo]
