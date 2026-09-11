@@ -1,0 +1,72 @@
+# ==============================================================================
+# TEMPLATE ONLY - NOT WIRED IN BASE
+# ==============================================================================
+# AWS EKS Production Overlay for kube-prometheus-stack
+#
+# This file is an example overlay and is NOT applied in the default base deployment
+# to prevent startup failures caused by unwired cloud infrastructure.
+#
+# REQUIRED CLOUD PREREQUISITES BEFORE APPLYING THIS OVERLAY:
+# 1. AWS EBS CSI Driver:
+#    The EKS cluster must have the aws-ebs-csi-driver addon installed to support
+#    the 'gp3' StorageClass for persistent volume claims.
+# 2. IAM Roles for Service Accounts (IRSA):
+#    Replace placeholder AWS Account IDs (123456789012) with your AWS Account ID:
+#    - Prometheus: 'arn:aws:iam::<AWS_ACCOUNT_ID>:role/prometheus-s3-backup-role'
+#      Must allow s3:PutObject, s3:GetObject, s3:ListBucket on the Thanos bucket.
+#    - Grafana: 'arn:aws:iam::<AWS_ACCOUNT_ID>:role/grafana-athena-cloudwatch-role'
+#      Optional role for CloudWatch/Athena queries.
+# 3. S3 Bucket & Thanos Object Storage Secret:
+#    Create an S3 bucket for Thanos metrics and deploy the Kubernetes secret
+#    'thanos-objstore-secret' in the monitoring namespace containing 'thanos.yaml'
+#    (reference: deploy/kubernetes/secrets/thanos-objstore-secret.yaml.example):
+#      kubectl create secret generic thanos-objstore-secret \
+#        --namespace monitoring \
+#        --from-file=thanos.yaml=thanos-config.yaml
+#
+# USAGE:
+#   helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#     --namespace monitoring \
+#     -f deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml \
+#     -f deploy/kubernetes/examples/overlays/values-eks.yaml
+# ==============================================================================
+
+prometheus:
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 500Gi
+    serviceAccount:
+      create: true
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/prometheus-s3-backup-role
+    thanos:
+      version: v0.34.1
+      objectStorageConfig:
+        existingSecret:
+          name: thanos-objstore-secret
+          key: thanos.yaml
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+grafana:
+  persistence:
+    storageClassName: gp3
+    size: 50Gi
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/grafana-athena-cloudwatch-role

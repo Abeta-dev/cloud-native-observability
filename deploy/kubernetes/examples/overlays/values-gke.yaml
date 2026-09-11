@@ -1,0 +1,71 @@
+# ==============================================================================
+# TEMPLATE ONLY - NOT WIRED IN BASE
+# ==============================================================================
+# GCP GKE Production Overlay for kube-prometheus-stack
+#
+# This file is an example overlay and is NOT applied in the default base deployment
+# to prevent startup failures caused by unwired cloud infrastructure.
+#
+# REQUIRED CLOUD PREREQUISITES BEFORE APPLYING THIS OVERLAY:
+# 1. GKE StorageClass:
+#    Uses Google Cloud Compute Engine persistent disk 'standard-rwo' StorageClass.
+# 2. Workload Identity (GSA Binding):
+#    Replace placeholder service account with your Google Service Account:
+#    - Prometheus: 'prometheus-sa@my-gcp-project.iam.gserviceaccount.com'
+#      Must have roles/storage.objectAdmin on the Thanos GCS bucket and
+#      roles/iam.workloadIdentityUser binding to the k8s service account in
+#      the monitoring namespace:
+#        gcloud iam service-accounts add-iam-policy-binding prometheus-sa@PROJECT.iam.gserviceaccount.com \
+#          --role roles/iam.workloadIdentityUser \
+#          --member "serviceAccount:PROJECT.svc.id.goog[monitoring/kube-prometheus-stack-prometheus]"
+# 3. GCS Bucket & Thanos Object Storage Secret:
+#    Create a GCS bucket for Thanos metrics and deploy the Kubernetes secret
+#    'thanos-gcs-secret' in the monitoring namespace containing 'thanos.yaml'
+#    (reference: deploy/kubernetes/secrets/thanos-objstore-secret.yaml.example):
+#      kubectl create secret generic thanos-gcs-secret \
+#        --namespace monitoring \
+#        --from-file=thanos.yaml=thanos-config.yaml
+#
+# USAGE:
+#   helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#     --namespace monitoring \
+#     -f deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml \
+#     -f deploy/kubernetes/examples/overlays/values-gke.yaml
+# ==============================================================================
+
+prometheus:
+  prometheusSpec:
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard-rwo
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 500Gi
+    serviceAccount:
+      create: true
+      annotations:
+        iam.gke.io/gcp-service-account: prometheus-sa@my-gcp-project.iam.gserviceaccount.com
+    thanos:
+      version: v0.34.1
+      objectStorageConfig:
+        existingSecret:
+          name: thanos-gcs-secret
+          key: thanos.yaml
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: standard-rwo
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+grafana:
+  persistence:
+    storageClassName: standard-rwo
+    size: 50Gi

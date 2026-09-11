@@ -203,7 +203,7 @@ ArgoCD automatically reconciles and manages:
 - `tempo-distributed` (Scalable trace storage with S3/GCS)
 - `opentelemetry-collector` (DaemonSet with `k8sattributes` processor)
 
-Cloud provider overlays are included for AWS EKS (`values-eks.yaml` with gp3 & IRSA) and GCP GKE (`values-gke.yaml` with Workload Identity).
+Cloud provider overlay templates are available in [`deploy/kubernetes/examples/overlays/`](deploy/kubernetes/examples/overlays/) for AWS EKS (`values-eks.yaml` with gp3 & IRSA) and GCP GKE (`values-gke.yaml` with Workload Identity).
 
 ---
 
@@ -248,7 +248,8 @@ Read the full [Terraform Observability Guide](docs/TERRAFORM_GUIDE.md) for archi
 │   ├── kubernetes/                  # Production GitOps infrastructure
 │   │   ├── alerts/                  # Alertmanager & Google SRE PrometheusRules
 │   │   ├── argocd/                  # ArgoCD App-of-Apps declarations
-│   │   └── helm/                    # Base values and EKS/GKE overlays
+│   │   ├── examples/overlays/       # Cloud provider overlay templates (EKS/GKE)
+│   │   └── helm/                    # Base values for core stack
 │   └── terraform/                   # Observability as Code (Storage, Helm, Grafana OaC)
 │       ├── main.tf                  # Root multi-tier composition
 │       ├── modules/                 # Storage, Kubernetes, and Grafana modules
