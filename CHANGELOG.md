@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- kubernetes: Relocated unwired cloud-specific overlays (`values-eks.yaml`, `values-gke.yaml`) from `deploy/kubernetes/helm/kube-prometheus-stack/` to `deploy/kubernetes/examples/overlays/` with explicit `TEMPLATE ONLY - NOT WIRED IN BASE` headers detailing cloud prerequisites (EBS CSI/PD StorageClasses, AWS IRSA / GCP Workload Identity, and Thanos secrets).
+- otel-collector: Clarified OpenTelemetry sampling strategy overlay contracts in `sampling-strategies.yaml` and `docs/SAMPLING_STRATEGIES.md`, introducing modular Helm overlays (`values-sampling-probabilistic.yaml`, `values-sampling-tail.yaml`) with a dual-pipeline pattern protecting 100% Golden Signals metrics while reducing Tempo trace storage costs.
+
+### Added
+- secrets: Added `deploy/kubernetes/secrets/thanos-objstore-secret.yaml.example` template for S3 and GCS Thanos object storage credentials.
+- docs: Added `deploy/kubernetes/examples/overlays/README.md` documenting cloud overlay prerequisites, IAM identity mappings, and Helm deployment steps.
+
 ## [0.1.0] - 2026-09-09
 
 Initial public release.
