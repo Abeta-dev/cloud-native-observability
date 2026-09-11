@@ -590,13 +590,13 @@ func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(&sb, "http_request_duration_seconds_sum{service=\"demo-app\"} %.6f\n", float64(metrics.durationSum.Load())/1_000_000)
 	fmt.Fprintf(&sb, "http_request_duration_seconds_count{service=\"demo-app\"} %d\n\n", totalRequests)
 
-	sb.WriteString("# HELP workerpool_queue_depth Current worker pool queue depth\n")
-	sb.WriteString("# TYPE workerpool_queue_depth gauge\n")
-	fmt.Fprintf(&sb, "workerpool_queue_depth{service=\"demo-app\"} %d\n\n", metrics.poolQueueDepth.Load())
+	sb.WriteString("# HELP app_workerpool_queue_depth Current worker pool queue depth\n")
+	sb.WriteString("# TYPE app_workerpool_queue_depth gauge\n")
+	fmt.Fprintf(&sb, "app_workerpool_queue_depth{service=\"demo-app\"} %d\n\n", metrics.poolQueueDepth.Load())
 
-	sb.WriteString("# HELP workerpool_queue_capacity Maximum worker pool capacity\n")
-	sb.WriteString("# TYPE workerpool_queue_capacity gauge\n")
-	fmt.Fprintf(&sb, "workerpool_queue_capacity{service=\"demo-app\"} %d\n\n", maxWorkerQueueCapacity)
+	sb.WriteString("# HELP app_workerpool_queue_capacity Maximum worker pool capacity\n")
+	sb.WriteString("# TYPE app_workerpool_queue_capacity gauge\n")
+	fmt.Fprintf(&sb, "app_workerpool_queue_capacity{service=\"demo-app\"} %d\n\n", maxWorkerQueueCapacity)
 
 	sb.WriteString("# HELP app_circuit_breaker_requests_total Total requests through circuit breaker\n")
 	sb.WriteString("# TYPE app_circuit_breaker_requests_total counter\n")
@@ -622,9 +622,6 @@ func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	sb.WriteString("# TYPE app_workerpool_tasks_dropped_total counter\n")
 	fmt.Fprintf(&sb, "app_workerpool_tasks_dropped_total %d\n\n", metrics.poolDropped.Load())
 
-	sb.WriteString("# HELP app_workerpool_queue_size Worker pool queue size gauge\n")
-	sb.WriteString("# TYPE app_workerpool_queue_size gauge\n")
-	fmt.Fprintf(&sb, "app_workerpool_queue_size %d\n\n", metrics.poolQueueDepth.Load())
 
 	sb.WriteString("# HELP app_cache_hits_total Total cache hits\n")
 	sb.WriteString("# TYPE app_cache_hits_total counter\n")

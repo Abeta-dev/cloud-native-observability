@@ -184,7 +184,7 @@ In addition to multi-window burn rate alerts, the stack defines production-ready
 | `ServiceDown` | `up == 0` for 1m | `critical` | Availability | Immediate on-call page via PagerDuty / Slack |
 | `HighErrorRate` | `rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.01` for 2m | `critical` | Errors | Page engineer; triage via Loki logs & APM |
 | `HighLatencyP99` | `histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 1.0` for 2m | `warning` | Latency | Slack notification; inspect Tempo distributed traces |
-| `WorkerpoolQueueNearFull` | `workerpool_queue_depth / workerpool_queue_capacity > 0.85` for 2m | `warning` | Saturation | Slack notification; check async worker pool utilization |
+| `WorkerpoolQueueNearFull` | `app_workerpool_queue_depth / app_workerpool_queue_capacity > 0.85` for 2m | `warning` | Saturation | Slack notification; check async worker pool utilization |
 
 ---
 

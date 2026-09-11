@@ -87,9 +87,9 @@ tests:
   # ---------------------------------------------------------------------------
   - interval: 1m
     input_series:
-      - series: 'workerpool_queue_depth{instance="demo-app:8080"}'
+      - series: 'app_workerpool_queue_depth{instance="demo-app:8080"}'
         values: '11+0x10'
-      - series: 'workerpool_queue_capacity{instance="demo-app:8080"}'
+      - series: 'app_workerpool_queue_capacity{instance="demo-app:8080"}'
         values: '12+0x10'
     alert_rule_test:
       - eval_time: 1m

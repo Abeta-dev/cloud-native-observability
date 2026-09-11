@@ -160,7 +160,7 @@ Standard Operating Procedures (SOPs) for on-call SRE and Platform Engineers resp
 
 ### `WorkerpoolQueueNearFull`
 - **Severity**: `warning` (Slack Alert)
-- **Condition**: Asynchronous worker pool queue depth exceeds 85% of capacity (`workerpool_queue_depth / workerpool_queue_capacity > 0.85`).
+- **Condition**: Asynchronous worker pool queue depth exceeds 85% of capacity (`app_workerpool_queue_depth / app_workerpool_queue_capacity > 0.85`).
 - **Target SLA Impact**: Asynchronous task processing lag and risk of task drops.
 - **Triage Steps**:
   1. Check worker pool task velocities (submitted vs completed) on [Microservice APM](http://localhost:3000/d/microservice-apm).

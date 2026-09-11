@@ -47,7 +47,7 @@ groups:
       # 4. Saturation: Worker Pool Queue Near Full (> 85% capacity)
       # -------------------------------------------------------------------------
       - alert: WorkerpoolQueueNearFull
-        expr: workerpool_queue_depth / workerpool_queue_capacity > 0.85
+        expr: app_workerpool_queue_depth / app_workerpool_queue_capacity > 0.85
         for: 2m
         labels:
           severity: warning

@@ -161,7 +161,7 @@
       "id": 7,
       "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
       "targets": [
-        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "app_workerpool_queue_size", "legendFormat": "Current Queue Size", "refId": "A" }
+        { "datasource": { "type": "prometheus", "uid": "prometheus" }, "expr": "app_workerpool_queue_depth", "legendFormat": "Current Queue Size", "refId": "A" }
       ],
       "title": "Worker Pool Queue Backlog",
       "type": "timeseries"

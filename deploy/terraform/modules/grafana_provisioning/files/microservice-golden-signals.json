@@ -496,7 +496,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "app_workerpool_queue_size",
+          "expr": "app_workerpool_queue_depth",
           "legendFormat": "Active Queue Backlog",
           "refId": "A"
         },
