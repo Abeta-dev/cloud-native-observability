@@ -124,7 +124,7 @@ jobs:
       - name: Validate Kubernetes Manifests with Kubeconform
         run: |
           echo "Validating Kubernetes manifests with Kubeconform..."
-          kubeconform -summary -strict -ignore-missing-schemas deploy/kubernetes/alerts/k8s-node-alerts.yaml deploy/kubernetes/alerts/slo-alerts.yaml deploy/kubernetes/alerts/alertmanager.yaml deploy/kubernetes/secrets/ deploy/kubernetes/argocd/
+          kubeconform -summary -strict -ignore-missing-schemas deploy/kubernetes/alerts/k8s-node-alerts.yaml deploy/kubernetes/alerts/slo-alerts.yaml deploy/kubernetes/secrets/ deploy/kubernetes/argocd/
 
       - name: Validate Docker Compose Configuration
         run: |

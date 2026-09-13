@@ -286,5 +286,32 @@ else:
     print("   - All dashboard PromQL queries verified against exported metrics catalog.")
 EOF
 
+# ==============================================================================
+# Alertmanager Configuration Single-Source / Drift Gate
+# ==============================================================================
+echo "🔔 Verifying Alertmanager configuration synchronization..."
+python3 - << 'EOF'
+import yaml, sys
+
+try:
+    with open("deploy/kubernetes/alerts/alertmanager.yaml") as f:
+        am_cfg = yaml.safe_load(f)
+    with open("deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml") as f:
+        kps_cfg = yaml.safe_load(f)
+
+    helm_am = kps_cfg.get("alertmanager", {}).get("config", {})
+    diffs = []
+    for k in ["global", "route", "inhibit_rules", "receivers"]:
+        if am_cfg.get(k) != helm_am.get(k):
+            diffs.append(k)
+    if diffs:
+        print(f"❌ Error: Alertmanager configuration drift detected between deploy/kubernetes/alerts/alertmanager.yaml and deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml in sections: {diffs}")
+        sys.exit(1)
+    print("   - Alertmanager routes, receivers, and inhibit rules strictly synchronized ✅")
+except Exception as e:
+    print(f"❌ Error during Alertmanager config verification: {e}")
+    sys.exit(1)
+EOF
+
 echo "========================================================"
 echo "✅ All versions, documentation, and telemetry queries are strictly verified and truthful!"
