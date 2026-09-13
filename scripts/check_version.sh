@@ -313,5 +313,299 @@ except Exception as e:
     sys.exit(1)
 EOF
 
+# ==============================================================================
+# Canonical Availability SLI & Cross-Layer AST Equivalence Gate
+# ==============================================================================
+echo "📐 Verifying Canonical Availability SLI AST equivalence across layers..."
+python3 - << 'EOF'
+import re, sys, yaml
+
+class BinaryOp:
+    def __init__(self, op, left, right):
+        self.op = op
+        self.left = left
+        self.right = right
+    def __repr__(self):
+        return f"BinaryOp({self.op}, {self.left}, {self.right})"
+
+class Aggregation:
+    def __init__(self, func, expr, by=None):
+        self.func = func
+        self.expr = expr
+        self.by = tuple(sorted(by)) if by else ()
+    def __repr__(self):
+        return f"Aggregation({self.func}, {self.expr}, by={self.by})"
+
+class FunctionCall:
+    def __init__(self, name, args):
+        self.name = name
+        self.args = args
+    def __repr__(self):
+        return f"FunctionCall({self.name}, {self.args})"
+
+class MatrixSelector:
+    def __init__(self, metric, matchers, window):
+        self.metric = metric
+        self.matchers = matchers
+        self.window = window
+    def __repr__(self):
+        return f"MatrixSelector({self.metric}, {self.matchers}, [{self.window}])"
+
+class NumberLiteral:
+    def __init__(self, value):
+        self.value = value
+    def __repr__(self):
+        return f"Number({self.value})"
+
+def tokenize(text):
+    tokens = []
+    token_spec = [
+        ('TMPL_VAR', r'\{\{[a-zA-Z0-9_]+\}\}'),
+        ('DURATION', r'[0-9]+[smhdwy]'),
+        ('STRING',   r'"[^"]*"|\'[^\']*\''),
+        ('NUMBER',   r'\d+(\.\d+)?'),
+        ('LABEL_OP', r'=~|!~|!=|='),
+        ('COMP_OP',  r'==|!=|>=|<=|>|<'),
+        ('ARITH_OP', r'[+\-*/%^]'),
+        ('LPAREN',   r'\('),
+        ('RPAREN',   r'\)'),
+        ('LBRACE',   r'\{'),
+        ('RBRACE',   r'\}'),
+        ('LBRACKET', r'\['),
+        ('RBRACKET', r'\]'),
+        ('COMMA',    r','),
+        ('ID',       r'[a-zA-Z_:][a-zA-Z0-9_:]*'),
+        ('SKIP',     r'[ \t\r\n]+'),
+    ]
+    tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_spec)
+    for mo in re.finditer(tok_regex, text):
+        kind = mo.lastgroup
+        val = mo.group()
+        if kind == 'SKIP':
+            continue
+        tokens.append((kind, val))
+    return tokens
+
+class PromQLParser:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.pos = 0
+
+    def peek(self):
+        if self.pos < len(self.tokens):
+            return self.tokens[self.pos]
+        return ('EOF', '')
+
+    def consume(self, expected_kind=None):
+        tok = self.peek()
+        if expected_kind and tok[0] != expected_kind:
+            raise ValueError(f"Expected {expected_kind}, got {tok} at pos {self.pos}")
+        self.pos += 1
+        return tok
+
+    def parse(self):
+        return self.parse_comparison()
+
+    def parse_comparison(self):
+        node = self.parse_addition()
+        while self.peek()[0] == 'COMP_OP':
+            op = self.consume('COMP_OP')[1]
+            right = self.parse_addition()
+            node = BinaryOp(op, node, right)
+        return node
+
+    def parse_addition(self):
+        node = self.parse_multiplication()
+        while self.peek()[0] == 'ARITH_OP' and self.peek()[1] in ('+', '-'):
+            op = self.consume('ARITH_OP')[1]
+            right = self.parse_multiplication()
+            node = BinaryOp(op, node, right)
+        return node
+
+    def parse_multiplication(self):
+        node = self.parse_primary()
+        while self.peek()[0] == 'ARITH_OP' and self.peek()[1] in ('*', '/', '%', '^'):
+            op = self.consume('ARITH_OP')[1]
+            right = self.parse_primary()
+            node = BinaryOp(op, node, right)
+        return node
+
+    def parse_primary(self):
+        tok = self.peek()
+        if tok[0] == 'NUMBER':
+            self.consume()
+            return NumberLiteral(float(tok[1]))
+        if tok[0] == 'LPAREN':
+            self.consume('LPAREN')
+            node = self.parse_comparison()
+            self.consume('RPAREN')
+            return node
+
+        if tok[0] == 'ID':
+            name = self.consume('ID')[1]
+            if name in ('sum', 'avg', 'count', 'min', 'max'):
+                by_labels = []
+                if self.peek()[0] == 'ID' and self.peek()[1] == 'by':
+                    self.consume('ID')
+                    by_labels = self.parse_label_list()
+                self.consume('LPAREN')
+                inner = self.parse_comparison()
+                self.consume('RPAREN')
+                if not by_labels and self.peek()[0] == 'ID' and self.peek()[1] == 'by':
+                    self.consume('ID')
+                    by_labels = self.parse_label_list()
+                return Aggregation(name, inner, by=by_labels)
+
+            if self.peek()[0] == 'LPAREN':
+                self.consume('LPAREN')
+                args = []
+                if self.peek()[0] != 'RPAREN':
+                    args.append(self.parse_comparison())
+                    while self.peek()[0] == 'COMMA':
+                        self.consume('COMMA')
+                        args.append(self.parse_comparison())
+                self.consume('RPAREN')
+                return FunctionCall(name, args)
+
+            matchers = {}
+            if self.peek()[0] == 'LBRACE':
+                self.consume('LBRACE')
+                while self.peek()[0] != 'RBRACE':
+                    lbl = self.consume('ID')[1]
+                    op = self.consume('LABEL_OP')[1]
+                    val = self.consume('STRING')[1].strip('"\'')
+                    matchers[lbl] = (op, val)
+                    if self.peek()[0] == 'COMMA':
+                        self.consume('COMMA')
+                    else:
+                        break
+                self.consume('RBRACE')
+
+            window = None
+            if self.peek()[0] == 'LBRACKET':
+                self.consume('LBRACKET')
+                tok = self.peek()
+                if tok[0] in ('DURATION', 'TMPL_VAR', 'ID'):
+                    window = self.consume()[1]
+                else:
+                    raise ValueError(f"Expected window in brackets, got {tok}")
+                self.consume('RBRACKET')
+            return MatrixSelector(metric=name, matchers=matchers, window=window)
+
+        raise ValueError(f"Unexpected token in expression: {tok}")
+
+    def parse_label_list(self):
+        self.consume('LPAREN')
+        labels = []
+        while self.peek()[0] == 'ID':
+            labels.append(self.consume('ID')[1])
+            if self.peek()[0] == 'COMMA':
+                self.consume('COMMA')
+            else:
+                break
+        self.consume('RPAREN')
+        return labels
+
+def find_sli_division(node):
+    if isinstance(node, BinaryOp):
+        if node.op == '/':
+            lhs, rhs = node.left, node.right
+            if isinstance(lhs, Aggregation) and isinstance(rhs, Aggregation):
+                if isinstance(lhs.expr, FunctionCall) and isinstance(rhs.expr, FunctionCall):
+                    if lhs.expr.name == 'rate' and rhs.expr.name == 'rate':
+                        return node
+        left_res = find_sli_division(node.left)
+        if left_res:
+            return left_res
+        return find_sli_division(node.right)
+    return None
+
+def verify_ast_equivalence(canonical_ast, target_ast, context_name):
+    target_sli = find_sli_division(target_ast)
+    if not target_sli:
+        raise ValueError(f"[{context_name}] Could not find SLI division node in AST: {target_ast}")
+
+    canonical_sli = find_sli_division(canonical_ast)
+    if not canonical_sli:
+        raise ValueError("Could not find SLI division node in canonical AST")
+
+    c_lhs, c_rhs = canonical_sli.left, canonical_sli.right
+    t_lhs, t_rhs = target_sli.left, target_sli.right
+
+    if t_lhs.func != c_lhs.func or t_rhs.func != c_rhs.func:
+        raise ValueError(f"[{context_name}] Aggregation mismatch: {t_lhs.func}/{t_rhs.func} vs {c_lhs.func}/{c_rhs.func}")
+
+    if t_lhs.expr.name != c_lhs.expr.name or t_rhs.expr.name != c_rhs.expr.name:
+        raise ValueError(f"[{context_name}] Rate function mismatch: {t_lhs.expr.name}/{t_rhs.expr.name} vs {c_lhs.expr.name}/{c_rhs.expr.name}")
+
+    t_num_sel, t_den_sel = t_lhs.expr.args[0], t_rhs.expr.args[0]
+    c_num_sel, c_den_sel = c_lhs.expr.args[0], c_rhs.expr.args[0]
+
+    if t_num_sel.metric != c_num_sel.metric or t_den_sel.metric != c_den_sel.metric:
+        raise ValueError(f"[{context_name}] Metric name mismatch: {t_num_sel.metric}/{t_den_sel.metric} vs {c_num_sel.metric}/{c_den_sel.metric}")
+
+    c_status_matcher = c_num_sel.matchers.get("status")
+    t_status_matcher = t_num_sel.matchers.get("status")
+    if t_status_matcher != c_status_matcher:
+        raise ValueError(f"[{context_name}] Numerator status matcher mismatch: {t_status_matcher} vs expected {c_status_matcher}")
+
+    if "status" in t_den_sel.matchers:
+        raise ValueError(f"[{context_name}] Denominator has unexpected status filter: {t_den_sel.matchers['status']}")
+
+    if t_num_sel.window != t_den_sel.window:
+        raise ValueError(f"[{context_name}] Window mismatch between numerator [{t_num_sel.window}] and denominator [{t_den_sel.window}]")
+
+    if t_lhs.by != t_rhs.by:
+        raise ValueError(f"[{context_name}] Grouping mismatch: numerator by {t_lhs.by} vs denominator by {t_rhs.by}")
+
+    print(f"   - {context_name}: AST verified equivalent to canonical SLI ✅")
+
+try:
+    with open("deploy/slo/canonical_sli.promql") as f:
+        canon_raw = f.read().strip()
+    canon_ast = PromQLParser(tokenize(canon_raw)).parse()
+
+    # 1. deploy/docker-compose/prometheus/alerts.yml
+    with open("deploy/docker-compose/prometheus/alerts.yml") as f:
+        compose_alerts = yaml.safe_load(f)
+    found_compose = False
+    for grp in compose_alerts.get("groups", []):
+        for rule in grp.get("rules", []):
+            if rule.get("alert") == "HighErrorRate":
+                ast = PromQLParser(tokenize(rule["expr"])).parse()
+                verify_ast_equivalence(canon_ast, ast, "deploy/docker-compose/prometheus/alerts.yml (HighErrorRate)")
+                found_compose = True
+    if not found_compose:
+        raise ValueError("HighErrorRate alert not found in deploy/docker-compose/prometheus/alerts.yml")
+
+    # 2. deploy/kubernetes/alerts/slo-alerts.yaml
+    with open("deploy/kubernetes/alerts/slo-alerts.yaml") as f:
+        k8s_alerts = yaml.safe_load(f)
+    k8s_count = 0
+    for grp in k8s_alerts.get("spec", {}).get("groups", []):
+        for rule in grp.get("rules", []):
+            rec = rule.get("record", "")
+            if rec.startswith("job:http_requests:error_rate_"):
+                ast = PromQLParser(tokenize(rule["expr"])).parse()
+                verify_ast_equivalence(canon_ast, ast, f"deploy/kubernetes/alerts/slo-alerts.yaml ({rec})")
+                k8s_count += 1
+    if k8s_count != 5:
+        raise ValueError(f"Expected 5 recording rules in slo-alerts.yaml, found {k8s_count}")
+
+    # 3. deploy/terraform/modules/grafana_provisioning/alerts.tf
+    with open("deploy/terraform/modules/grafana_provisioning/alerts.tf") as f:
+        tf_content = f.read()
+    m = re.search(r'name\s*=\s*"HighErrorRateP1".*?expr\s*=\s*"((?:\\.|[^"\\])*)"', tf_content, re.DOTALL)
+    if not m:
+        raise ValueError("HighErrorRateP1 expr not found in alerts.tf")
+    tf_expr = m.group(1).replace(r'\"', '"')
+    tf_ast = PromQLParser(tokenize(tf_expr)).parse()
+    verify_ast_equivalence(canon_ast, tf_ast, "deploy/terraform/modules/grafana_provisioning/alerts.tf (HighErrorRateP1)")
+
+except Exception as ex:
+    print(f"❌ Error during Canonical SLI AST equivalence check: {ex}")
+    sys.exit(1)
+EOF
+
 echo "========================================================"
 echo "✅ All versions, documentation, and telemetry queries are strictly verified and truthful!"
