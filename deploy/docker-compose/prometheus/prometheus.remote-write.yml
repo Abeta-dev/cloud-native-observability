@@ -1,0 +1,75 @@
+# ==============================================================================
+# Prometheus Configuration with Clustered Remote-Write Enabled
+# ==============================================================================
+# Target: deploy/docker-compose/prometheus/prometheus.remote-write.yml
+# Extends standard local Prometheus scrape configuration with remote_write
+# streaming to a clustered Mimir or Thanos Receive distributor.
+# ==============================================================================
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    cluster: "docker-compose-local"
+    environment: "development"
+    tenant: "cno-tenant-dev"
+
+rule_files:
+  - "alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: "demo-app"
+    static_configs:
+      - targets: ["demo-app:8080"]
+
+  - job_name: "otel-collector"
+    static_configs:
+      - targets: ["otel-collector:8889"]
+
+  - job_name: "loki"
+    static_configs:
+      - targets: ["loki:3100"]
+
+  - job_name: "tempo"
+    static_configs:
+      - targets: ["tempo:3200"]
+
+  - job_name: "alertmanager"
+    static_configs:
+      - targets: ["alertmanager:9093"]
+
+# ------------------------------------------------------------------------------
+# Clustered Storage Remote-Write Configuration (Mimir / Thanos Receive)
+# ------------------------------------------------------------------------------
+remote_write:
+  - url: "http://mimir-distributor.monitoring.svc:8080/api/v1/push"
+    name: "mimir-distributor-compose"
+    remote_timeout: 30s
+    send_exemplars: true
+    headers:
+      X-Scope-OrgID: "cno-tenant-dev"
+    queue_config:
+      capacity: 10000
+      max_shards: 200
+      min_shards: 2
+      max_samples_per_send: 2000
+      batch_send_deadline: 5s
+      min_backoff: 30ms
+      max_backoff: 5s
+      retry_on_http_429: true
+    write_relabel_configs:
+      # Drop ephemeral docker container IDs and image hashes
+      - action: labeldrop
+        regex: "(container_id|image_id)"
+      # Tag data source environment
+      - target_label: environment
+        replacement: "docker-compose-dev"

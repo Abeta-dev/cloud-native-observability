@@ -1,0 +1,149 @@
+# ==============================================================================
+# Production Overlay: Clustered Prometheus Remote-Write (Grafana Mimir / Thanos)
+# ==============================================================================
+# Target: deploy/kubernetes/overlays/mimir-remote-write.yaml
+#
+# PURPOSE:
+# Configures Prometheus instances managed by Prometheus Operator (kube-prometheus-stack)
+# to stream TSDB metric samples to horizontally scalable clustered object storage
+# backends (such as Grafana Mimir or Thanos Receive).
+#
+# ARCHITECTURAL ROLE:
+#   Edge Prometheus (local scrape & 2h WAL buffer)
+#     --> Remote Write (sharded HTTP POSTs with rate limiting & backpressure)
+#     --> Mimir Distributor / Thanos Receive (:8080/api/v1/push)
+#     --> Ingesters (in-memory replication via consistent hash ring)
+#     --> Object Storage (AWS S3 / GCP GCS / MinIO)
+#
+# USAGE (Helm):
+#   helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+#     --namespace monitoring \
+#     -f deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml \
+#     -f deploy/kubernetes/overlays/mimir-remote-write.yaml
+# ==============================================================================
+
+prometheus:
+  prometheusSpec:
+    # --------------------------------------------------------------------------
+    # Retention & Storage Tuning for Remote-Write Topology
+    # --------------------------------------------------------------------------
+    # When streaming metrics to clustered object storage, local disk retention
+    # can be reduced from 30d to 24h-48h, keeping node disks small, fast, and
+    # dramatically reducing recovery time during node rescheduling.
+    # --------------------------------------------------------------------------
+    retention: 48h
+    retentionSize: "40Gi"
+
+    # --------------------------------------------------------------------------
+    # Remote Write Configuration
+    # --------------------------------------------------------------------------
+    remoteWrite:
+      - url: "http://mimir-distributor.monitoring.svc:8080/api/v1/push"
+        name: "mimir-distributor"
+        remoteTimeout: 30s
+        sendExemplars: true
+
+        # Multi-tenant isolation header for Grafana Mimir (X-Scope-OrgID)
+        headers:
+          X-Scope-OrgID: "cno-production"
+
+        # ----------------------------------------------------------------------
+        # Write Queue Configuration
+        # ----------------------------------------------------------------------
+        # Tuned for high-throughput microservice clusters to avoid write-queue lag,
+        # eliminate OOM risk, and survive temporary network or distributor blips.
+        # ----------------------------------------------------------------------
+        queueConfig:
+          # Maximum parallel shards (HTTP worker goroutines sending batches)
+          maxShards: 200
+          # Baseline shards always allocated to eliminate ramp-up latency
+          minShards: 4
+          # Number of samples queued per shard buffer in memory
+          capacity: 10000
+          # Maximum batch size per HTTP POST request to distributor
+          maxSamplesPerSend: 2000
+          # Maximum buffer wait time before flushing a partial batch
+          batchSendDeadline: 5s
+          # Exponential backoff parameters for handling HTTP 429 / 5xx retries
+          minBackoff: 30ms
+          maxBackoff: 5s
+          retryOnRateLimit: true
+
+        # ----------------------------------------------------------------------
+        # Write Relabeling (Edge Cardinality Protection)
+        # ----------------------------------------------------------------------
+        # Strips high-cardinality ephemeral labels that cause series explosions
+        # in long-term object storage index headers, while preserving business,
+        # service, and cluster observability.
+        # ----------------------------------------------------------------------
+        writeRelabelConfigs:
+          # 1. Drop ephemeral deployment and replicaset hash labels
+          # These change on every rolling update and cause series churn
+          - action: labeldrop
+            regex: "(pod_template_hash|controller_revision_hash|pod_template_generation)"
+
+          # 2. Drop low-value ephemeral container and infrastructure identifiers
+          - action: labeldrop
+            regex: "(container_id|image_id|uid|endpoint)"
+
+          # 3. Drop packaging and internal Helm build metadata
+          - action: labeldrop
+            regex: "(chart|heritage|app_kubernetes_io_managed_by)"
+
+          # 4. Drop accidental high-cardinality application tags (client IPs, UUIDs)
+          - action: labeldrop
+            regex: "(client_ip|request_id|trace_id|span_id)"
+
+          # 5. Inject / preserve immutable cluster identifier for multi-cluster federation
+          - targetLabel: cluster
+            replacement: "cno-k8s-prod"
+            action: replace
+
+# ==============================================================================
+# APPENDIX: Reference Prometheus CRD & Native prometheus.yml formats
+# ==============================================================================
+#
+# Kubernetes CRD Spec Equivalent (monitoring.coreos.com/v1 Prometheus):
+# ------------------------------------------------------------------------------
+# spec:
+#   remoteWrite:
+#     - url: http://mimir-distributor.monitoring.svc:8080/api/v1/push
+#       name: mimir-distributor
+#       remoteTimeout: 30s
+#       headers:
+#         X-Scope-OrgID: "cno-production"
+#       queueConfig:
+#         maxShards: 200
+#         minShards: 4
+#         capacity: 10000
+#         maxSamplesPerSend: 2000
+#         batchSendDeadline: 5s
+#         minBackoff: 30ms
+#         maxBackoff: 5s
+#       writeRelabelConfigs:
+#         - action: labeldrop
+#           regex: "(pod_template_hash|controller_revision_hash|container_id|image_id|uid)"
+#         - targetLabel: cluster
+#           replacement: "cno-k8s-prod"
+#
+# Pure prometheus.yml (snake_case) Equivalent:
+# ------------------------------------------------------------------------------
+# remote_write:
+#   - url: "http://mimir-distributor.monitoring.svc:8080/api/v1/push"
+#     name: "mimir-distributor"
+#     remote_timeout: 30s
+#     headers:
+#       X-Scope-OrgID: "cno-production"
+#     queue_config:
+#       max_shards: 200
+#       min_shards: 4
+#       capacity: 10000
+#       max_samples_per_send: 2000
+#       batch_send_deadline: 5s
+#       min_backoff: 30ms
+#       max_backoff: 5s
+#     write_relabel_configs:
+#       - action: labeldrop
+#         regex: "(pod_template_hash|controller_revision_hash|container_id|image_id|uid)"
+#       - target_label: cluster
+#         replacement: "cno-k8s-prod"

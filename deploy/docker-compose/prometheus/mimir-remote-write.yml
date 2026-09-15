@@ -1,0 +1,63 @@
+# ==============================================================================
+# Docker Compose Overlay: Prometheus Remote-Write to Clustered Storage
+# ==============================================================================
+# Target: deploy/docker-compose/prometheus/mimir-remote-write.yml
+#
+# PURPOSE:
+# Demonstrates remote-writing metrics from local Prometheus to an external or
+# clustered Grafana Mimir / Thanos Receive backend in development environments.
+#
+# USAGE:
+#   # From repository root:
+#   docker compose -f deploy/docker-compose/docker-compose.yml \
+#                  -f deploy/docker-compose/prometheus/mimir-remote-write.yml up -d
+#
+#   # From deploy/docker-compose directory:
+#   docker compose -f docker-compose.yml \
+#                  -f prometheus/mimir-remote-write.yml up -d
+# ==============================================================================
+
+version: "3.8"
+
+services:
+  # ----------------------------------------------------------------------------
+  # Prometheus Service Extension with Remote-Write Enabled
+  # ----------------------------------------------------------------------------
+  prometheus:
+    volumes:
+      - ./prometheus/prometheus.remote-write.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    environment:
+      - REMOTE_WRITE_ENABLED=true
+      - MIMIR_ENDPOINT=http://mimir-distributor.monitoring.svc:8080/api/v1/push
+      - MIMIR_TENANT_ID=cno-tenant-dev
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=24h"
+      - "--web.enable-lifecycle"
+      - "--enable-feature=remote-write-receiver"
+
+# ------------------------------------------------------------------------------
+# SNIPPET: Prometheus remote_write block embedded in prometheus.remote-write.yml
+# ------------------------------------------------------------------------------
+# remote_write:
+#   - url: "http://mimir-distributor.monitoring.svc:8080/api/v1/push"
+#     name: "mimir-distributor"
+#     remote_timeout: 30s
+#     send_exemplars: true
+#     headers:
+#       X-Scope-OrgID: "cno-tenant-dev"
+#     queue_config:
+#       capacity: 10000
+#       max_shards: 200
+#       min_shards: 2
+#       max_samples_per_send: 2000
+#       batch_send_deadline: 5s
+#       min_backoff: 30ms
+#       max_backoff: 5s
+#     write_relabel_configs:
+#       - action: labeldrop
+#         regex: "(container_id|image_id)"
+#       - target_label: source
+#         replacement: "docker-compose"

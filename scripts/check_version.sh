@@ -98,10 +98,14 @@ for f in docs/*.md docs/adr/*.md; do
   [ -f "$f" ] && DOC_FILES+=("$f")
 done
 
-# 1. Phantom service check: Mimir (repo uses Prometheus / Thanos)
-MIMIR_MATCHES=$(grep -inE '\bmimir\b' "${DOC_FILES[@]}" 2>/dev/null || true)
+# 1. Phantom service check: Mimir in base documentation (core repo uses Prometheus / Thanos in base; Mimir clustered architecture is documented in CLUSTERED_OBSERVABILITY.md)
+MIMIR_CHECK_FILES=()
+for f in "${DOC_FILES[@]}"; do
+  [ "$f" != "docs/CLUSTERED_OBSERVABILITY.md" ] && MIMIR_CHECK_FILES+=("$f")
+done
+MIMIR_MATCHES=$(grep -inE '\bmimir\b' "${MIMIR_CHECK_FILES[@]}" 2>/dev/null || true)
 if [ -n "$MIMIR_MATCHES" ]; then
-  echo "❌ Error: Unverified phantom service 'Mimir' found in documentation:"
+  echo "❌ Error: Unverified phantom service 'Mimir' found in base documentation:"
   echo "$MIMIR_MATCHES"
   exit 1
 fi
