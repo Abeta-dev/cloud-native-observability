@@ -318,7 +318,15 @@ helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheu
   -f deploy/kubernetes/overlays/mimir-remote-write.yaml
 ```
 
-### 2. Verify Remote Write Ingestion at Runtime
+### 2. Apply Docker Compose Remote-Write Overlay (Local Sandbox)
+
+```bash
+# Launch Prometheus with Mimir remote-write overlay configuration
+docker compose -f deploy/docker-compose/docker-compose.yml \
+  -f deploy/docker-compose/mimir-remote-write.yaml up -d
+```
+
+### 3. Verify Remote Write Ingestion at Runtime
 
 Check that Prometheus successfully communicates with the remote write endpoint:
 

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2026-09-15
 
+Clean-slate architecture: No backward compatibility preserved. Legacy un-versioned metrics, deprecated dashboard schemas, and unwired cloud provider manifests have been purged without backwards-compatibility shims, as no external developers are actively consuming pre-release revisions.
 
 ### Changed
 - demo-app: Deduplicated worker pool queue metrics, standardizing on `app_workerpool_queue_depth` and `app_workerpool_queue_capacity` with consistent `app_workerpool_*` metric prefixing across demo-app, Prometheus alert rules, Grafana dashboards, and runbooks.
