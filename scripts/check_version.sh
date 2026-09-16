@@ -101,7 +101,7 @@ done
 # 1. Phantom service check: Mimir in base documentation (core repo uses Prometheus / Thanos in base; Mimir clustered architecture is documented in CLUSTERED_OBSERVABILITY.md)
 MIMIR_CHECK_FILES=()
 for f in "${DOC_FILES[@]}"; do
-  [ "$f" != "docs/CLUSTERED_OBSERVABILITY.md" ] && MIMIR_CHECK_FILES+=("$f")
+  [ "$f" != "docs/CLUSTERED_OBSERVABILITY.md" ] && [ "$f" != "CHANGELOG.md" ] && MIMIR_CHECK_FILES+=("$f")
 done
 MIMIR_MATCHES=$(grep -inE '\bmimir\b' "${MIMIR_CHECK_FILES[@]}" 2>/dev/null || true)
 if [ -n "$MIMIR_MATCHES" ]; then

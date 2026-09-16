@@ -4,10 +4,11 @@
 
 `cloud-native-observability` provides security updates for the current minor release series:
 
-| Version Series | Status             | Security Updates |
-| -------------- | ------------------ | ---------------- |
-| 0.2.x          | **Active / Current** | :white_check_mark: Yes |
-| < 0.2.0        | End-of-Life        | :x: No           |
+| Version Series | Security Updates       | Status               |
+| -------------- | ---------------------- | -------------------- |
+| 0.2.x          | :white_check_mark: Yes | **Active / Current** |
+| 0.1.x          | :white_check_mark: Yes | Maintenance          |
+| < 0.1.0        | :x: No                 | End-of-Life          |
 
 ---
 
