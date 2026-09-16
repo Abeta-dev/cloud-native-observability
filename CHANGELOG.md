@@ -1,13 +1,14 @@
 # Changelog
 
-> **Note on Repository History**: History reconstructed on 2026-09-11; see CHANGELOG.md for the real feature timeline.
+> **Note on Repository History**: History reconstructed on 2026-09-15; see CHANGELOG.md for the real feature timeline.
 
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2026-09-11
+## [0.2.0] - 2026-09-15
+
 
 ### Changed
 - demo-app: Deduplicated worker pool queue metrics, standardizing on `app_workerpool_queue_depth` and `app_workerpool_queue_capacity` with consistent `app_workerpool_*` metric prefixing across demo-app, Prometheus alert rules, Grafana dashboards, and runbooks.
