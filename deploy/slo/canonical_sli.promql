@@ -1,1 +1,1 @@
-sum(rate(http_requests_total{status=~"5.."}[{{WINDOW}}])) / sum(rate(http_requests_total[{{WINDOW}}]))
+(sum(rate(http_requests_total{status=~"5.."}[{{WINDOW}}])) or vector(0)) / (sum(rate(http_requests_total[{{WINDOW}}])) > 0) or vector(0)

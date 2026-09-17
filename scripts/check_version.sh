@@ -381,7 +381,25 @@ def tokenize(text):
         ('ID',       r'[a-zA-Z_:][a-zA-Z0-9_:]*'),
         ('SKIP',     r'[ \t\r\n]+'),
     ]
-    tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in token_spec)
+    tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in [
+        ('TMPL_VAR',   r'\{\{[a-zA-Z0-9_]+\}\}'),
+        ('DURATION',   r'[0-9]+[smhdwy]'),
+        ('STRING',     r'"[^"]*"|\'[^\']*\''),
+        ('NUMBER',     r'\d+(\.\d+)?'),
+        ('LABEL_OP',   r'=~|!~|!=|='),
+        ('COMP_OP',    r'==|!=|>=|<=|>|<'),
+        ('ARITH_OP',   r'[+\-*/%^]'),
+        ('LOGICAL_OP', r'\b(or|and|unless)\b'),
+        ('LPAREN',     r'\('),
+        ('RPAREN',     r'\)'),
+        ('LBRACE',     r'\{'),
+        ('RBRACE',     r'\}'),
+        ('LBRACKET',   r'\['),
+        ('RBRACKET',   r'\]'),
+        ('COMMA',      r','),
+        ('ID',         r'[a-zA-Z_:][a-zA-Z0-9_:]*'),
+        ('SKIP',       r'[ \t\r\n]+'),
+    ])
     for mo in re.finditer(tok_regex, text):
         kind = mo.lastgroup
         val = mo.group()
@@ -408,7 +426,15 @@ class PromQLParser:
         return tok
 
     def parse(self):
-        return self.parse_comparison()
+        return self.parse_logical()
+
+    def parse_logical(self):
+        node = self.parse_comparison()
+        while self.peek()[0] == 'LOGICAL_OP':
+            op = self.consume('LOGICAL_OP')[1]
+            right = self.parse_comparison()
+            node = BinaryOp(op, node, right)
+        return node
 
     def parse_comparison(self):
         node = self.parse_addition()
@@ -441,7 +467,7 @@ class PromQLParser:
             return NumberLiteral(float(tok[1]))
         if tok[0] == 'LPAREN':
             self.consume('LPAREN')
-            node = self.parse_comparison()
+            node = self.parse()
             self.consume('RPAREN')
             return node
 
@@ -453,7 +479,7 @@ class PromQLParser:
                     self.consume('ID')
                     by_labels = self.parse_label_list()
                 self.consume('LPAREN')
-                inner = self.parse_comparison()
+                inner = self.parse()
                 self.consume('RPAREN')
                 if not by_labels and self.peek()[0] == 'ID' and self.peek()[1] == 'by':
                     self.consume('ID')
@@ -464,10 +490,10 @@ class PromQLParser:
                 self.consume('LPAREN')
                 args = []
                 if self.peek()[0] != 'RPAREN':
-                    args.append(self.parse_comparison())
+                    args.append(self.parse())
                     while self.peek()[0] == 'COMMA':
                         self.consume('COMMA')
-                        args.append(self.parse_comparison())
+                        args.append(self.parse())
                 self.consume('RPAREN')
                 return FunctionCall(name, args)
 
@@ -510,14 +536,28 @@ class PromQLParser:
         self.consume('RPAREN')
         return labels
 
+class SLIDivision:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+def extract_rate_aggregation(node):
+    if isinstance(node, Aggregation) and isinstance(node.expr, FunctionCall) and node.expr.name in ('rate', 'irate'):
+        return node
+    if isinstance(node, BinaryOp):
+        left_res = extract_rate_aggregation(node.left)
+        if left_res:
+            return left_res
+        return extract_rate_aggregation(node.right)
+    return None
+
 def find_sli_division(node):
     if isinstance(node, BinaryOp):
         if node.op == '/':
-            lhs, rhs = node.left, node.right
-            if isinstance(lhs, Aggregation) and isinstance(rhs, Aggregation):
-                if isinstance(lhs.expr, FunctionCall) and isinstance(rhs.expr, FunctionCall):
-                    if lhs.expr.name == 'rate' and rhs.expr.name == 'rate':
-                        return node
+            lhs_agg = extract_rate_aggregation(node.left)
+            rhs_agg = extract_rate_aggregation(node.right)
+            if lhs_agg and rhs_agg:
+                return SLIDivision(lhs_agg, rhs_agg)
         left_res = find_sli_division(node.left)
         if left_res:
             return left_res
