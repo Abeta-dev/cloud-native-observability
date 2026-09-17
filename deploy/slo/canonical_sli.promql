@@ -1,1 +1,14 @@
+# ==============================================================================
+# Canonical Service Level Indicator (SLI) - HTTP Availability Error Ratio
+# ==============================================================================
+# Route Path Normalization & TSDB Cardinality Guardrail:
+# - NEVER include unparameterized, dynamic URL paths (e.g. /users/12345, /orders/uuid)
+#   in the 'path' or 'route' labels of http_requests_total.
+# - Dynamic paths cause high-cardinality time-series explosions in Prometheus TSDB
+#   and Mimir ingesters, exhausting memory and leading to compaction failures and OOMKills.
+# - Always normalize routes at the application framework or ingress layer to
+#   low-cardinality route templates (e.g. /users/:id, /orders/:uuid, /healthz).
+# - High-cardinality entity IDs, client IPs, and query parameters must be captured
+#   in OpenTelemetry trace attributes or Loki log streams, never metric labels.
+# ==============================================================================
 (sum(rate(http_requests_total{status=~"5.."}[{{WINDOW}}])) or vector(0)) / (sum(rate(http_requests_total[{{WINDOW}}])) > 0) or vector(0)

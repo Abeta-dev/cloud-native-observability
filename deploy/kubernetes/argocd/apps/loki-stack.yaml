@@ -16,7 +16,7 @@ spec:
     targetRevision: 5.43.3
     helm:
       valueFiles:
-        - https://raw.githubusercontent.com/umesh0492/cloud-native-observability/v0.2.1/deploy/kubernetes/helm/loki/values.yaml
+        - https://raw.githubusercontent.com/umesh0492/cloud-native-observability/v0.2.2/deploy/kubernetes/helm/loki/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

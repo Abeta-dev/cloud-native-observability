@@ -26,15 +26,21 @@ if [ -z "$README_HEADER_VER" ]; then
   exit 1
 fi
 
+echo "   - Expected Version: v0.2.2"
 echo "   - CHANGELOG.md:     v$CHANGELOG_VER"
 echo "   - README.md Header: v$README_HEADER_VER"
+
+EXPECTED_VER="0.2.2"
+
+if [ "$CHANGELOG_VER" != "$EXPECTED_VER" ]; then
+  echo "❌ Error: CHANGELOG.md version (v$CHANGELOG_VER) does not match expected version (v$EXPECTED_VER)"
+  exit 1
+fi
 
 if [ "$CHANGELOG_VER" != "$README_HEADER_VER" ]; then
   echo "❌ Error: Version mismatch between CHANGELOG.md (v$CHANGELOG_VER) and README.md header (v$README_HEADER_VER)"
   exit 1
 fi
-
-EXPECTED_VER="$CHANGELOG_VER"
 
 # Enforce git tag if GIT_TAG is set, or if GITHUB_REF_TYPE is tag, or if tag points at HEAD
 TAG_TO_VERIFY="${GIT_TAG:-}"
@@ -398,12 +404,13 @@ def tokenize(text):
         ('RBRACKET',   r'\]'),
         ('COMMA',      r','),
         ('ID',         r'[a-zA-Z_:][a-zA-Z0-9_:]*'),
+        ('COMMENT',    r'#[^\r\n]*'),
         ('SKIP',       r'[ \t\r\n]+'),
     ])
     for mo in re.finditer(tok_regex, text):
         kind = mo.lastgroup
         val = mo.group()
-        if kind == 'SKIP':
+        if kind in ('SKIP', 'COMMENT'):
             continue
         tokens.append((kind, val))
     return tokens

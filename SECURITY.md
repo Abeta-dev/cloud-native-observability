@@ -41,6 +41,7 @@ This repository adheres to strict cloud-native security principles:
 3. **Immutable Image Supply Chain**: Container base images are pinned to explicit versions and digests.
 4. **Least-Privilege RBAC**: Prometheus and OpenTelemetry Collector ServiceAccounts have read-only cluster inspection permissions (`get`, `list`, `watch` on Pods, Services, Endpoints, and Nodes).
 5. **Container Hardening**: All demo and tooling containers run with `readOnlyRootFilesystem: true`, non-root execution (`runAsNonRoot: true`), and dropped capabilities (`drop: ["ALL"]`).
+6. **CI/CD Action Hardening**: All GitHub Actions automation workflows pin actions to immutable commit SHAs with minimum `permissions: read-all` scopes to defend against pipeline supply-chain compromise.
 
 ---
 

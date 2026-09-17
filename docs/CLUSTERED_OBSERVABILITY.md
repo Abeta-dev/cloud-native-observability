@@ -293,6 +293,32 @@ writeRelabelConfigs:
     action: replace
 ```
 
+#### Route Path Normalization Guidelines (TSDB Cardinality Guardrails)
+
+A primary source of catastrophic Prometheus TSDB memory growth and compaction failures is unparameterized HTTP path labels (such as emitting `/users/98234` or `/orders/e8c9b3a1-4f11-4091` directly into `path` or `route` labels). Each unique path creates a brand-new time-series in the TSDB inverted index and Mimir ingester hashrings, causing memory bloat ($O(N)$ active series explosion) and disk thrashing.
+
+Follow these strict normalization rules across all services and instrumentation:
+
+1. **Parameterize Dynamic Segments**:
+   - ❌ **Anti-Pattern**: `/api/v1/users/12345/orders/98765`
+   - ✅ **Normalized Pattern**: `/api/v1/users/:user_id/orders/:order_id`
+   - Use web framework route templates (e.g. Gin `c.FullPath()`, Echo `c.Path()`, Chi `RoutePattern()`, Express `req.route.path`).
+
+2. **Decouple Metric Labels from Request Attributes**:
+   - Metric labels must only contain bounded, low-cardinality discrete sets (e.g. `method="POST"`, `status="200"`, `route="/api/v1/checkout"`).
+   - High-cardinality request attributes (e.g. `user_id`, `tenant_uuid`, `client_ip`, `trace_id`, query parameters) must be stored in **OpenTelemetry Spans** or **Loki Log Streams**, never Prometheus metric labels.
+
+3. **Enforce Ingress and Metric Relabeling Fallbacks**:
+   - If an application leaks raw URLs or invalid routes (e.g. scanner probes, 404 scans), normalize them via Prometheus `metric_relabel_configs`:
+     ```yaml
+     metricRelabelConfigs:
+       - sourceLabels: [__name__, route]
+         regex: "http_requests_total;/.*[0-9a-f]{8}-[0-9a-f]{4}-.*"
+         targetLabel: route
+         replacement: "/_unmatched_uuid_path_"
+     ```
+   - Drop or aggregate unknown paths to keep total active series under Prometheus and Mimir operational thresholds.
+
 #### Auditing High-Cardinality Labels at Runtime
 
 Identify series explosions before they pollute long-term storage:

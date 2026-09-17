@@ -7,6 +7,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-09-17
+
+Path cardinality guardrails, cluster observability documentation, canonical SLI division-by-zero resilience, and CI/CD security hardening.
+
+### Added
+- architecture: Documented route path normalization guidelines in `docs/CLUSTERED_OBSERVABILITY.md` and comments in `deploy/slo/canonical_sli.promql` to prevent high-cardinality time-series explosions in Prometheus TSDB and Mimir ingester rings.
+
+### Fixed
+- slo: Resolved division-by-zero edge condition in canonical SLI query with SRE vector fallback guard (`(sum(...) > 0) or vector(0)`).
+
+### Security
+- ci: Pinned GitHub Actions workflows to immutable commit SHAs and enforced `permissions: read-all` across automation pipelines.
+
 ## [0.2.1] - 2026-09-17
 
 Clustered observability architecture, Mimir remote-write overlays, and compose modernization.

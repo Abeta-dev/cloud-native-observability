@@ -16,7 +16,7 @@ spec:
     targetRevision: 1.9.1
     helm:
       valueFiles:
-        - https://raw.githubusercontent.com/umesh0492/cloud-native-observability/v0.2.1/deploy/kubernetes/helm/tempo/values.yaml
+        - https://raw.githubusercontent.com/umesh0492/cloud-native-observability/v0.2.2/deploy/kubernetes/helm/tempo/values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: tracing
