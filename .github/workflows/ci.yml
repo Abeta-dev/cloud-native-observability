@@ -6,6 +6,8 @@ on:
       - main
       - "fix/**"
       - "feat/**"
+      - "chore/**"
+      - "release/**"
     tags:
       - "v*"
   pull_request:
