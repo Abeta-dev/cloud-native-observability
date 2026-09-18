@@ -1,4 +1,4 @@
-# cloud-native-observability · v0.2.2
+# cloud-native-observability · v0.2.3
 
 > **Note on Repository History**: History reconstructed on 2026-09-11; see [CHANGELOG.md](CHANGELOG.md) for the real feature timeline.
 

@@ -20,7 +20,7 @@ if [[ -z "${tag}" ]]; then
 fi
 
 if [[ ! "${tag}" =~ ^v${SEMVER_PATTERN}$ ]]; then
-  fail "Tag must be valid SemVer prefixed with 'v' (e.g. v0.2.2): ${tag}"
+  fail "Tag must be valid SemVer prefixed with 'v' (e.g. v0.2.3): ${tag}"
 fi
 
 version="${tag#v}"

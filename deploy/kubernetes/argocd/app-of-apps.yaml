@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Abeta-dev/cloud-native-observability.git
-    targetRevision: v0.2.2
+    targetRevision: v0.2.3
     path: deploy/kubernetes/argocd/apps
   destination:
     server: https://kubernetes.default.svc
