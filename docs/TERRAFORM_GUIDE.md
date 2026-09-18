@@ -98,7 +98,7 @@ resource "grafana_rule_group" "golden_signal_rules" {
     annotations = {
       summary     = "Microservice HTTP 5xx error rate exceeded 5%"
       description = "Microservice HTTP 5xx error rate is currently {{ $values.B.Value }}% which exceeds the 5% SLO threshold over 5m."
-      runbook_url = "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#higherrorrate"
+      runbook_url = "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#higherrorrate"
     }
 
     labels = {

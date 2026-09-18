@@ -1,6 +1,6 @@
 # Downstream Microservice Integration Guide
 
-This guide explains how to connect any microservice (specifically Go services using `github.com/umesh0492/go-libs`) to this centralized Cloud-Native Observability platform.
+This guide explains how to connect any microservice (specifically Go services using Abeta go-libs (github.com/umesh0492/go-libs)) to this centralized Cloud-Native Observability platform.
 
 ---
 
