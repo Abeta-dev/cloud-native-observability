@@ -2,9 +2,15 @@ name: Observability Platform CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - "fix/**"
+      - "feat/**"
+    tags:
+      - "v*"
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions: read-all
 

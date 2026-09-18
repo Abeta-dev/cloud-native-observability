@@ -38,6 +38,18 @@ lint: ## Validate Kubernetes YAML and Helm values schemas
 	@echo "Linting Kubernetes and Alertmanager configurations..."
 	@which yamllint > /dev/null 2>&1 && yamllint -d relaxed deploy/ || echo "yamllint not installed, skipping syntax check"
 
+lint-terraform: ## Lint Terraform with TFLint and format check
+	@echo "Checking Terraform formatting..."
+	terraform -chdir=deploy/terraform fmt -check -recursive
+	@echo "Validating Terraform syntax..."
+	terraform -chdir=deploy/terraform init -backend=false
+	terraform -chdir=deploy/terraform validate
+	@echo "Running TFLint..."
+	cd deploy/terraform && tflint --init && tflint --recursive
+
+check-release-readiness: ## Verify repository readiness before tagging a release (usage: make check-release-readiness TAG=v0.2.2)
+	@./scripts/check_tag_readiness.sh $(TAG)
+
 clean: ## Remove temporary containers, networks, and volumes
 	docker compose -f $(COMPOSE_FILE) down -v --remove-orphans
 

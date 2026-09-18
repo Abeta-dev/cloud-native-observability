@@ -2,7 +2,7 @@
 
 > **Note on Repository History**: History reconstructed on 2026-09-11; see [CHANGELOG.md](CHANGELOG.md) for the real feature timeline.
 
-[![CI](https://github.com/umesh0492/cloud-native-observability/actions/workflows/ci.yml/badge.svg)](https://github.com/umesh0492/cloud-native-observability/actions/workflows/ci.yml)
+[![CI](https://github.com/Abeta-dev/cloud-native-observability/actions/workflows/ci.yml/badge.svg)](https://github.com/Abeta-dev/cloud-native-observability/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.28+-326ce5.svg?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Prometheus](https://img.shields.io/badge/Prometheus-v2.51+-e6522c.svg?logo=prometheus&logoColor=white)](https://prometheus.io)
@@ -71,7 +71,7 @@ Experience the complete enterprise platform locally on your laptop with zero clo
 
 ```bash
 # Clone the repository
-git clone https://github.com/umesh0492/cloud-native-observability.git
+git clone https://github.com/Abeta-dev/cloud-native-observability.git
 cd cloud-native-observability
 
 # Spin up Prometheus, Loki, Tempo, OTel Collector, Grafana, Alertmanager, Demo App, and Traffic Generator
@@ -268,7 +268,7 @@ Read the full [Terraform Observability Guide](docs/TERRAFORM_GUIDE.md) for archi
 
 ## 🤝 Integration with `go-libs`
 
-Microservices built on [`github.com/umesh0492/go-libs`](https://github.com/umesh0492/go-libs) connect natively:
+Microservices built on [`github.com/Abeta-dev/go-libs`](https://github.com/Abeta-dev/go-libs) connect natively:
 1. **Metrics**: Scraped automatically via `ServiceMonitor` on `/metrics`.
 2. **APM & Traces**: Exported via `go-libs/apm` to OTel Collector on port `4317`.
 3. **Logs**: Structured JSON with `trace_id` fields auto-correlated in Grafana.
@@ -279,4 +279,4 @@ See the full [Integration Guide](docs/INTEGRATION_GUIDE.md) for copy-paste recip
 
 ## 📄 License
 
-MIT License. Copyright (c) 2026 Umesh Gupta ([umesh0492](https://github.com/umesh0492)).
+MIT License. Copyright (c) 2026 Abeta.

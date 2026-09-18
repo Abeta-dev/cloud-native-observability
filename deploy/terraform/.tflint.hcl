@@ -1,6 +1,6 @@
 config {
-  module = true
-  force  = false
+  call_module_type = "local"
+  force            = false
 }
 
 plugin "terraform" {

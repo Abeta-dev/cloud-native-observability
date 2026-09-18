@@ -27,7 +27,7 @@ tests:
             exp_annotations:
               summary: "Service instance cno-demo-app:8080 is down"
               description: "Service target cno-demo-app:8080 of job demo-app has been unreachable for more than 1 minute."
-              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#servicedown"
+              runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#servicedown"
 
   # ---------------------------------------------------------------------------
   # Test 2: HighErrorRate Alert (>1% 5xx over 5m)
@@ -52,7 +52,7 @@ tests:
             exp_annotations:
               summary: "High HTTP 5xx error rate detected"
               description: "HTTP 5xx error rate exceeds 1% (0.01) over the last 5 minutes on demo-app (demo-app:8080)."
-              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#higherrorrate"
+              runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#higherrorrate"
 
   # ---------------------------------------------------------------------------
   # Test 3: HighLatencyP99 Alert (>1.0s P99)
@@ -80,7 +80,7 @@ tests:
             exp_annotations:
               summary: "High P99 latency breach"
               description: "P99 HTTP request duration for service demo-app exceeds 1.0s over the last 5 minutes."
-              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#highlatencyp99"
+              runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#highlatencyp99"
 
   # ---------------------------------------------------------------------------
   # Test 4: WorkerpoolQueueNearFull Alert (>85% capacity)
@@ -104,4 +104,4 @@ tests:
             exp_annotations:
               summary: "Worker pool queue near full capacity"
               description: "Worker pool queue depth exceeds 85% of total capacity on instance demo-app:8080."
-              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#workerpoolqueuenearfull"
+              runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#workerpoolqueuenearfull"

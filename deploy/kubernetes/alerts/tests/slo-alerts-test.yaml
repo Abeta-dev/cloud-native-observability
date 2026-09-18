@@ -32,7 +32,7 @@ tests:
             exp_annotations:
               summary: "Critical 1h Error Budget Burn Rate (14.4x)"
               description: "Service is burning error budget at 14.4x over 1 hour and 5 minutes (2% of monthly budget consumed in 1 hour). Requires immediate intervention."
-              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnratehigh1h"
+              runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnratehigh1h"
 
   # ---------------------------------------------------------------------------
   # Test 2: ServiceErrorBudgetBurnRateHigh6h (6x burn rate over 6h and 30m)
@@ -62,7 +62,7 @@ tests:
             exp_annotations:
               summary: "High 6h Error Budget Burn Rate (6x)"
               description: "Service is burning error budget at 6x over 6 hours (5% of monthly budget consumed in 6 hours)."
-              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnratehigh6h"
+              runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnratehigh6h"
 
   # ---------------------------------------------------------------------------
   # Test 3: ServiceErrorBudgetBurnRateSlow3d (1x burn rate over 3d and 6h)
@@ -92,4 +92,4 @@ tests:
             exp_annotations:
               summary: "Slow 3-day Error Budget Burn Rate (1x)"
               description: "Service is steadily consuming error budget over a 3-day window and 6-hour window. Create tracking ticket for service owners."
-              runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnrateslow3d"
+              runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnrateslow3d"
