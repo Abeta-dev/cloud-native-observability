@@ -47,7 +47,7 @@ lint-terraform: ## Lint Terraform with TFLint and format check
 	@echo "Running TFLint..."
 	cd deploy/terraform && tflint --init && tflint --recursive
 
-check-release-readiness: ## Verify repository readiness before tagging a release (usage: make check-release-readiness TAG=v0.2.2)
+check-release-readiness: ## Verify repository readiness before tagging a release (usage: make check-release-readiness TAG=v0.2.3)
 	@./scripts/check_tag_readiness.sh $(TAG)
 
 clean: ## Remove temporary containers, networks, and volumes

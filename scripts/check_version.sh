@@ -26,11 +26,11 @@ if [ -z "$README_HEADER_VER" ]; then
   exit 1
 fi
 
-echo "   - Expected Version: v0.2.2"
+echo "   - Expected Version: v0.2.3"
 echo "   - CHANGELOG.md:     v$CHANGELOG_VER"
 echo "   - README.md Header: v$README_HEADER_VER"
 
-EXPECTED_VER="0.2.2"
+EXPECTED_VER="0.2.3"
 
 if [ "$CHANGELOG_VER" != "$EXPECTED_VER" ]; then
   echo "❌ Error: CHANGELOG.md version (v$CHANGELOG_VER) does not match expected version (v$EXPECTED_VER)"

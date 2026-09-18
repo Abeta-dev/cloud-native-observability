@@ -7,6 +7,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] - 2026-09-19
+
+TFLint rule resolution across Terraform modules, CI-gated automated release pipeline, and Abeta ecosystem documentation rebranding.
+
+### Fixed
+- terraform: Resolved TFLint module-level provider and required version rule violations (`terraform_required_version`, `terraform_required_providers`) across `modules/grafana_provisioning`, `modules/kubernetes_stack`, and `modules/storage`.
+- terraform: Modernized `.tflint.hcl` to use `call_module_type = "local"` instead of deprecated `module = true` while preserving the full `recommended` ruleset.
+- terraform: Removed duplicate inline `terraform` provider configuration in `modules/grafana_provisioning/main.tf` in favor of dedicated `versions.tf`.
+
+### Added
+- ci: Redesigned `.github/workflows/release.yml` with a pre-requisite `gate-ci-and-verify` job verifying commit check-runs and running the complete validation suite before publishing releases.
+- ci: Expanded `.github/workflows/ci.yml` trigger configurations to execute on `tags: ["v*"]`, `fix/**`, `feat/**`, and `workflow_dispatch`.
+- tooling: Added `scripts/check_tag_readiness.sh` for pre-release validation and added `make lint-terraform` and `make check-release-readiness` targets to `Makefile`.
+
+### Documentation
+- branding: Synchronized all documentation, README badges, licenses, security advisories, codes of conduct, alert runbook URLs, and ArgoCD GitOps manifests with `Abeta` and `Abeta-dev`.
+
 ## [0.2.2] - 2026-09-17
 
 Path cardinality guardrails, cluster observability documentation, canonical SLI division-by-zero resilience, and CI/CD security hardening.
