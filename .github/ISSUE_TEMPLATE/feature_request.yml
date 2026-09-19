@@ -1,0 +1,72 @@
+name: "Feature Request / Telemetry Enhancement"
+description: "Suggest an idea, new exporter, Grafana dashboard, OpenTelemetry pipeline, or architectural enhancement"
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an enhancement to `cloud-native-observability`!
+        We welcome proposals for new exporters, Grafana panels, OpenTelemetry pipelines, and cloud-native blueprints that uphold our zero-cardinality-explosion and strict AST-verification standards.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Enhancement Category
+      description: Select the telemetry domain for your proposal.
+      options:
+        - New Exporter / Metric Ingestion
+        - Grafana Dashboard Addition / Enhancement
+        - OpenTelemetry Collector Pipeline
+        - Alert Rule / SLO Enhancement
+        - Infrastructure / Terraform Blueprint
+        - Documentation / Runbook
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation / Problem Statement
+      description: Is your feature request related to a problem or observability gap? Please describe.
+      placeholder: A clear and concise description of the engineering challenge or gap you are addressing...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution & Technical Specification
+      description: Describe your proposed design, PromQL queries, pipeline configurations, or dashboard layouts.
+      placeholder: |
+        - Pipeline components (receivers, processors, exporters)
+        - Specific PromQL or LogQL queries
+        - Architecture integration points
+    validations:
+      required: true
+  - type: textarea
+    id: cardinality
+    attributes:
+      label: Cardinality & Resource Impact Analysis
+      description: If introducing new metrics or labels, how will TSDB cardinality and memory be bounded?
+      placeholder: |
+        - Expected series count
+        - Label normalization strategy (e.g. stripping IDs from paths)
+        - Memory or storage overhead
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternative solutions, tools, or configurations have you considered?
+      placeholder: Other exporters, query patterns, or architectures explored...
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribution_intent
+    attributes:
+      label: Contribution Readiness
+      options:
+        - label: I am willing to submit a pull request implementing this feature.
+          required: false
+        - label: I have verified this proposal complies with our ground rules (zero hardcoded secrets, canonical SLI standards).
+          required: true

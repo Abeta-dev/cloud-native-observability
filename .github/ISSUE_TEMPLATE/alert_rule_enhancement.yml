@@ -1,0 +1,118 @@
+name: "Alert Rule / SLO Enhancement"
+description: "Propose, modify, or tune a Prometheus alert rule, recording rule, or SLO definition"
+title: "[Alert/SLO]: "
+labels: ["alerts", "slo", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### SRE Alert & SLO Governance Notice
+        `cloud-native-observability` enforces strict automated validation for all alerting rules:
+        1. **Truth-Gate Protocol**: All queries must use verified telemetry metrics and bounded cardinality.
+        2. **Canonical SLI AST Equivalence**: Service availability error rates must match the single canonical AST in `deploy/slo/canonical_sli.promql` (excluding 4xx client faults).
+        3. **Promtool Test Suite**: Every alert rule must include Promtool unit tests in `deploy/*/alerts/tests/`.
+        4. **Runbook Requirement**: Every alert must map directly to an actionable SOP in `docs/RUNBOOKS.md`.
+  - type: dropdown
+    id: alert_category
+    attributes:
+      label: Alert Category
+      description: Select the classification of the alert or recording rule.
+      options:
+        - Canonical Availability SLI / Burn-Rate Alert (Multi-Window 14.4x / 6x / 1x)
+        - Golden Signal Alert (Latency, Traffic, Errors, Saturation)
+        - Kubernetes Infrastructure Alert (Node, Pod, Workload)
+        - Middleware / Component Alert (Loki, Tempo, OTel Collector)
+        - Precomputed SLO Recording Rule
+        - Other Alert Tuning
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity & Notification Routing
+      description: Desired alert severity and Alertmanager receiver tier.
+      options:
+        - "critical (Immediate Pager / PagerDuty - breaches error budget or service down)"
+        - "warning (Slack Alert / Channel Notification - potential degradation)"
+        - "info (Ticketing / Daily Standup Triage)"
+    validations:
+      required: true
+  - type: input
+    id: target_file
+    attributes:
+      label: Target File Path
+      description: File to be added or modified.
+      placeholder: deploy/kubernetes/alerts/slo-alerts.yaml, deploy/docker-compose/prometheus/alerts.yml, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: promql_rule
+    attributes:
+      label: PromQL Expression & Rule Definition
+      description: Provide the complete YAML rule definition including `alert`, `expr`, `for`, `labels`, and `annotations`.
+      placeholder: |
+        - alert: ServiceHighLatencyP99
+          expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)) > 1.0
+          for: 5m
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "P99 latency above 1s for {{ $labels.service }}"
+            runbook_url: "https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md#highlatencyp99"
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: promtool_test_spec
+    attributes:
+      label: Promtool Unit Test Case Specification
+      description: Provide the input series fixtures and expected evaluation states to be added to the Promtool test file.
+      placeholder: |
+        evaluation_interval: 1m
+        input_series:
+          - series: 'http_request_duration_seconds_bucket{le="1.0",service="demo"}'
+            values: '100+10x10'
+        alert_rule_test:
+          - eval_time: 10m
+            alertname: ServiceHighLatencyP99
+            exp_alerts:
+              - exp_labels:
+                  severity: warning
+                  service: demo
+      render: yaml
+    validations:
+      required: true
+  - type: input
+    id: runbook_url_mapping
+    attributes:
+      label: Runbook URL Mapping in docs/RUNBOOKS.md
+      description: Specify the exact anchor and heading in docs/RUNBOOKS.md documenting triage & mitigation procedures.
+      placeholder: docs/RUNBOOKS.md#servicehighlatencyp99
+    validations:
+      required: true
+  - type: textarea
+    id: ast_cardinality_impact
+    attributes:
+      label: AST Equivalence & Metric Cardinality Analysis
+      description: |
+        If modifying availability rules, confirm compatibility with `deploy/slo/canonical_sli.promql`.
+        List all metric label dimensions (`by (...)`) and verify no high-cardinality values (e.g. user IDs, raw URLs) are introduced.
+      placeholder: |
+        - Canonical SLI AST equivalent: Yes / N/A
+        - Grouping dimensions: (service, namespace)
+        - Cardinality bounded to low-cardinality route templates
+    validations:
+      required: true
+  - type: checkboxes
+    id: preflight_checks
+    attributes:
+      label: Pre-Submission Verification
+      description: Verify the following before submitting this proposal.
+      options:
+        - label: I have verified that 4xx client errors are NOT included in availability SLIs (server 5xx errors only).
+          required: true
+        - label: I have verified this rule has a designated runbook entry in `docs/RUNBOOKS.md`.
+          required: true
+        - label: I have run or will run `bash ./scripts/test_alerts.sh` to validate Promtool test passes.
+          required: true
