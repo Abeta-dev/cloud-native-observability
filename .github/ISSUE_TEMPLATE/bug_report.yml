@@ -1,0 +1,84 @@
+name: "Bug Report"
+description: "Report a reproducible defect, broken dashboard, failing alert rule, or configuration error"
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue with `cloud-native-observability`!
+        Please fill out this form as completely as possible. Remember to omit or mask all proprietary secrets, tokens, or credentials.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Select the telemetry layer or repository component where the issue occurs.
+      options:
+        - docker-compose
+        - kubernetes
+        - terraform
+        - slo-alerts
+        - runbooks
+        - otel-collector
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem Description
+      description: Provide a clear and concise description of the bug.
+      placeholder: What went wrong? What behavior was unexpected?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can maintainers reproduce this issue?
+      placeholder: |
+        1. Deploy stack using '...'
+        2. Execute query '...'
+        3. Observe error '...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: The alert should fire when... / The container should start...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs, PromQL Expressions, or Error Messages
+      description: Paste any terminal logs, container logs, Promtool error messages, or PromQL outputs.
+      render: shell
+  - type: textarea
+    id: system_info
+    attributes:
+      label: Environment & Tooling Versions
+      description: Please share relevant environment details.
+      value: |
+        - OS: [e.g. macOS 14.5, Ubuntu 22.04]
+        - Docker / Docker Compose Version: [e.g. 24.0 / 2.24]
+        - Kubernetes / Helm Version: [e.g. k8s 1.28, Helm 3.14]
+        - Terraform Version: [e.g. 1.5.7]
+        - Promtool Version: [e.g. 2.51.0]
+        - OpenTelemetry Collector Version: [e.g. 0.98.0]
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Verification Checklist
+      description: Please confirm the following before submitting.
+      options:
+        - label: I have searched existing issues and verified this is not a duplicate.
+          required: true
+        - label: I have verified this report contains ZERO hardcoded secrets, API tokens, or internal credentials.
+          required: true
+        - label: If this is an alert rule issue, I have tested locally using `bash ./scripts/test_alerts.sh`.
+          required: false

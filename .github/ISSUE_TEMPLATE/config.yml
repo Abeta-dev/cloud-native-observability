@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Community Discussions & Architecture QA
+    url: https://github.com/umesh0492/cloud-native-observability/discussions
+    about: Ask architectural questions, discuss Grafana dashboards, or consult on SLO design.
+  - name: Incident Response Runbooks
+    url: https://github.com/umesh0492/cloud-native-observability/blob/main/docs/RUNBOOKS.md
+    about: Consult on-call SRE runbooks, triage procedures, and alert mitigation guides.
+  - name: Security Vulnerabilities & Disclosure
+    url: https://github.com/umesh0492/cloud-native-observability/security/advisories/new
+    about: Privately report security concerns, credential leaks, or vulnerability findings under our responsible disclosure policy.
