@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-09-24
+
+Interactive documentation portal for GitHub Pages, unified CI Quality Gate with intelligent path filtering, standardized issue and PR templates, and expanded contributor workflows.
+
+### Added
+- docs: Interactive documentation portal for GitHub Pages (`docs/index.html`) with interactive golden signal metrics visualizer, SLO budget calculators, and stack component architecture guides.
+- ci: Unified CI Quality Gate workflow with intelligent path filtering (`dorny/paths-filter`) to optimize build times across Terraform, Kubernetes, and documentation changes.
+- community: Standardized GitHub issue templates (bug report, feature request) and pull request templates (`.github/PULL_REQUEST_TEMPLATE.md`).
+
+### Changed
+- CONTRIBUTING.md: Expanded contributor guidelines with local verification workflows and truth gate compliance standards.
+
 ## [0.2.3] - 2026-09-19
 
 TFLint rule resolution across Terraform modules, CI-gated automated release pipeline, and Abeta ecosystem documentation rebranding.
