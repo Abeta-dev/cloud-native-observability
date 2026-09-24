@@ -163,13 +163,13 @@ python3 -m yamllint .
 ```
 
 ### Step 6: Release Readiness Preflight
-When preparing a new release tag (e.g. `v0.2.3`), run the pre-release readiness script or make target to verify working tree cleanliness, changelog alignment, and end-to-end verification:
+When preparing a new release tag (e.g. `v0.2.4`), run the pre-release readiness script or make target to verify working tree cleanliness, changelog alignment, and end-to-end verification:
 ```bash
 # Direct script execution
-./scripts/check_tag_readiness.sh v0.2.3
+./scripts/check_tag_readiness.sh v0.2.4
 
 # Or via Makefile target
-make check-release-readiness TAG=v0.2.3
+make check-release-readiness TAG=v0.2.4
 ```
 
 ---
