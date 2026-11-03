@@ -95,3 +95,14 @@ All Kubernetes workloads in this repository are managed via the **App-of-Apps pa
   - `tempo-distributed` (Tracing namespace)
   - `opentelemetry-collector` (OpenTelemetry namespace)
 - **Self-Healing**: Out-of-band drifts are automatically corrected by ArgoCD reconciliation loops.
+
+---
+
+## 5. AI Agent Skills & Multi-Model Context Routing (`AGENTS.md` + `skills/`)
+
+This repository provides vendor-neutral **Agent Skills (`SKILL.md`)** routed from [`AGENTS.md`](AGENTS.md) so AI agents load only the relevant operational context:
+- [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) — Umbrella router and truth-gate invariants
+- [`skills/cno-otel-lgtm-stack/SKILL.md`](skills/cno-otel-lgtm-stack/SKILL.md) — OTel Collector, Prometheus, Loki TSDB `v13`, Tempo spanmetrics, and Grafana dashboards
+- [`skills/cno-sre-slo-alerting/SKILL.md`](skills/cno-sre-slo-alerting/SKILL.md) — Google SRE multi-window burn-rate alerts, recording rules, Alertmanager parity, and PromQL AST equivalence
+- [`skills/cno-gitops-terraform/SKILL.md`](skills/cno-gitops-terraform/SKILL.md) — Kubernetes Kustomize overlays, ArgoCD App-of-Apps, and Terraform Observability-as-Code
+
