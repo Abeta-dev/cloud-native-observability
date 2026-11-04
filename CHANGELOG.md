@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] - 2026-11-05
+
+Portable multi-model AI Agent Skills (`SKILL.md`), root `AGENTS.md` context router, and synchronized GitOps/documentation release references.
+
+### Documentation
+- skills: Added portable multi-model `AGENTS.md` router and 4 operational Agent Skills (`cloud-native-observability`, `cno-otel-lgtm-stack`, `cno-sre-slo-alerting`, `cno-gitops-terraform`) in `skills/`.
+- docs: Documented AI Agent Skills & Multi-Model Context Routing in `README.md` and `ARCHITECTURE.md`, and synchronized ArgoCD manifests and portal version references to `v0.2.5`.
+
 ## [0.2.4] - 2026-09-24
 
 Interactive documentation portal for GitHub Pages, unified CI Quality Gate with intelligent path filtering, standardized issue and PR templates, and expanded contributor workflows.

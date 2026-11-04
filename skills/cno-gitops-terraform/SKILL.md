@@ -1,9 +1,9 @@
 ---
 name: cno-gitops-terraform
-description: Kubernetes Kustomize overlays (local, EKS, GKE), ArgoCD App-of-Apps GitOps deployment, and Terraform Observability-as-Code provisioning for github.com/Abeta-dev/cloud-native-observability (v0.2.4).
+description: Kubernetes Kustomize overlays (local, EKS, GKE), ArgoCD App-of-Apps GitOps deployment, and Terraform Observability-as-Code provisioning for github.com/Abeta-dev/cloud-native-observability (v0.2.5).
 ---
 
-# `cno-gitops-terraform` Subskill (`v0.2.4`)
+# `cno-gitops-terraform` Subskill (`v0.2.5`)
 
 Key paths:
 - `deploy/kubernetes/base/`

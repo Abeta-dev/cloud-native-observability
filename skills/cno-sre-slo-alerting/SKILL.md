@@ -1,9 +1,9 @@
 ---
 name: cno-sre-slo-alerting
-description: Google SRE multi-window multi-burn-rate SLO alerting, Prometheus recording rules, Alertmanager routing parity, and PromQL AST equivalence gates for github.com/Abeta-dev/cloud-native-observability (v0.2.4).
+description: Google SRE multi-window multi-burn-rate SLO alerting, Prometheus recording rules, Alertmanager routing parity, and PromQL AST equivalence gates for github.com/Abeta-dev/cloud-native-observability (v0.2.5).
 ---
 
-# `cno-sre-slo-alerting` Subskill (`v0.2.4`)
+# `cno-sre-slo-alerting` Subskill (`v0.2.5`)
 
 Key configuration paths:
 - `configs/prometheus/rules/recording_rules.yml`
