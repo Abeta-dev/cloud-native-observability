@@ -22,6 +22,7 @@ const (
 	StateOpen     int64 = 2
 
 	maxWorkerQueueCapacity int64 = 12
+	maxOTLPConcurrency     int   = 32
 )
 
 type Metrics struct {
@@ -53,12 +54,17 @@ type CircuitBreaker struct {
 }
 
 var (
-	leThresholds = []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0}
-	metrics      = &Metrics{}
-	logger       *slog.Logger
-	otelEndpoint string
-	cb           *CircuitBreaker
-	httpClient   = &http.Client{Timeout: 2 * time.Second}
+	leThresholds   = []float64{0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0}
+	metrics        = &Metrics{}
+	logger         *slog.Logger
+	otelEndpoint   string
+	cb             *CircuitBreaker
+	httpClient     = &http.Client{Timeout: 2 * time.Second}
+	otlpSem        = make(chan struct{}, maxOTLPConcurrency)
+	otlpWG         sync.WaitGroup
+	taskExecDelay  = 100 * time.Millisecond
+	listenAndServe = http.ListenAndServe
+	exitFunc       = os.Exit
 )
 
 func newCircuitBreaker() *CircuitBreaker {
@@ -152,24 +158,34 @@ func (c *CircuitBreaker) AllowRequest(traceID string) (bool, int64) {
 	return true, c.state
 }
 
-func (c *CircuitBreaker) StartWatchdog() {
+func (c *CircuitBreaker) CheckWatchdog() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if c.state == StateOpen && time.Since(c.openedAt) >= c.openTimeout {
+		c.state = StateHalfOpen
+		c.halfOpenSuccesses = 0
+		metrics.breakerState.Store(StateHalfOpen)
+		emitLog(slog.LevelWarn, "circuit_breaker watchdog: state transition from OPEN to HALF-OPEN", "", "",
+			"service", "demo-app",
+			"app", "demo-app",
+			"circuit_breaker", "HALF-OPEN",
+			"state", StateHalfOpen,
+		)
+	}
+}
+
+func (c *CircuitBreaker) StartWatchdog(ctx context.Context, interval time.Duration) {
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
-		for range ticker.C {
-			c.mu.Lock()
-			if c.state == StateOpen && time.Since(c.openedAt) >= c.openTimeout {
-				c.state = StateHalfOpen
-				c.halfOpenSuccesses = 0
-				metrics.breakerState.Store(StateHalfOpen)
-				emitLog(slog.LevelWarn, "circuit_breaker watchdog: state transition from OPEN to HALF-OPEN", "", "",
-					"service", "demo-app",
-					"app", "demo-app",
-					"circuit_breaker", "HALF-OPEN",
-					"state", StateHalfOpen,
-				)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				c.CheckWatchdog()
 			}
-			c.mu.Unlock()
 		}
 	}()
 }
@@ -187,7 +203,7 @@ func stateString(state int64) string {
 	}
 }
 
-func init() {
+func initApp(ctx context.Context) {
 	logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	}))
@@ -197,13 +213,47 @@ func init() {
 	}
 	metrics.poolQueueDepth.Store(2)
 	cb = newCircuitBreaker()
-	cb.StartWatchdog()
+	cb.StartWatchdog(ctx, 1*time.Second)
+}
+
+func init() {
+	initApp(context.Background())
 }
 
 func randomHex(bytesLen int) string {
 	b := make([]byte, bytesLen)
 	_, _ = rand.Read(b)
 	return hex.EncodeToString(b)
+}
+
+func dispatchOTLP(fn func()) {
+	select {
+	case otlpSem <- struct{}{}:
+		otlpWG.Add(1)
+		go func() {
+			defer func() {
+				<-otlpSem
+				otlpWG.Done()
+			}()
+			fn()
+		}()
+	default:
+		// Drop OTLP telemetry export when concurrency limit is saturated
+	}
+}
+
+func postOTLP(path string, payload map[string]any) {
+	body, _ := json.Marshal(payload)
+	req, err := http.NewRequest(http.MethodPost, otelEndpoint+path, bytes.NewReader(body))
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := httpClient.Do(req)
+	if err == nil && resp != nil {
+		_ = resp.Body.Close()
+	}
 }
 
 func emitLog(level slog.Level, msg string, traceID, spanID string, keyValues ...any) {
@@ -218,8 +268,11 @@ func emitLog(level slog.Level, msg string, traceID, spanID string, keyValues ...
 	fields = append(fields, keyValues...)
 	logger.Log(context.Background(), level, msg, fields...)
 
-	// 2. Dispatch OTLP log directly to OpenTelemetry Collector / Loki
-	go sendOTLPLog(traceID, spanID, level, msg, keyValues...)
+	// 2. Dispatch OTLP log directly to OpenTelemetry Collector / Loki with bounded concurrency
+	kvCopy := append([]any(nil), keyValues...)
+	dispatchOTLP(func() {
+		sendOTLPLog(traceID, spanID, level, msg, kvCopy...)
+	})
 }
 
 func sendOTLPLog(traceID, spanID string, level slog.Level, bodyMsg string, keyValues ...any) {
@@ -302,25 +355,11 @@ func sendOTLPLog(traceID, spanID string, level slog.Level, bodyMsg string, keyVa
 		},
 	}
 
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return
-	}
-
-	req, err := http.NewRequest(http.MethodPost, otelEndpoint+"/v1/logs", bytes.NewReader(body))
-	if err != nil {
-		return
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := httpClient.Do(req)
-	if err == nil && resp != nil {
-		_ = resp.Body.Close()
-	}
+	postOTLP("/v1/logs", payload)
 }
 
 func sendOTLPSpan(traceID, spanID, name string, startTime, endTime time.Time, statusCode int) {
-	go func() {
+	dispatchOTLP(func() {
 		startNano := uint64(startTime.UnixNano())
 		endNano := uint64(endTime.UnixNano())
 
@@ -367,22 +406,8 @@ func sendOTLPSpan(traceID, spanID, name string, startTime, endTime time.Time, st
 			},
 		}
 
-		body, err := json.Marshal(payload)
-		if err != nil {
-			return
-		}
-
-		req, err := http.NewRequest(http.MethodPost, otelEndpoint+"/v1/traces", bytes.NewReader(body))
-		if err != nil {
-			return
-		}
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := httpClient.Do(req)
-		if err == nil && resp != nil {
-			_ = resp.Body.Close()
-		}
-	}()
+		postOTLP("/v1/traces", payload)
+	})
 }
 
 func recordDuration(seconds float64) {
@@ -492,8 +517,9 @@ func handleTasks(w http.ResponseWriter, r *http.Request) {
 	metrics.poolQueueDepth.Add(1)
 
 	// Simulate async execution
+	delay := taskExecDelay
 	go func() {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(delay)
 		metrics.poolCompleted.Add(1)
 		if metrics.poolQueueDepth.Load() > 0 {
 			metrics.poolQueueDepth.Add(-1)
@@ -622,7 +648,6 @@ func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	sb.WriteString("# TYPE app_workerpool_tasks_dropped_total counter\n")
 	fmt.Fprintf(&sb, "app_workerpool_tasks_dropped_total %d\n\n", metrics.poolDropped.Load())
 
-
 	sb.WriteString("# HELP app_cache_hits_total Total cache hits\n")
 	sb.WriteString("# TYPE app_cache_hits_total counter\n")
 	fmt.Fprintf(&sb, "app_cache_hits_total %d\n\n", metrics.cacheHits.Load())
@@ -635,7 +660,7 @@ func handleMetrics(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(sb.String()))
 }
 
-func main() {
+func newHandler() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -650,7 +675,7 @@ func main() {
 	mux.HandleFunc("/api/v1/error", withInstrumentation("/api/v1/error", handleError))
 
 	// Fallback 404 handler for invalid routes
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/healthz" && r.URL.Path != "/metrics" &&
 			r.URL.Path != "/api/v1/items" && r.URL.Path != "/api/v1/tasks" &&
 			r.URL.Path != "/api/v1/quotes" && r.URL.Path != "/api/v1/error" {
@@ -661,7 +686,9 @@ func main() {
 		}
 		mux.ServeHTTP(w, r)
 	})
+}
 
+func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -674,8 +701,8 @@ func main() {
 		"app", "demo-app",
 	)
 
-	if err := http.ListenAndServe(":"+port, handler); err != nil {
+	if err := listenAndServe(":"+port, newHandler()); err != nil {
 		emitLog(slog.LevelError, "Server terminated unexpectedly", "", "", "error", err.Error())
-		os.Exit(1)
+		exitFunc(1)
 	}
 }

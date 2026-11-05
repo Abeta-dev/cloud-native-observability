@@ -1,4 +1,4 @@
-# cloud-native-observability · v0.2.5
+# cloud-native-observability · v0.3.0
 
 > **Note on Repository History**: History reconstructed on 2026-09-11; see [CHANGELOG.md](CHANGELOG.md) for the real feature timeline.
 
@@ -270,7 +270,7 @@ Read the full [Terraform Observability Guide](docs/TERRAFORM_GUIDE.md) for archi
 
 Microservices built on [`github.com/Abeta-dev/go-libs`](https://github.com/Abeta-dev/go-libs) connect natively:
 1. **Metrics**: Scraped automatically via `ServiceMonitor` on `/metrics`.
-2. **APM & Traces**: Exported via `go-libs/apm` to OTel Collector on port `4317`.
+2. **APM & Traces**: Exported via `go-libs/telemetry` (`ginmw.Telemetry`) to OTel Collector on port `4317`.
 3. **Logs**: Structured JSON with `trace_id` fields auto-correlated in Grafana.
 
 See the full [Integration Guide](docs/INTEGRATION_GUIDE.md) for copy-paste recipes.
@@ -284,9 +284,9 @@ See the full [Integration Guide](docs/INTEGRATION_GUIDE.md) for copy-paste recip
 | Skill | Path | Covered Capabilities |
 | :--- | :--- | :--- |
 | **`cloud-native-observability` (Umbrella)** | [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) | Architecture overview, repository layout, and truth-gate verification |
-| **`cno-otel-lgtm-stack`** | [`skills/cno-otel-lgtm-stack/SKILL.md`](skills/cno-otel-lgtm-stack/SKILL.md) | OpenTelemetry Collector pipeline (`:4317`/`:4318`), Prometheus, Loki TSDB `v13` structured metadata, Tempo `traces_spanmetrics_calls_total`, and Grafana dashboards |
+| **`cno-otel-lgtm-stack`** | [`skills/cno-otel-lgtm-stack/SKILL.md`](skills/cno-otel-lgtm-stack/SKILL.md) | OpenTelemetry Collector pipeline (`:4317`/`:4318`, `spanmetrics` connector `traces_spanmetrics_calls_total`), Prometheus, Loki TSDB `v13` structured metadata, Tempo, and Grafana dashboards |
 | **`cno-sre-slo-alerting`** | [`skills/cno-sre-slo-alerting/SKILL.md`](skills/cno-sre-slo-alerting/SKILL.md) | Google SRE multi-window burn-rate alerts (`14.4x`, `6.0x`, `1.0x`), recording rules, Alertmanager parity, and PromQL AST equivalence gates |
-| **`cno-gitops-terraform`** | [`skills/cno-gitops-terraform/SKILL.md`](skills/cno-gitops-terraform/SKILL.md) | Kubernetes Kustomize overlays (`local`, `eks`, `gke`), ArgoCD App-of-Apps manifests, and Terraform Observability-as-Code |
+| **`cno-gitops-terraform`** | [`skills/cno-gitops-terraform/SKILL.md`](skills/cno-gitops-terraform/SKILL.md) | Kubernetes Helm overlays (`values-eks.yaml`, `values-gke.yaml`), ArgoCD App-of-Apps manifests, and Terraform Observability-as-Code |
 
 ---
 

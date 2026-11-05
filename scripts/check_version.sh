@@ -26,11 +26,11 @@ if [ -z "$README_HEADER_VER" ]; then
   exit 1
 fi
 
-echo "   - Expected Version: v0.2.5"
+echo "   - Expected Version: v0.3.0"
 echo "   - CHANGELOG.md:     v$CHANGELOG_VER"
 echo "   - README.md Header: v$README_HEADER_VER"
 
-EXPECTED_VER="0.2.5"
+EXPECTED_VER="0.3.0"
 
 if [ "$CHANGELOG_VER" != "$EXPECTED_VER" ]; then
   echo "❌ Error: CHANGELOG.md version (v$CHANGELOG_VER) does not match expected version (v$EXPECTED_VER)"
@@ -42,15 +42,17 @@ if [ "$CHANGELOG_VER" != "$README_HEADER_VER" ]; then
   exit 1
 fi
 
-# Enforce git tag if GIT_TAG is set, or if GITHUB_REF_TYPE is tag, or if tag points at HEAD
+# Enforce git tag if GIT_TAG is set, or if GITHUB_REF_TYPE is tag, or if tag points at clean HEAD
 TAG_TO_VERIFY="${GIT_TAG:-}"
 if [ -z "$TAG_TO_VERIFY" ] && [ "${GITHUB_REF_TYPE:-}" = "tag" ] && [ -n "${GITHUB_REF_NAME:-}" ]; then
   TAG_TO_VERIFY="${GITHUB_REF_NAME:-}"
 fi
 if [ -z "$TAG_TO_VERIFY" ] && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  HEAD_TAG=$(git tag --points-at HEAD 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
-  if [ -n "$HEAD_TAG" ]; then
-    TAG_TO_VERIFY="$HEAD_TAG"
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    HEAD_TAG=$(git tag --points-at HEAD 2>/dev/null | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+    if [ -n "$HEAD_TAG" ]; then
+      TAG_TO_VERIFY="$HEAD_TAG"
+    fi
   fi
 fi
 
@@ -99,10 +101,18 @@ echo "   - All ArgoCD manifests synchronized to v${EXPECTED_VER} ✅"
 # ==============================================================================
 echo "🔍 Checking documentation for unverified superlatives, unmeasured claims, or phantom services..."
 
-DOC_FILES=(README.md ARCHITECTURE.md CHANGELOG.md deploy/terraform/README.md)
-for f in docs/*.md docs/adr/*.md; do
+DOC_FILES=(README.md ARCHITECTURE.md AGENTS.md CHANGELOG.md deploy/terraform/README.md)
+for f in docs/*.md docs/adr/*.md skills/*/SKILL.md; do
   [ -f "$f" ] && DOC_FILES+=("$f")
 done
+
+# Verify AGENTS.md and skills/*/SKILL.md version parity
+SKILL_STALE=$(grep -rnE 'v[0-9]+\.[0-9]+\.[0-9]+' AGENTS.md skills/*/SKILL.md 2>/dev/null | grep -vE "v${EXPECTED_VER}|v13|v1\b|v2\b" || true)
+if [ -n "$SKILL_STALE" ]; then
+  echo "❌ Error: Stale or mismatched version detected in AGENTS.md or skills/*/SKILL.md (expected v${EXPECTED_VER}):"
+  echo "$SKILL_STALE"
+  exit 1
+fi
 
 # 1. Phantom service check: Mimir in base documentation (core repo uses Prometheus / Thanos in base; Mimir clustered architecture is documented in CLUSTERED_OBSERVABILITY.md)
 MIMIR_CHECK_FILES=()
@@ -657,6 +667,20 @@ except Exception as ex:
     print(f"❌ Error during Canonical SLI AST equivalence check: {ex}")
     sys.exit(1)
 EOF
+
+# ==============================================================================
+# Demo App Unit Test & 100.0% Statement Coverage Gate
+# ==============================================================================
+if command -v go >/dev/null 2>&1 && [ -f "deploy/docker-compose/demo-app/go.mod" ]; then
+  echo "🧪 Verifying demo-app unit tests and 100.0% statement coverage..."
+  DEMO_COV_OUT=$(cd deploy/docker-compose/demo-app && go test -race -cover ./... 2>&1)
+  if ! echo "$DEMO_COV_OUT" | grep -q "coverage: 100.0% of statements"; then
+    echo "❌ Error: demo-app did not achieve 100.0% statement coverage:"
+    echo "$DEMO_COV_OUT"
+    exit 1
+  fi
+  echo "   - demo-app unit tests passed with 100.0% statement coverage ✅"
+fi
 
 echo "========================================================"
 echo "✅ All versions, documentation, and telemetry queries are strictly verified and truthful!"
