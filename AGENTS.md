@@ -1,0 +1,27 @@
+# AGENTS.md — `cloud-native-observability` (`github.com/Abeta-dev/cloud-native-observability`)
+
+Production-grade OpenTelemetry + LGTM (`Loki` + `Grafana` + `Tempo` + `Prometheus`) observability blueprint (`v0.2.5`, `Go 1.26.0`) with Google SRE multi-window burn-rate alerting, Kubernetes ArgoCD GitOps overlays, and Terraform Observability-as-Code.
+
+## Skill Routing Table
+
+Load the smallest subskill that matches your task:
+
+| Skill | Path | When to Load |
+| :--- | :--- | :--- |
+| **`cloud-native-observability` (Umbrella)** | [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) | Architecture overview, repository layout, and truth-gate verification (`./scripts/check_version.sh`). |
+| **`cno-otel-lgtm-stack`** | [`skills/cno-otel-lgtm-stack/SKILL.md`](skills/cno-otel-lgtm-stack/SKILL.md) | OpenTelemetry Collector pipeline (`:4317`/`:4318`), Prometheus scraping, Loki TSDB `v13` structured metadata, Tempo spanmetrics (`traces_spanmetrics_calls_total`), and Grafana dashboards. |
+| **`cno-sre-slo-alerting`** | [`skills/cno-sre-slo-alerting/SKILL.md`](skills/cno-sre-slo-alerting/SKILL.md) | Google SRE multi-window multi-burn-rate alerts (`14.4x`, `6.0x`, `1.0x`), recording rules (`job:http_requests:error_rate_*`), Alertmanager parity, and PromQL AST equivalence gates. |
+| **`cno-gitops-terraform`** | [`skills/cno-gitops-terraform/SKILL.md`](skills/cno-gitops-terraform/SKILL.md) | Kubernetes Kustomize overlays (`local`, `eks`, `gke`), ArgoCD App-of-Apps manifests, and Terraform (`deploy/terraform/`) provisioning. |
+
+## Mandatory Verification Gates
+
+Before committing or opening a PR in this repository, always run:
+
+```bash
+./scripts/check_version.sh
+go test -race ./...
+```
+
+- **Alertmanager Parity Gate**: `configs/alertmanager/alertmanager.yml` and `deploy/kubernetes/base/alertmanager/configmap.yaml` must remain semantically identical.
+- **Canonical Availability SLI Gate**: Recording rules (`configs/prometheus/rules/recording_rules.yml`), Grafana dashboards (`configs/grafana/dashboards/service-golden-signals.json`), and Terraform SLO modules (`deploy/terraform/alerts.tf`) must use the exact same PromQL AST for HTTP error ratio (`status=~"5.."` over total `http_requests_total`).
+- **Tempo Spanmetrics Gate**: Always use `traces_spanmetrics_calls_total` produced by Tempo's `metrics_generator`.

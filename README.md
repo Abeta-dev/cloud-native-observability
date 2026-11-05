@@ -1,4 +1,4 @@
-# cloud-native-observability · v0.2.4
+# cloud-native-observability · v0.2.5
 
 > **Note on Repository History**: History reconstructed on 2026-09-11; see [CHANGELOG.md](CHANGELOG.md) for the real feature timeline.
 
@@ -274,6 +274,19 @@ Microservices built on [`github.com/Abeta-dev/go-libs`](https://github.com/Abeta
 3. **Logs**: Structured JSON with `trace_id` fields auto-correlated in Grafana.
 
 See the full [Integration Guide](docs/INTEGRATION_GUIDE.md) for copy-paste recipes.
+
+---
+
+## 🤖 AI Agent Skills & Multi-Model Context Routing
+
+`cloud-native-observability` ships with vendor-neutral **Agent Skills (`SKILL.md`)** and a root **[`AGENTS.md`](AGENTS.md)** router for any LLM coding agent (Antigravity, Gemini CLI, Claude Code, OpenAI Codex, Cursor, Windsurf):
+
+| Skill | Path | Covered Capabilities |
+| :--- | :--- | :--- |
+| **`cloud-native-observability` (Umbrella)** | [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) | Architecture overview, repository layout, and truth-gate verification |
+| **`cno-otel-lgtm-stack`** | [`skills/cno-otel-lgtm-stack/SKILL.md`](skills/cno-otel-lgtm-stack/SKILL.md) | OpenTelemetry Collector pipeline (`:4317`/`:4318`), Prometheus, Loki TSDB `v13` structured metadata, Tempo `traces_spanmetrics_calls_total`, and Grafana dashboards |
+| **`cno-sre-slo-alerting`** | [`skills/cno-sre-slo-alerting/SKILL.md`](skills/cno-sre-slo-alerting/SKILL.md) | Google SRE multi-window burn-rate alerts (`14.4x`, `6.0x`, `1.0x`), recording rules, Alertmanager parity, and PromQL AST equivalence gates |
+| **`cno-gitops-terraform`** | [`skills/cno-gitops-terraform/SKILL.md`](skills/cno-gitops-terraform/SKILL.md) | Kubernetes Kustomize overlays (`local`, `eks`, `gke`), ArgoCD App-of-Apps manifests, and Terraform Observability-as-Code |
 
 ---
 
