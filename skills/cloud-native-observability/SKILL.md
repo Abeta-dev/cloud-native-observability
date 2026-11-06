@@ -1,11 +1,11 @@
 ---
 name: cloud-native-observability
-description: Umbrella router and operational blueprint for github.com/Abeta-dev/cloud-native-observability (v0.3.0). Use when instrumenting Go services with OpenTelemetry, configuring OTel Collector + Prometheus + Grafana + Loki + Tempo, authoring Google SRE burn-rate SLO alerts, or deploying via ArgoCD and Terraform.
+description: Umbrella router and operational blueprint for github.com/abeta-dev/cloud-native-observability (v0.3.0). Use when instrumenting Go services with OpenTelemetry, configuring OTel Collector + Prometheus + Grafana + Loki + Tempo, authoring Google SRE burn-rate SLO alerts, or deploying via ArgoCD and Terraform.
 ---
 
 # `cloud-native-observability` Umbrella Skill (`v0.3.0`)
 
-Repository: `github.com/Abeta-dev/cloud-native-observability` (`v0.3.0`, `Go 1.26.0`)
+Repository: `github.com/abeta-dev/cloud-native-observability` (`v0.3.0`, `Go 1.26.0`)
 
 ## When to Use
 

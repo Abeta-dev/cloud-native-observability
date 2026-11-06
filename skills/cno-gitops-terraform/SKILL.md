@@ -1,6 +1,6 @@
 ---
 name: cno-gitops-terraform
-description: Kubernetes Helm value profiles, cloud overlays (EKS, GKE), ArgoCD App-of-Apps GitOps deployment, and Terraform Observability-as-Code provisioning for github.com/Abeta-dev/cloud-native-observability (v0.3.0).
+description: Kubernetes Helm value profiles, cloud overlays (EKS, GKE), ArgoCD App-of-Apps GitOps deployment, and Terraform Observability-as-Code provisioning for github.com/abeta-dev/cloud-native-observability (v0.3.0).
 ---
 
 # `cno-gitops-terraform` Subskill (`v0.3.0`)

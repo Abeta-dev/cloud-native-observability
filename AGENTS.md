@@ -1,4 +1,4 @@
-# AGENTS.md — `cloud-native-observability` (`github.com/Abeta-dev/cloud-native-observability`)
+# AGENTS.md — `cloud-native-observability` (`github.com/abeta-dev/cloud-native-observability`)
 
 Production-grade OpenTelemetry + LGTM (`Loki` + `Grafana` + `Tempo` + `Prometheus`) observability blueprint (`v0.3.0`, `Go 1.26.0`) with Google SRE multi-window burn-rate alerting, Kubernetes ArgoCD GitOps overlays, and Terraform Observability-as-Code.
 

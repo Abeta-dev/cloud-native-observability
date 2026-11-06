@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/Abeta-dev/cloud-native-observability.git
+    repoURL: https://github.com/abeta-dev/cloud-native-observability.git
     targetRevision: v0.3.0
     path: deploy/kubernetes/argocd/apps
   destination:

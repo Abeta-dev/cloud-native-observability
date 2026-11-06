@@ -1,6 +1,6 @@
 # Downstream Microservice Integration Guide
 
-This guide explains how to connect any microservice (specifically Go services using Abeta `go-libs` (`github.com/Abeta-dev/go-libs`)) to this centralized Cloud-Native Observability platform.
+This guide explains how to connect any microservice (specifically Go services using Abeta `go-libs` (`github.com/abeta-dev/go-libs`)) to this centralized Cloud-Native Observability platform.
 
 ---
 
@@ -17,7 +17,7 @@ To achieve full observability, every service must provide:
 
 ### Step 1: Export OTLP Distributed Traces (`telemetry` + `ginmw.Telemetry`)
 
-Using `github.com/Abeta-dev/go-libs/telemetry`, initialize the OpenTelemetry tracer provider and register W3C Trace Context propagation:
+Using `github.com/abeta-dev/go-libs/telemetry`, initialize the OpenTelemetry tracer provider and register W3C Trace Context propagation:
 
 ```go
 package main
@@ -25,8 +25,8 @@ package main
 import (
     "context"
 
-    "github.com/Abeta-dev/go-libs/ginmw"
-    "github.com/Abeta-dev/go-libs/telemetry"
+    "github.com/abeta-dev/go-libs/ginmw"
+    "github.com/abeta-dev/go-libs/telemetry"
     "github.com/gin-gonic/gin"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
     sdktrace "go.opentelemetry.io/otel/sdk/trace"

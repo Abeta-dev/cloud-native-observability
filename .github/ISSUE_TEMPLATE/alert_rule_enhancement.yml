@@ -59,7 +59,7 @@ body:
             team: platform
           annotations:
             summary: "P99 latency above 1s for {{ $labels.service }}"
-            runbook_url: "https://github.com/Abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#highlatencyp99"
+            runbook_url: "https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#highlatencyp99"
       render: yaml
     validations:
       required: true
