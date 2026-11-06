@@ -7,6 +7,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-05
+
+Complete `github.com/abeta-dev/*` module and documentation migration, Kubernetes OTel Collector Loki log pipeline parity, `AGENTS.md` / `skills/` path & architecture truthfulness alignment, and 100.0% statement coverage across `deploy/docker-compose/demo-app`.
+
+### Added
+- demo-app: Added `deploy/docker-compose/demo-app/go.mod` (`Go 1.26.0`) and comprehensive unit test suite (`main_test.go`) achieving 100.0% statement coverage with bounded OTLP telemetry dispatch concurrency.
+- otel-collector: Added `otlphttp/loki` exporter and `logs` pipeline (`[memory_limiter, k8sattributes, batch] -> [otlphttp/loki]`) to `deploy/kubernetes/helm/otel-collector/values.yaml` for parity with the Docker Compose OTLP log pipeline.
+- scripts: Extended `scripts/check_version.sh` truthfulness gates to cover `AGENTS.md`, `skills/*/SKILL.md`, and `demo-app` 100.0% statement coverage verification.
+
+### Changed
+- docs: Migrated all remaining legacy repository and module references to `github.com/abeta-dev/*` and updated `docs/INTEGRATION_GUIDE.md` to use `github.com/abeta-dev/go-libs/telemetry`, `ginmw.Telemetry`, and `logger.FromContext`.
+- skills: Synchronized `AGENTS.md` and all 4 `skills/*/SKILL.md` files with exact repository file paths and OpenTelemetry Collector `spanmetrics` connector semantics (`v0.3.0`).
+- docker-compose: Removed duplicate `deploy/docker-compose/prometheus/prometheus.remote-write.yml` in favor of `deploy/docker-compose/prometheus/mimir-remote-write.yml`, and upgraded `demo-app/Dockerfile` builder image to `golang:1.26-alpine`.
+
 ## [0.2.5] - 2026-11-05
 
 Portable multi-model AI Agent Skills (`SKILL.md`), root `AGENTS.md` context router, and synchronized GitOps/documentation release references.
@@ -42,7 +56,7 @@ TFLint rule resolution across Terraform modules, CI-gated automated release pipe
 - tooling: Added `scripts/check_tag_readiness.sh` for pre-release validation and added `make lint-terraform` and `make check-release-readiness` targets to `Makefile`.
 
 ### Documentation
-- branding: Synchronized all documentation, README badges, licenses, security advisories, codes of conduct, alert runbook URLs, and ArgoCD GitOps manifests with `Abeta` and `Abeta-dev`.
+- branding: Synchronized all documentation, README badges, licenses, security advisories, codes of conduct, alert runbook URLs, and ArgoCD GitOps manifests with `Abeta` and `abeta-dev`.
 
 ## [0.2.2] - 2026-09-17
 

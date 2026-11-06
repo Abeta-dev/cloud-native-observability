@@ -1,6 +1,6 @@
-FROM golang:1.24.4-alpine AS builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /app
-COPY main.go .
+COPY go.mod main.go ./
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o demo-app main.go
 
 FROM alpine:3.19.1
