@@ -68,6 +68,7 @@ cloud-native-observability/
 │   ├── SLO_DESIGN.md              # SRE error budget and multi-burn-rate mathematical framework
 │   └── TERRAFORM_GUIDE.md         # Terraform provisioning workflows
 └── scripts/                       # Verification gates and test runners
+    ├── check_secrets.sh           # TruffleHog & credential leak prevention gate
     ├── check_tag_readiness.sh     # Pre-release tag readiness verification
     ├── check_version.sh           # Core truth-gate & AST synchronization verifier
     └── test_alerts.sh             # Promtool alert test runner & CRD sync
@@ -124,9 +125,10 @@ pip install yamllint
 
 Before opening a pull request or pushing tags, run the complete local verification suite to ensure zero errors.
 
-### Step 1: Version & Truthfulness Gate
-Validates version synchronizations between `CHANGELOG.md`, `README.md`, Git tags, and ArgoCD manifests. Checks for unverified claims, validates dashboard PromQL against the metric catalog, verifies Alertmanager route parity, and executes AST equivalence parsing:
+### Step 1: Secret, Version & Truthfulness Gate
+Scans for leaked credentials/secrets via `./scripts/check_secrets.sh` (including TruffleHog git history inspection), validates version synchronizations between `CHANGELOG.md`, `README.md`, Git tags, and ArgoCD manifests, checks for unverified claims, validates dashboard PromQL against the metric catalog, verifies Alertmanager route parity, executes AST equivalence parsing, and enforces `100.0%` statement coverage on `deploy/docker-compose/demo-app`:
 ```bash
+./scripts/check_secrets.sh
 ./scripts/check_version.sh
 ```
 
