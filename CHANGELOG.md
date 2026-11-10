@@ -9,16 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-11-05
 
-Complete `github.com/abeta-dev/*` module and documentation migration, Kubernetes OTel Collector Loki log pipeline parity, `AGENTS.md` / `skills/` path & architecture truthfulness alignment, and 100.0% statement coverage across `deploy/docker-compose/demo-app`.
+Complete lowercase `github.com/abeta-dev/cloud-native-observability` module and documentation migration, Kubernetes OTel Collector Loki log pipeline parity, `AGENTS.md` / `skills/` path & architecture truthfulness alignment, TruffleHog + `scripts/check_secrets.sh` security gate, polished `docs/index.html` documentation portal, and `100.0%` statement coverage across `deploy/docker-compose/demo-app`.
 
 ### Added
-- demo-app: Added `deploy/docker-compose/demo-app/go.mod` (`Go 1.26.0`) and comprehensive unit test suite (`main_test.go`) achieving 100.0% statement coverage with bounded OTLP telemetry dispatch concurrency.
+- demo-app: Added `deploy/docker-compose/demo-app/go.mod` (`github.com/abeta-dev/cloud-native-observability/deploy/docker-compose/demo-app`, `Go 1.26.0`) and comprehensive unit test suite (`main_test.go`) achieving `100.0%` statement coverage with bounded OTLP telemetry dispatch concurrency.
+- security: Added `scripts/check_secrets.sh` and TruffleHog CI secret-scanning gate enforcing zero tracked credential files, private key headers, cloud/API tokens, or embedded DSN passwords across tracked files and git history.
 - otel-collector: Added `otlphttp/loki` exporter and `logs` pipeline (`[memory_limiter, k8sattributes, batch] -> [otlphttp/loki]`) to `deploy/kubernetes/helm/otel-collector/values.yaml` for parity with the Docker Compose OTLP log pipeline.
-- scripts: Extended `scripts/check_version.sh` truthfulness gates to cover `AGENTS.md`, `skills/*/SKILL.md`, and `demo-app` 100.0% statement coverage verification.
+- scripts: Extended `scripts/check_version.sh` truthfulness gates to cover `AGENTS.md`, `skills/*/SKILL.md`, `scripts/check_secrets.sh`, and `demo-app` `100.0%` statement coverage verification.
 
 ### Changed
-- docs: Migrated all remaining legacy repository and module references to `github.com/abeta-dev/*` and updated `docs/INTEGRATION_GUIDE.md` to use `github.com/abeta-dev/go-libs/telemetry`, `ginmw.Telemetry`, and `logger.FromContext`.
-- skills: Synchronized `AGENTS.md` and all 4 `skills/*/SKILL.md` files with exact repository file paths and OpenTelemetry Collector `spanmetrics` connector semantics (`v0.3.0`).
+- docs: Standardized all repository and module paths to lowercase `github.com/abeta-dev/cloud-native-observability`, updated `docs/INTEGRATION_GUIDE.md` to use `github.com/abeta-dev/go-libs/telemetry`, `ginmw.Telemetry`, and `logger.FromContext`, and polished `docs/index.html` for semantic landmarks, WCAG AA contrast, responsive mobile navigation, and reduced-motion accessibility.
+- skills: Synchronized `AGENTS.md` and all 4 `skills/*/SKILL.md` files with exact repository file paths, verification gates (`./scripts/check_secrets.sh`, `./scripts/check_version.sh`, `./scripts/test_alerts.sh`, `100.0%` `demo-app` coverage), and OpenTelemetry Collector `spanmetrics` connector semantics (`v0.3.0`).
 - docker-compose: Removed duplicate `deploy/docker-compose/prometheus/prometheus.remote-write.yml` in favor of `deploy/docker-compose/prometheus/mimir-remote-write.yml`, and upgraded `demo-app/Dockerfile` builder image to `golang:1.26-alpine`.
 
 ## [0.2.5] - 2026-11-05

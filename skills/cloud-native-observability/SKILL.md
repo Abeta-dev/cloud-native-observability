@@ -12,7 +12,7 @@ Repository: `github.com/abeta-dev/cloud-native-observability` (`v0.3.0`, `Go 1.2
 - Instrumenting Go services (built with `go-libs` and `go-app-kit`) to emit correlated OpenTelemetry traces, metrics, and structured JSON logs (`docs/INTEGRATION_GUIDE.md`)
 - Operating or modifying the local Docker Compose LGTM stack (`compose.yaml`, `deploy/docker-compose/docker-compose.yml`) or Kubernetes Helm/ArgoCD deployments (`deploy/kubernetes/`)
 - Authoring or auditing Prometheus recording rules, Google SRE multi-window burn-rate alerts, or Grafana dashboards
-- Validating cross-layer observability parity via `./scripts/check_version.sh` and `./scripts/test_alerts.sh`
+- Validating cross-layer observability parity and security gates via `./scripts/check_secrets.sh` (TruffleHog + secret scanning gate), `./scripts/check_version.sh`, `./scripts/test_alerts.sh`, and `100.0%` statement coverage on `deploy/docker-compose/demo-app`
 
 ## Subskill Routing
 
@@ -29,4 +29,4 @@ Repository: `github.com/abeta-dev/cloud-native-observability` (`v0.3.0`, `Go 1.2
    - **Metrics → Traces**: Prometheus scrapes `/metrics` and OpenTelemetry Collector spanmetrics on `:8889`, linked to Tempo in Grafana (`deploy/docker-compose/grafana/provisioning/datasources/datasources.yml`).
    - **Logs → Traces**: Structured `slog` JSON logs include `trace_id` and `span_id`, indexed as Loki TSDB `v13` structured metadata (`deploy/docker-compose/loki/loki-config.yml`).
    - **Traces → Metrics**: The OpenTelemetry Collector `spanmetrics` connector synthesizes RED metrics (`traces_spanmetrics_calls_total`, `traces_spanmetrics_duration_milliseconds_bucket`) from spans and exposes them on `:8889` for Prometheus scraping.
-3. **Config Parity Enforcement**: Always run `./scripts/check_version.sh`, `./scripts/test_alerts.sh`, and `(cd deploy/docker-compose/demo-app && go test -race -cover ./...)` after editing any Go, YAML, JSON, or `.tf` configuration file.
+3. **Config Parity & Security Enforcement**: Always run `./scripts/check_secrets.sh` (TruffleHog + secret scanning gate), `./scripts/check_version.sh`, `./scripts/test_alerts.sh`, and `(cd deploy/docker-compose/demo-app && go test -race -cover ./...)` (enforcing `100.0%` statement coverage on `deploy/docker-compose/demo-app`) after editing any Go, YAML, JSON, or `.tf` configuration file.
