@@ -20,7 +20,7 @@ Instead, report vulnerabilities through one of the following confidential channe
 
 ### 1. GitHub Private Vulnerability Reporting (Preferred)
 Submit a confidential advisory directly via GitHub:
-- Navigate to the **Security** tab of `github.com/Abeta-dev/cloud-native-observability`.
+- Navigate to the **Security** tab of `github.com/abeta-dev/cloud-native-observability`.
 - Click **"Report a vulnerability"** to open a private advisory draft.
 - Include a description, affected component(s) (e.g. Helm values, ArgoCD sync-waves, Terraform modules, or Docker Compose), reproduction steps, and potential impact.
 
