@@ -9,20 +9,24 @@
     :root {
       --bg-main: #0a0e17;
       --bg-surface: #111827;
+      --bg-elevated: #0f172a;
+      --bg-footer: #080b12;
       --bg-card: #151e32;
       --bg-card-hover: #1c2742;
       --bg-code: #0b1120;
       --border-color: #1f2d45;
       --border-bright: #334155;
       --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-code: #e2e8f0;
       --accent-cyan: #38bdf8;
+      --accent-cyan-hover: #7dd3fc;
       --accent-blue: #3b82f6;
-      --accent-emerald: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
-      --accent-violet: #818cf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #fda4af;
+      --accent-violet: #a5b4fc;
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
@@ -33,6 +37,17 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-bright) var(--bg-main);
+    }
+
+    ::selection {
+      background: rgba(56, 189, 248, 0.28);
+      color: var(--text-primary);
+    }
+
     body {
       background-color: var(--bg-main);
       color: var(--text-primary);
@@ -41,15 +56,44 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    h1, h2, h3 {
+      text-wrap: balance;
+    }
+
     a {
       color: var(--accent-cyan);
       text-decoration: none;
+      text-underline-offset: 0.22em;
       transition: color 0.15s ease;
     }
 
     a:hover {
-      color: #7dd3fc;
+      color: var(--accent-cyan-hover);
       text-decoration: underline;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid var(--accent-cyan);
+      outline-offset: 2px;
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0.75rem;
+      z-index: 200;
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 2px solid var(--accent-cyan);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+    }
+
+    .skip-link:focus-visible {
+      left: 1rem;
     }
 
     /* Container */
@@ -63,7 +107,7 @@
     header {
       position: sticky;
       top: 0;
-      background: rgba(10, 14, 23, 0.88);
+      background: rgba(10, 14, 23, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-color);
       z-index: 100;
@@ -73,15 +117,24 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 4.25rem;
+      min-height: 4.25rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .brand {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.75rem;
       font-weight: 700;
-      font-size: 1.15rem;
+      font-size: 1.125rem;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .brand:hover {
       color: var(--text-primary);
       text-decoration: none;
     }
@@ -89,20 +142,21 @@
     .brand-icon {
       width: 2rem;
       height: 2rem;
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
       border-radius: 0.5rem;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-size: 1.1rem;
-      font-weight: bold;
+      color: var(--accent-cyan);
+      flex-shrink: 0;
     }
 
     nav ul {
       display: flex;
+      flex-wrap: wrap;
       list-style: none;
-      gap: 1.5rem;
+      gap: 1.25rem;
       align-items: center;
     }
 
@@ -111,7 +165,9 @@
       font-size: 0.925rem;
       font-weight: 500;
       text-decoration: none;
-      transition: all 0.15s;
+      padding: 0.35rem 0.25rem;
+      display: inline-block;
+      transition: color 0.15s ease;
     }
 
     nav a:hover {
@@ -121,13 +177,14 @@
 
     .nav-badge {
       font-size: 0.75rem;
-      padding: 0.2rem 0.6rem;
+      padding: 0.25rem 0.65rem;
       border-radius: 9999px;
-      background: rgba(16, 185, 129, 0.15);
+      background: rgba(52, 211, 153, 0.12);
       color: var(--accent-emerald);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border: 1px solid rgba(52, 211, 153, 0.35);
       font-weight: 600;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
     }
 
     /* Hero Section */
@@ -135,38 +192,21 @@
       padding: 5rem 0 4rem;
       text-align: center;
       border-bottom: 1px solid var(--border-color);
-      background: radial-gradient(circle at 50% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
-    }
-
-    .hero-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 1rem;
-      border-radius: 9999px;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      color: var(--accent-cyan);
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
     }
 
     .hero h1 {
       font-size: 3rem;
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.15;
       letter-spacing: -0.025em;
       margin-bottom: 1.25rem;
-      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-primary);
     }
 
     .hero p {
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       color: var(--text-secondary);
-      max-width: 760px;
+      max-width: 68ch;
       margin: 0 auto 2rem;
     }
 
@@ -181,20 +221,21 @@
     .status-pill {
       display: inline-flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.35rem 0.85rem;
+      gap: 0.45rem;
+      padding: 0.4rem 0.9rem;
       border-radius: 6px;
       font-size: 0.825rem;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       font-weight: 600;
       border: 1px solid var(--border-color);
       background: var(--bg-surface);
     }
 
     .status-pill.success {
-      border-color: rgba(16, 185, 129, 0.4);
+      border-color: rgba(52, 211, 153, 0.4);
       color: var(--accent-emerald);
-      background: rgba(16, 185, 129, 0.08);
+      background: rgba(52, 211, 153, 0.08);
     }
 
     .status-pill.info {
@@ -204,25 +245,24 @@
     }
 
     .status-pill.purple {
-      border-color: rgba(129, 140, 248, 0.4);
+      border-color: rgba(165, 180, 252, 0.4);
       color: var(--accent-violet);
-      background: rgba(129, 140, 248, 0.08);
+      background: rgba(165, 180, 252, 0.08);
     }
 
     .status-pill.amber {
-      border-color: rgba(245, 158, 11, 0.4);
+      border-color: rgba(251, 191, 36, 0.4);
       color: var(--accent-amber);
-      background: rgba(245, 158, 11, 0.08);
+      background: rgba(251, 191, 36, 0.08);
     }
 
     /* Quickstart Window */
     .quickstart-box {
-      max-width: 720px;
+      max-width: 740px;
       margin: 0 auto;
       background: var(--bg-code);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-bright);
       border-radius: 0.75rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
       overflow: hidden;
       text-align: left;
     }
@@ -231,8 +271,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 1rem;
-      background: #0f172a;
+      padding: 0.75rem 1.25rem;
+      background: var(--bg-elevated);
       border-bottom: 1px solid var(--border-color);
     }
 
@@ -268,7 +308,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.75rem;
       margin-bottom: 0.5rem;
+      overflow-x: auto;
     }
 
     .prompt {
@@ -278,30 +320,35 @@
     }
 
     .copy-btn {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--bg-card);
       border: 1px solid var(--border-bright);
       color: var(--text-secondary);
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
+      padding: 0.4rem 0.85rem;
+      min-height: 2.25rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
       cursor: pointer;
       font-family: var(--font-sans);
-      transition: all 0.15s ease;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      flex-shrink: 0;
     }
 
     .copy-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: var(--bg-card-hover);
       color: var(--text-primary);
+      border-color: var(--accent-cyan);
     }
 
     .endpoints-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
       gap: 0.75rem;
       margin-top: 1rem;
       padding-top: 1rem;
       border-top: 1px solid var(--border-color);
       font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
     }
 
     .endpoint-item span {
@@ -310,9 +357,11 @@
       font-size: 0.75rem;
     }
 
-    .endpoint-item a {
+    .endpoint-item a,
+    .endpoint-item strong {
       font-family: var(--font-mono);
       color: var(--accent-cyan);
+      font-weight: 600;
     }
 
     /* Section Headings */
@@ -326,27 +375,18 @@
       text-align: center;
     }
 
-    .section-tag {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--accent-cyan);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 0.5rem;
-      display: block;
-    }
-
     .section-title {
       font-size: 2.25rem;
       font-weight: 800;
       letter-spacing: -0.02em;
-      margin-bottom: 1rem;
+      margin-bottom: 0.85rem;
+      color: var(--text-primary);
     }
 
     .section-desc {
       color: var(--text-secondary);
-      font-size: 1.1rem;
-      max-width: 680px;
+      font-size: 1.075rem;
+      max-width: 66ch;
       margin: 0 auto;
     }
 
@@ -362,11 +402,11 @@
       border: 1px solid var(--border-color);
       border-radius: 0.75rem;
       padding: 1.75rem;
-      transition: transform 0.2s, border-color 0.2s, background 0.2s;
+      transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
     }
 
     .stack-card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-2px);
       border-color: var(--border-bright);
       background: var(--bg-card-hover);
     }
@@ -375,30 +415,29 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.75rem;
       margin-bottom: 1rem;
     }
 
     .stack-card-title {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      color: var(--text-primary);
     }
 
     .role-badge {
       font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
+      padding: 0.25rem 0.55rem;
       border-radius: 4px;
       font-family: var(--font-mono);
       font-weight: 600;
     }
 
-    .role-badge.logs { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
-    .role-badge.dashboards { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
-    .role-badge.traces { background: rgba(129, 140, 248, 0.15); color: var(--accent-violet); border: 1px solid rgba(129, 140, 248, 0.3); }
-    .role-badge.metrics { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); }
-    .role-badge.pipeline { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .role-badge.logs { background: rgba(251, 191, 36, 0.12); color: var(--accent-amber); border: 1px solid rgba(251, 191, 36, 0.35); }
+    .role-badge.dashboards { background: rgba(253, 164, 175, 0.12); color: var(--accent-rose); border: 1px solid rgba(253, 164, 175, 0.35); }
+    .role-badge.traces { background: rgba(165, 180, 252, 0.12); color: var(--accent-violet); border: 1px solid rgba(165, 180, 252, 0.35); }
+    .role-badge.metrics { background: rgba(56, 189, 248, 0.12); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.35); }
+    .role-badge.pipeline { background: rgba(52, 211, 153, 0.12); color: var(--accent-emerald); border: 1px solid rgba(52, 211, 153, 0.35); }
 
     .stack-card p {
       color: var(--text-secondary);
@@ -415,14 +454,14 @@
     }
 
     .feature-list li {
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.45rem;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 0.5rem;
     }
 
     .feature-list li::before {
-      content: "✓";
+      content: "•";
       color: var(--accent-emerald);
       font-weight: bold;
     }
@@ -433,7 +472,6 @@
       border: 1px solid var(--border-color);
       border-radius: 0.75rem;
       padding: 2rem;
-      margin-bottom: 3rem;
       text-align: center;
     }
 
@@ -457,14 +495,15 @@
     .diagram-node small {
       display: block;
       color: var(--text-muted);
-      font-weight: normal;
+      font-weight: 400;
       font-size: 0.75rem;
+      margin-top: 0.2rem;
     }
 
     .diagram-arrow {
       color: var(--accent-cyan);
       font-size: 1.25rem;
-      font-weight: bold;
+      font-weight: 700;
     }
 
     /* Google SRE Burn Rate Section */
@@ -476,12 +515,24 @@
       margin-bottom: 2.5rem;
     }
 
+    .math-card h3 {
+      margin-bottom: 0.75rem;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+    }
+
+    .math-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
     .math-formula {
       background: var(--bg-code);
       border: 1px solid var(--border-bright);
       padding: 1rem 1.5rem;
       border-radius: 0.5rem;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       font-size: 0.95rem;
       color: var(--accent-cyan);
       margin: 1rem 0;
@@ -499,6 +550,7 @@
       border-collapse: collapse;
       text-align: left;
       font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
     }
 
     th, td {
@@ -519,13 +571,34 @@
       background: rgba(255, 255, 255, 0.02);
     }
 
+    .tier-critical {
+      color: var(--accent-rose);
+      font-weight: 700;
+    }
+
+    .tier-warning {
+      color: var(--accent-amber);
+      font-weight: 700;
+    }
+
     /* Calculator Widget */
     .calc-container {
-      background: linear-gradient(145deg, #111a2e, #0e1526);
+      background: var(--bg-card);
       border: 1px solid var(--border-bright);
       border-radius: 0.75rem;
       padding: 2rem;
-      margin-bottom: 3rem;
+    }
+
+    .calc-container h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+    }
+
+    .calc-lead {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
     }
 
     .calc-grid {
@@ -546,18 +619,14 @@
     .calc-input {
       width: 100%;
       background: var(--bg-code);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border-bright);
       color: var(--text-primary);
       padding: 0.75rem 1rem;
+      min-height: 2.75rem;
       border-radius: 6px;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       font-size: 0.95rem;
-    }
-
-    .calc-input:focus {
-      outline: none;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
     }
 
     .calc-result-box {
@@ -584,17 +653,24 @@
       font-size: 1.5rem;
       font-weight: 700;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
     }
+
+    .stat-cyan { color: var(--accent-cyan); }
+    .stat-amber { color: var(--accent-amber); }
+    .stat-rose { color: var(--accent-rose); }
+    .stat-emerald { color: var(--accent-emerald); }
 
     /* AST Table */
     .ast-badge {
       font-family: var(--font-mono);
       font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
+      padding: 0.25rem 0.55rem;
       border-radius: 4px;
-      background: rgba(16, 185, 129, 0.15);
+      background: rgba(52, 211, 153, 0.12);
       color: var(--accent-emerald);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      font-weight: 600;
     }
 
     /* Tabs & Snippets */
@@ -602,36 +678,42 @@
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 0.75rem;
-      overflow: hidden;
+      padding: 1.25rem;
     }
 
     .tabs-header {
       display: flex;
       flex-wrap: wrap;
-      background: #0f172a;
-      border-bottom: 1px solid var(--border-color);
+      gap: 0.5rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
     }
 
     .tab-btn {
-      background: none;
-      border: none;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 0.375rem;
       color: var(--text-secondary);
-      padding: 0.9rem 1.5rem;
+      padding: 0.65rem 1.15rem;
+      min-height: 2.5rem;
       font-size: 0.875rem;
       font-weight: 600;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.15s ease;
+      transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
     .tab-btn:hover {
       color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.04);
     }
 
     .tab-btn.active {
       color: var(--accent-cyan);
-      border-bottom-color: var(--accent-cyan);
-      background: rgba(56, 189, 248, 0.05);
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.1);
     }
 
     .tab-content {
@@ -648,16 +730,19 @@
       margin: 0;
       overflow-x: auto;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       font-size: 0.875rem;
       line-height: 1.6;
       background: var(--bg-code);
-      color: #e2e8f0;
+      border: 1px solid var(--border-color);
+      border-radius: 0.5rem;
+      color: var(--text-code);
     }
 
     .tab-copy-btn {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
+      top: 0.85rem;
+      right: 0.85rem;
       z-index: 10;
     }
 
@@ -676,7 +761,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: transform 0.2s, border-color 0.2s;
+      transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
     .doc-card:hover {
@@ -705,13 +790,14 @@
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
+      padding: 0.25rem 0;
     }
 
     /* Footer */
     footer {
       padding: 4rem 0 3rem;
       border-top: 1px solid var(--border-color);
-      background: #080b12;
+      background: var(--bg-footer);
       color: var(--text-muted);
       font-size: 0.875rem;
     }
@@ -724,13 +810,19 @@
       gap: 1.5rem;
     }
 
+    .footer-meta {
+      margin-top: 0.25rem;
+    }
+
     .footer-links {
       display: flex;
+      flex-wrap: wrap;
       gap: 1.5rem;
     }
 
     .footer-links a {
       color: var(--text-secondary);
+      padding: 0.25rem 0;
     }
 
     .footer-links a:hover {
@@ -739,21 +831,41 @@
 
     @media (max-width: 768px) {
       .hero h1 { font-size: 2.2rem; }
-      .nav-links { display: none; }
+      .nav-container { flex-direction: column; align-items: flex-start; }
+      nav ul { gap: 0.75rem; }
       .calc-result-box { flex-direction: column; gap: 1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+      .stack-card,
+      .doc-card {
+        transition: border-color 0.1s ease, background-color 0.1s ease;
+      }
+      .stack-card:hover,
+      .doc-card:hover {
+        transform: none;
+      }
     }
   </style>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
   <!-- Navigation -->
   <header>
     <div class="container nav-container">
       <a href="#" class="brand">
-        <div class="brand-icon">⚡</div>
+        <span class="brand-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </span>
         <span>cloud-native-observability</span>
       </a>
-      <nav>
+      <nav aria-label="Primary">
         <ul class="nav-links">
           <li><a href="#architecture">Architecture</a></li>
           <li><a href="#matrix">LGTM Matrix</a></li>
@@ -767,422 +879,428 @@
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-eyebrow">
-        <span>🛡️</span> Production-Grade Observability Blueprints
-      </div>
-      <h1>Cloud-Native Observability Platform</h1>
-      <p>
-        Unified LGTM (Loki, Grafana, Tempo, Prometheus/Thanos) and OpenTelemetry architecture with automated cross-layer AST verification, Google SRE Multi-Burn-Rate alerting, and GitOps blueprints.
-      </p>
+  <main id="main-content">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <h1>Cloud-Native Observability Platform</h1>
+        <p>
+          Unified LGTM (Loki, Grafana, Tempo, Prometheus/Thanos) and OpenTelemetry reference architecture for <code>github.com/abeta-dev/cloud-native-observability</code> with automated cross-layer PromQL AST verification, Google SRE multi-window burn-rate alerting, and GitOps blueprints.
+        </p>
 
-      <div class="status-badges">
-        <div class="status-pill success"><span>●</span> Release: v0.3.0</div>
-        <div class="status-pill info"><span>✓</span> CI: Passing</div>
-        <div class="status-pill purple"><span>⬡</span> Terraform: 1.5+</div>
-        <div class="status-pill amber"><span>⚡</span> OTel Collector: v0.98+</div>
-      </div>
-
-      <!-- Quick Start Terminal -->
-      <div class="quickstart-box">
-        <div class="terminal-header">
-          <div class="terminal-dots">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot green"></div>
-          </div>
-          <div class="terminal-title">bash · quickstart</div>
-          <div></div>
+        <div class="status-badges" role="list" aria-label="Platform release and verification status">
+          <div class="status-pill success" role="listitem">Release: v0.3.0</div>
+          <div class="status-pill info" role="listitem">CI Gates: Passing</div>
+          <div class="status-pill success" role="listitem">demo-app Coverage: 100.0%</div>
+          <div class="status-pill purple" role="listitem">Terraform: 1.5+</div>
+          <div class="status-pill amber" role="listitem">OTel Collector: v0.98+</div>
         </div>
-        <div class="terminal-body">
-          <div class="code-line">
-            <span><span class="prompt">$</span>git clone https://github.com/abeta-dev/cloud-native-observability.git</span>
-            <button class="copy-btn" onclick="copySnippet(this, 'git clone https://github.com/abeta-dev/cloud-native-observability.git\ncd cloud-native-observability\ndocker compose up -d')">Copy</button>
-          </div>
-          <div class="code-line">
-            <span><span class="prompt">$</span>cd cloud-native-observability</span>
-          </div>
-          <div class="code-line">
-            <span><span class="prompt">$</span>docker compose up -d</span>
-          </div>
-          <div class="endpoints-grid">
-            <div class="endpoint-item">
-              <span>Grafana UI (admin/admin)</span>
-              <a href="http://localhost:3000" target="_blank" rel="noreferrer">localhost:3000</a>
+
+        <!-- Quick Start Terminal -->
+        <div class="quickstart-box">
+          <div class="terminal-header">
+            <div class="terminal-dots" aria-hidden="true">
+              <div class="dot red"></div>
+              <div class="dot yellow"></div>
+              <div class="dot green"></div>
             </div>
-            <div class="endpoint-item">
-              <span>Prometheus Web</span>
-              <a href="http://localhost:9090" target="_blank" rel="noreferrer">localhost:9090</a>
+            <div class="terminal-title">bash · local sandbox quickstart</div>
+            <div></div>
+          </div>
+          <div class="terminal-body">
+            <div class="code-line">
+              <span><span class="prompt">$</span>git clone https://github.com/abeta-dev/cloud-native-observability.git</span>
+              <button type="button" class="copy-btn" onclick="copySnippet(this, 'git clone https://github.com/abeta-dev/cloud-native-observability.git\ncd cloud-native-observability\ndocker compose up -d')">Copy</button>
             </div>
-            <div class="endpoint-item">
-              <span>Tempo Tracing</span>
-              <a href="http://localhost:3200" target="_blank" rel="noreferrer">localhost:3200</a>
+            <div class="code-line">
+              <span><span class="prompt">$</span>cd cloud-native-observability</span>
             </div>
-            <div class="endpoint-item">
-              <span>OTel OTLP Endpoints</span>
-              <span>4317 (gRPC) / 4318 (HTTP)</span>
+            <div class="code-line">
+              <span><span class="prompt">$</span>docker compose up -d</span>
+            </div>
+            <div class="endpoints-grid">
+              <div class="endpoint-item">
+                <span>Grafana UI (admin/admin)</span>
+                <a href="http://localhost:3000" target="_blank" rel="noreferrer">localhost:3000</a>
+              </div>
+              <div class="endpoint-item">
+                <span>Prometheus Web</span>
+                <a href="http://localhost:9090" target="_blank" rel="noreferrer">localhost:9090</a>
+              </div>
+              <div class="endpoint-item">
+                <span>Tempo Tracing</span>
+                <a href="http://localhost:3200" target="_blank" rel="noreferrer">localhost:3200</a>
+              </div>
+              <div class="endpoint-item">
+                <span>OTel OTLP Endpoints</span>
+                <strong>4317 (gRPC) / 4318 (HTTP)</strong>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-    </div>
-  </section>
+    <!-- Architecture Overview -->
+    <section id="architecture">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Telemetry Flow &amp; Architecture</h2>
+          <p class="section-desc">
+            Unified telemetry ingestion: distributed traces, structured log streams, and golden signal metrics from instrumented workloads (including the Go 1.26.0 reference <code>demo-app</code> at 100.0% statement coverage) are normalized by OpenTelemetry Collectors and routed to dedicated storage backends.
+          </p>
+        </div>
 
-  <!-- Architecture Overview -->
-  <section id="architecture">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Topology</span>
-        <h2 class="section-title">Telemetry Flow & Architecture</h2>
-        <p class="section-desc">
-          Unified telemetry ingestion: distributed traces, log streams, and system metrics are normalized by OpenTelemetry Collectors and routed to dedicated storage backends.
-        </p>
-      </div>
-
-      <div class="pipeline-diagram">
-        <div class="diagram-steps">
-          <div class="diagram-node">
-            <span>Microservices / Workloads</span>
-            <small>Go, Python, Java, Node.js</small>
-          </div>
-          <div class="diagram-arrow">→</div>
-          <div class="diagram-node">
-            <span>OTel Collector</span>
-            <small>OTLP gRPC (4317) / HTTP (4318)</small>
-          </div>
-          <div class="diagram-arrow">→</div>
-          <div class="diagram-node">
-            <span>Processors & Connectors</span>
-            <small>Memory Limiter, Batch, Spanmetrics</small>
-          </div>
-          <div class="diagram-arrow">→</div>
-          <div class="diagram-node">
-            <span>LGTM Storage Backends</span>
-            <small>Prometheus/Thanos, Loki, Tempo</small>
-          </div>
-          <div class="diagram-arrow">→</div>
-          <div class="diagram-node">
-            <span>Grafana Unified UI</span>
-            <small>Single Pane of Glass</small>
+        <div class="pipeline-diagram">
+          <div class="diagram-steps">
+            <div class="diagram-node">
+              <span>Microservices / Workloads</span>
+              <small>Go demo-app (100.0% cov), Python, Java</small>
+            </div>
+            <div class="diagram-arrow" aria-hidden="true">→</div>
+            <div class="diagram-node">
+              <span>OTel Collector</span>
+              <small>OTLP gRPC (4317) / HTTP (4318)</small>
+            </div>
+            <div class="diagram-arrow" aria-hidden="true">→</div>
+            <div class="diagram-node">
+              <span>Processors &amp; Connectors</span>
+              <small>Memory Limiter, Batch, Spanmetrics</small>
+            </div>
+            <div class="diagram-arrow" aria-hidden="true">→</div>
+            <div class="diagram-node">
+              <span>LGTM Storage Backends</span>
+              <small>Prometheus/Thanos, Loki, Tempo</small>
+            </div>
+            <div class="diagram-arrow" aria-hidden="true">→</div>
+            <div class="diagram-node">
+              <span>Grafana Unified UI</span>
+              <small>Single Pane of Glass</small>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- LGTM Stack Matrix -->
-  <section id="matrix">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Components</span>
-        <h2 class="section-title">LGTM Platform Matrix</h2>
-        <p class="section-desc">
-          Engineered for production resilience across local Docker Compose sandboxes, Kubernetes Helm/ArgoCD clusters, and AWS EKS via Terraform.
-        </p>
-      </div>
-
-      <div class="matrix-grid">
-        <!-- Loki Card -->
-        <div class="stack-card">
-          <div class="stack-card-top">
-            <div class="stack-card-title">Loki</div>
-            <span class="role-badge logs">Logs</span>
-          </div>
-          <p>Horizontally scalable, multi-tenant log aggregation system optimized for cost efficiency through index-free metadata labeling.</p>
-          <ul class="feature-list">
-            <li>Structured metadata & LogQL streaming queries</li>
-            <li>Zero-indexing design avoids high-cardinality crashes</li>
-            <li>Direct trace-to-logs linking via `trace_id` correlation</li>
-          </ul>
+    <!-- LGTM Stack Matrix -->
+    <section id="matrix">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">LGTM Platform Matrix</h2>
+          <p class="section-desc">
+            Engineered for production resilience across local Docker Compose sandboxes, Kubernetes Helm/ArgoCD clusters, and AWS EKS via Terraform.
+          </p>
         </div>
 
-        <!-- Grafana Card -->
-        <div class="stack-card">
-          <div class="stack-card-top">
-            <div class="stack-card-title">Grafana</div>
-            <span class="role-badge dashboards">Visualization</span>
+        <div class="matrix-grid">
+          <!-- Loki Card -->
+          <div class="stack-card">
+            <div class="stack-card-top">
+              <h3 class="stack-card-title">Loki</h3>
+              <span class="role-badge logs">Logs</span>
+            </div>
+            <p>Horizontally scalable, multi-tenant log aggregation system optimized for cost efficiency through index-free metadata labeling.</p>
+            <ul class="feature-list">
+              <li>Structured metadata &amp; LogQL streaming queries</li>
+              <li>Zero-indexing design avoids high-cardinality crashes</li>
+              <li>Direct trace-to-logs linking via <code>trace_id</code> correlation</li>
+            </ul>
           </div>
-          <p>Production dashboard visualization engine with pre-provisioned data sources and single-pane-of-glass operational telemetry.</p>
-          <ul class="feature-list">
-            <li>Pre-built Platform Overview & Microservice APM dashboards</li>
-            <li>Automatic drill-down from metrics to Tempo trace spans</li>
-            <li>AST-verified alert rule queries & unified alert panel</li>
-          </ul>
-        </div>
 
-        <!-- Tempo Card -->
-        <div class="stack-card">
-          <div class="stack-card-top">
-            <div class="stack-card-title">Tempo</div>
-            <span class="role-badge traces">Distributed Tracing</span>
+          <!-- Grafana Card -->
+          <div class="stack-card">
+            <div class="stack-card-top">
+              <h3 class="stack-card-title">Grafana</h3>
+              <span class="role-badge dashboards">Visualization</span>
+            </div>
+            <p>Production dashboard visualization engine with pre-provisioned data sources and single-pane-of-glass operational telemetry.</p>
+            <ul class="feature-list">
+              <li>Pre-built Platform Overview &amp; Microservice APM dashboards</li>
+              <li>Automatic drill-down from metrics to Tempo trace spans</li>
+              <li>AST-verified alert rule queries &amp; unified alert panel</li>
+            </ul>
           </div>
-          <p>High-scale distributed tracing backend designed for massive ingestion throughput with zero-dependency object storage persistence.</p>
-          <ul class="feature-list">
-            <li>Native OTLP receiver integration</li>
-            <li>Spanmetrics connector derives latency histograms from spans</li>
-            <li>Service graph connector calculates request dependencies</li>
-          </ul>
-        </div>
 
-        <!-- Prometheus & Thanos Card -->
-        <div class="stack-card">
-          <div class="stack-card-top">
-            <div class="stack-card-title">Prometheus / Thanos</div>
-            <span class="role-badge metrics">Metrics & SLOs</span>
+          <!-- Tempo Card -->
+          <div class="stack-card">
+            <div class="stack-card-top">
+              <h3 class="stack-card-title">Tempo</h3>
+              <span class="role-badge traces">Distributed Tracing</span>
+            </div>
+            <p>High-scale distributed tracing backend designed for massive ingestion throughput with zero-dependency object storage persistence.</p>
+            <ul class="feature-list">
+              <li>Native OTLP receiver integration</li>
+              <li>Spanmetrics connector derives latency histograms from spans</li>
+              <li>Service graph connector calculates request dependencies</li>
+            </ul>
           </div>
-          <p>High-reliability metric TSDB with Thanos sidecar/store/querier integration for long-term historical retention and multi-cluster deduplication.</p>
-          <ul class="feature-list">
-            <li>Precomputed recording rules for rolling 5m/30m/1h/6h/3d error rates</li>
-            <li>Google SRE Multi-Burn-Rate alerting engine</li>
-            <li>100% unit-tested alert definitions via Promtool</li>
-          </ul>
-        </div>
 
-        <!-- OTel Collector Card -->
-        <div class="stack-card">
-          <div class="stack-card-top">
-            <div class="stack-card-title">OpenTelemetry Collector</div>
-            <span class="role-badge pipeline">Telemetry Gateway</span>
+          <!-- Prometheus & Thanos Card -->
+          <div class="stack-card">
+            <div class="stack-card-top">
+              <h3 class="stack-card-title">Prometheus / Thanos</h3>
+              <span class="role-badge metrics">Metrics &amp; SLOs</span>
+            </div>
+            <p>High-reliability metric TSDB with Thanos sidecar/store/querier integration for long-term historical retention and multi-cluster deduplication.</p>
+            <ul class="feature-list">
+              <li>Precomputed recording rules for rolling 5m/30m/1h/6h/3d error rates</li>
+              <li>Google SRE Multi-Burn-Rate alerting engine</li>
+              <li>100% unit-tested alert definitions via Promtool</li>
+            </ul>
           </div>
-          <p>Vendor-agnostic telemetry proxy providing memory-bounded pipeline buffering, attribute redaction, and multi-destination dispatching.</p>
-          <ul class="feature-list">
-            <li>Memory limiter processor prevents container OOMKills</li>
-            <li>Batch processor buffers high-throughput trace and metric events</li>
-            <li>Route path normalization eliminates TSDB cardinality explosion</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Google SRE Multi-Window Burn-Rate Alerting -->
-  <section id="burn-rate">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">SRE Governance</span>
-        <h2 class="section-title">Google SRE Multi-Window Burn-Rate Alerting</h2>
-        <p class="section-desc">
-          Mathematical framework for high-precision, low-noise error budget consumption alerting adhering to Chapter 5 of the Google Site Reliability Workbook.
-        </p>
-      </div>
-
-      <div class="math-card">
-        <h3 style="margin-bottom: 0.75rem; font-size: 1.15rem;">Mathematical Foundation</h3>
-        <p style="color: var(--text-secondary); font-size: 0.95rem;">
-          Given an availability target of <strong>99.9% (SLO)</strong>, the allowable unreliability is the <strong>Error Budget</strong>:
-        </p>
-        <div class="math-formula">
-          Error Budget = 1 - SLO = 1 - 0.999 = 0.001 (0.1% of total requests)
-        </div>
-        <p style="color: var(--text-secondary); font-size: 0.95rem;">
-          A <strong>Burn Rate of 1.0x</strong> exhausts exactly 100% of the budget over 30 days (720 hours). Faster consumption triggers multi-window paging:
-        </p>
-        <div class="math-formula">
-          Burn Rate = Observed Error Rate / Allowed Error Rate (0.001)
-        </div>
-      </div>
-
-      <!-- Burn Rate Matrix Table -->
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Alert Name</th>
-              <th>Severity Tier</th>
-              <th>Short Window</th>
-              <th>Long Window</th>
-              <th>Burn Rate</th>
-              <th>Budget Consumed</th>
-              <th>Routing Target</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>ServiceErrorBudgetBurnRateHigh1h</code></td>
-              <td><span style="color: var(--accent-rose); font-weight: 700;">CRITICAL PAGER</span></td>
-              <td>5 minutes</td>
-              <td>1 hour</td>
-              <td><strong>14.4x</strong></td>
-              <td>2% in 1 hour</td>
-              <td>PagerDuty (Immediate Page)</td>
-            </tr>
-            <tr>
-              <td><code>ServiceErrorBudgetBurnRateHigh6h</code></td>
-              <td><span style="color: var(--accent-rose); font-weight: 700;">CRITICAL PAGER</span></td>
-              <td>30 minutes</td>
-              <td>6 hours</td>
-              <td><strong>6.0x</strong></td>
-              <td>5% in 6 hours</td>
-              <td>PagerDuty (Immediate Page)</td>
-            </tr>
-            <tr>
-              <td><code>ServiceErrorBudgetBurnRateSlow3d</code></td>
-              <td><span style="color: var(--accent-amber); font-weight: 700;">WARNING TICKET</span></td>
-              <td>6 hours</td>
-              <td>3 days</td>
-              <td><strong>1.0x</strong></td>
-              <td>10% in 3 days</td>
-              <td>Slack / Jira Backlog</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Interactive Burn-Rate Calculator -->
-      <div class="calc-container">
-        <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem;">Interactive SRE Burn-Rate Simulator</h3>
-        <p style="color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 1.5rem;">
-          Adjust the parameters below to compute the instantaneous error budget burn rate and assess which alert tier triggers:
-        </p>
-
-        <div class="calc-grid">
-          <div class="calc-input-group">
-            <label for="slo-input">Target Availability SLO (%)</label>
-            <input type="number" id="slo-input" class="calc-input" value="99.9" step="0.01" min="90" max="99.999" oninput="calculateBurnRate()">
+          <!-- OTel Collector Card -->
+          <div class="stack-card">
+            <div class="stack-card-top">
+              <h3 class="stack-card-title">OpenTelemetry Collector</h3>
+              <span class="role-badge pipeline">Telemetry Gateway</span>
+            </div>
+            <p>Vendor-agnostic telemetry proxy providing memory-bounded pipeline buffering, attribute redaction, and multi-destination dispatching.</p>
+            <ul class="feature-list">
+              <li>Memory limiter processor prevents container OOMKills</li>
+              <li>Batch processor buffers high-throughput trace and metric events</li>
+              <li>Route path normalization eliminates TSDB cardinality explosion</li>
+            </ul>
           </div>
-          <div class="calc-input-group">
-            <label for="error-1h-input">Observed 1h Error Rate (%)</label>
-            <input type="number" id="error-1h-input" class="calc-input" value="1.44" step="0.01" min="0" max="100" oninput="calculateBurnRate()">
-          </div>
-          <div class="calc-input-group">
-            <label for="error-5m-input">Observed 5m Error Rate (%)</label>
-            <input type="number" id="error-5m-input" class="calc-input" value="1.50" step="0.01" min="0" max="100" oninput="calculateBurnRate()">
-          </div>
-        </div>
 
-        <div class="calc-result-box">
-          <div class="calc-stat">
-            <div class="calc-stat-label">Calculated Burn Rate</div>
-            <div class="calc-stat-val" id="calc-burn-rate" style="color: var(--accent-cyan);">14.4x</div>
-          </div>
-          <div class="calc-stat">
-            <div class="calc-stat-label">1h Budget Consumption</div>
-            <div class="calc-stat-val" id="calc-budget-speed" style="color: var(--accent-amber);">2.0% / hr</div>
-          </div>
-          <div class="calc-stat">
-            <div class="calc-stat-label">Alertmanager Evaluation</div>
-            <div class="calc-stat-val" id="calc-alert-status" style="color: var(--accent-rose);">FIRING (Critical Pager)</div>
+          <!-- Reference Demo App Card -->
+          <div class="stack-card">
+            <div class="stack-card-top">
+              <h3 class="stack-card-title">Go Reference demo-app</h3>
+              <span class="role-badge metrics">100.0% Coverage</span>
+            </div>
+            <p>Instrumented Go 1.26.0 microservice demonstrating W3C Trace Context propagation, RED metrics, worker pools, and circuit breaker telemetry.</p>
+            <ul class="feature-list">
+              <li>Verified 100.0% statement coverage in CI race detector gate</li>
+              <li>Exports <code>http_requests_total</code> and latency histograms</li>
+              <li>Simulates realistic latency spikes and error budget burn</li>
+            </ul>
           </div>
         </div>
       </div>
+    </section>
 
-    </div>
-  </section>
-
-  <!-- AST Equivalence Table -->
-  <section id="ast-table">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Cross-Layer Consistency</span>
-        <h2 class="section-title">Canonical Availability SLI AST Equivalence</h2>
-        <p class="section-desc">
-          Single-sourced mathematical logic in <code>deploy/slo/canonical_sli.promql</code> is statically parsed and AST-verified across all deployment blueprints to eliminate metric drift.
-        </p>
-      </div>
-
-      <div class="math-card" style="margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 0.5rem; font-size: 1.05rem;">Canonical AST Formula</h3>
-        <div class="math-formula">
-          (sum(rate(http_requests_total{status=~"5.."}[{{WINDOW}}])) or vector(0)) / (sum(rate(http_requests_total[{{WINDOW}}])) > 0) or vector(0)
-        </div>
-        <p style="color: var(--text-secondary); font-size: 0.85rem;">
-          <strong>Security & Cardinality Guardrail:</strong> Excludes 4xx client errors (`status=~"5.."` server-only) to protect against false pages triggered by bad clients, unauthorized scans, or user typos.
-        </p>
-      </div>
-
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Observability Layer</th>
-              <th>Target Configuration File</th>
-              <th>Rule / Metric Target</th>
-              <th>Window</th>
-              <th>AST Verification Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Layer 1: Local Sandbox</strong></td>
-              <td><code>deploy/docker-compose/prometheus/alerts.yml</code></td>
-              <td><code>HighErrorRate</code></td>
-              <td>5m</td>
-              <td><span class="ast-badge">Verified Equivalent ✅</span></td>
-            </tr>
-            <tr>
-              <td><strong>Layer 2: Production GitOps</strong></td>
-              <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
-              <td><code>job:http_requests:error_rate_5m</code></td>
-              <td>5m</td>
-              <td><span class="ast-badge">Verified Equivalent ✅</span></td>
-            </tr>
-            <tr>
-              <td><strong>Layer 2: Production GitOps</strong></td>
-              <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
-              <td><code>job:http_requests:error_rate_30m</code></td>
-              <td>30m</td>
-              <td><span class="ast-badge">Verified Equivalent ✅</span></td>
-            </tr>
-            <tr>
-              <td><strong>Layer 2: Production GitOps</strong></td>
-              <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
-              <td><code>job:http_requests:error_rate_1h</code></td>
-              <td>1h</td>
-              <td><span class="ast-badge">Verified Equivalent ✅</span></td>
-            </tr>
-            <tr>
-              <td><strong>Layer 2: Production GitOps</strong></td>
-              <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
-              <td><code>job:http_requests:error_rate_6h</code></td>
-              <td>6h</td>
-              <td><span class="ast-badge">Verified Equivalent ✅</span></td>
-            </tr>
-            <tr>
-              <td><strong>Layer 2: Production GitOps</strong></td>
-              <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
-              <td><code>job:http_requests:error_rate_3d</code></td>
-              <td>3d</td>
-              <td><span class="ast-badge">Verified Equivalent ✅</span></td>
-            </tr>
-            <tr>
-              <td><strong>Layer 3: Infrastructure as Code</strong></td>
-              <td><code>deploy/terraform/modules/grafana_provisioning/alerts.tf</code></td>
-              <td><code>HighErrorRateP1</code></td>
-              <td>5m</td>
-              <td><span class="ast-badge">Verified Equivalent ✅</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- Interactive Code Snippets -->
-  <section id="snippets">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Implementation</span>
-        <h2 class="section-title">Telemetry Configurations & Rules</h2>
-        <p class="section-desc">
-          Browse verified PromQL alert rules, OpenTelemetry pipeline definitions, and Alertmanager routing hierarchies.
-        </p>
-      </div>
-
-      <div class="tabs-wrapper">
-        <div class="tabs-header">
-          <button class="tab-btn active" onclick="switchTab(0)">Canonical SLI (PromQL)</button>
-          <button class="tab-btn" onclick="switchTab(1)">Multi-Burn-Rate 14.4x Rule</button>
-          <button class="tab-btn" onclick="switchTab(2)">OTel Collector Pipeline</button>
-          <button class="tab-btn" onclick="switchTab(3)">Alertmanager Routes</button>
+    <!-- Google SRE Multi-Window Burn-Rate Alerting -->
+    <section id="burn-rate">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Google SRE Multi-Window Burn-Rate Alerting</h2>
+          <p class="section-desc">
+            Mathematical framework for high-precision, low-noise error budget consumption alerting adhering to Chapter 5 of the Google Site Reliability Workbook.
+          </p>
         </div>
 
-        <!-- Tab 0 -->
-        <div class="tab-content active" id="tab-0">
-          <button class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-0').innerText)">Copy</button>
-          <pre id="code-tab-0"><code># Canonical Service Level Indicator (SLI) - Availability Error Rate
+        <div class="math-card">
+          <h3>Mathematical Foundation</h3>
+          <p>
+            Given an availability target of <strong>99.9% (SLO)</strong>, the allowable unreliability is the <strong>Error Budget</strong>:
+          </p>
+          <div class="math-formula">
+            Error Budget = 1 - SLO = 1 - 0.999 = 0.001 (0.1% of total requests)
+          </div>
+          <p>
+            A <strong>Burn Rate of 1.0x</strong> exhausts exactly 100% of the budget over 30 days (720 hours). Faster consumption triggers multi-window paging:
+          </p>
+          <div class="math-formula">
+            Burn Rate = Observed Error Rate / Allowed Error Rate (0.001)
+          </div>
+        </div>
+
+        <!-- Burn Rate Matrix Table -->
+        <div class="table-responsive">
+          <table aria-label="Google SRE Multi-Window Burn-Rate Alerting Matrix">
+            <thead>
+              <tr>
+                <th scope="col">Alert Name</th>
+                <th scope="col">Severity Tier</th>
+                <th scope="col">Short Window</th>
+                <th scope="col">Long Window</th>
+                <th scope="col">Burn Rate</th>
+                <th scope="col">Budget Consumed</th>
+                <th scope="col">Routing Target</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>ServiceErrorBudgetBurnRateHigh1h</code></td>
+                <td><span class="tier-critical">CRITICAL PAGER</span></td>
+                <td>5 minutes</td>
+                <td>1 hour</td>
+                <td><strong>14.4x</strong></td>
+                <td>2% in 1 hour</td>
+                <td>PagerDuty (Immediate Page)</td>
+              </tr>
+              <tr>
+                <td><code>ServiceErrorBudgetBurnRateHigh6h</code></td>
+                <td><span class="tier-critical">CRITICAL PAGER</span></td>
+                <td>30 minutes</td>
+                <td>6 hours</td>
+                <td><strong>6.0x</strong></td>
+                <td>5% in 6 hours</td>
+                <td>PagerDuty (Immediate Page)</td>
+              </tr>
+              <tr>
+                <td><code>ServiceErrorBudgetBurnRateSlow3d</code></td>
+                <td><span class="tier-warning">WARNING TICKET</span></td>
+                <td>6 hours</td>
+                <td>3 days</td>
+                <td><strong>1.0x</strong></td>
+                <td>10% in 3 days</td>
+                <td>Slack / Jira Backlog</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Interactive Burn-Rate Calculator -->
+        <div class="calc-container">
+          <h3>Interactive SRE Burn-Rate Simulator</h3>
+          <p class="calc-lead">
+            Adjust the parameters below to compute the instantaneous error budget burn rate and assess which alert tier triggers:
+          </p>
+
+          <div class="calc-grid">
+            <div class="calc-input-group">
+              <label for="slo-input">Target Availability SLO (%)</label>
+              <input type="number" id="slo-input" class="calc-input" value="99.9" step="0.01" min="90" max="99.999" oninput="calculateBurnRate()">
+            </div>
+            <div class="calc-input-group">
+              <label for="error-1h-input">Observed 1h Error Rate (%)</label>
+              <input type="number" id="error-1h-input" class="calc-input" value="1.44" step="0.01" min="0" max="100" oninput="calculateBurnRate()">
+            </div>
+            <div class="calc-input-group">
+              <label for="error-5m-input">Observed 5m Error Rate (%)</label>
+              <input type="number" id="error-5m-input" class="calc-input" value="1.50" step="0.01" min="0" max="100" oninput="calculateBurnRate()">
+            </div>
+          </div>
+
+          <div class="calc-result-box" aria-live="polite">
+            <div class="calc-stat">
+              <div class="calc-stat-label">Calculated Burn Rate</div>
+              <div class="calc-stat-val stat-cyan" id="calc-burn-rate">14.4x</div>
+            </div>
+            <div class="calc-stat">
+              <div class="calc-stat-label">1h Budget Consumption</div>
+              <div class="calc-stat-val stat-amber" id="calc-budget-speed">2.0% / hr</div>
+            </div>
+            <div class="calc-stat">
+              <div class="calc-stat-label">Alertmanager Evaluation</div>
+              <div class="calc-stat-val stat-rose" id="calc-alert-status">FIRING (Critical Pager)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AST Equivalence Table -->
+    <section id="ast-table">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Canonical Availability SLI AST Equivalence</h2>
+          <p class="section-desc">
+            Single-sourced mathematical logic in <code>deploy/slo/canonical_sli.promql</code> is statically parsed and AST-verified across all deployment blueprints to eliminate metric drift.
+          </p>
+        </div>
+
+        <div class="math-card">
+          <h3>Canonical AST Formula</h3>
+          <div class="math-formula">
+            (sum(rate(http_requests_total{status=~"5.."}[{{WINDOW}}])) or vector(0)) / (sum(rate(http_requests_total[{{WINDOW}}])) &gt; 0) or vector(0)
+          </div>
+          <p>
+            <strong>Security &amp; Cardinality Guardrail:</strong> Excludes 4xx client errors (<code>status=~"5.."</code> server-only) to protect against false pages triggered by bad clients, unauthorized scans, or user typos.
+          </p>
+        </div>
+
+        <div class="table-responsive">
+          <table aria-label="Canonical Availability SLI Cross-Layer AST Verification Status">
+            <thead>
+              <tr>
+                <th scope="col">Observability Layer</th>
+                <th scope="col">Target Configuration File</th>
+                <th scope="col">Rule / Metric Target</th>
+                <th scope="col">Window</th>
+                <th scope="col">AST Verification Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Layer 1: Local Sandbox</strong></td>
+                <td><code>deploy/docker-compose/prometheus/alerts.yml</code></td>
+                <td><code>HighErrorRate</code></td>
+                <td>5m</td>
+                <td><span class="ast-badge">Verified Equivalent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Layer 2: Production GitOps</strong></td>
+                <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
+                <td><code>job:http_requests:error_rate_5m</code></td>
+                <td>5m</td>
+                <td><span class="ast-badge">Verified Equivalent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Layer 2: Production GitOps</strong></td>
+                <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
+                <td><code>job:http_requests:error_rate_30m</code></td>
+                <td>30m</td>
+                <td><span class="ast-badge">Verified Equivalent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Layer 2: Production GitOps</strong></td>
+                <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
+                <td><code>job:http_requests:error_rate_1h</code></td>
+                <td>1h</td>
+                <td><span class="ast-badge">Verified Equivalent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Layer 2: Production GitOps</strong></td>
+                <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
+                <td><code>job:http_requests:error_rate_6h</code></td>
+                <td>6h</td>
+                <td><span class="ast-badge">Verified Equivalent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Layer 2: Production GitOps</strong></td>
+                <td><code>deploy/kubernetes/alerts/slo-alerts.yaml</code></td>
+                <td><code>job:http_requests:error_rate_3d</code></td>
+                <td>3d</td>
+                <td><span class="ast-badge">Verified Equivalent</span></td>
+              </tr>
+              <tr>
+                <td><strong>Layer 3: Infrastructure as Code</strong></td>
+                <td><code>deploy/terraform/modules/grafana_provisioning/alerts.tf</code></td>
+                <td><code>HighErrorRateP1</code></td>
+                <td>5m</td>
+                <td><span class="ast-badge">Verified Equivalent</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Code Snippets -->
+    <section id="snippets">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Telemetry Configurations &amp; Rules</h2>
+          <p class="section-desc">
+            Browse verified PromQL alert rules, OpenTelemetry pipeline definitions, and Alertmanager routing hierarchies.
+          </p>
+        </div>
+
+        <div class="tabs-wrapper">
+          <div class="tabs-header" role="tablist" aria-label="Telemetry configuration snippets">
+            <button type="button" class="tab-btn active" role="tab" id="tab-btn-0" aria-selected="true" aria-controls="tab-0" tabindex="0" onclick="switchTab(0)" onkeydown="handleTabKeydown(event, 0)">Canonical SLI (PromQL)</button>
+            <button type="button" class="tab-btn" role="tab" id="tab-btn-1" aria-selected="false" aria-controls="tab-1" tabindex="-1" onclick="switchTab(1)" onkeydown="handleTabKeydown(event, 1)">Multi-Burn-Rate 14.4x Rule</button>
+            <button type="button" class="tab-btn" role="tab" id="tab-btn-2" aria-selected="false" aria-controls="tab-2" tabindex="-1" onclick="switchTab(2)" onkeydown="handleTabKeydown(event, 2)">OTel Collector Pipeline</button>
+            <button type="button" class="tab-btn" role="tab" id="tab-btn-3" aria-selected="false" aria-controls="tab-3" tabindex="-1" onclick="switchTab(3)" onkeydown="handleTabKeydown(event, 3)">Alertmanager Routes</button>
+          </div>
+
+          <!-- Tab 0 -->
+          <div class="tab-content active" id="tab-0" role="tabpanel" aria-labelledby="tab-btn-0">
+            <button type="button" class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-0').innerText)">Copy</button>
+            <pre id="code-tab-0"><code># Canonical Service Level Indicator (SLI) - Availability Error Rate
 # deploy/slo/canonical_sli.promql
 (
   sum(rate(http_requests_total{status=~"5.."}[{{WINDOW}}]))
@@ -1190,24 +1308,24 @@
 )
 /
 (
-  sum(rate(http_requests_total[{{WINDOW}}])) > 0
+  sum(rate(http_requests_total[{{WINDOW}}])) &gt; 0
 )
 or vector(0)</code></pre>
-        </div>
+          </div>
 
-        <!-- Tab 1 -->
-        <div class="tab-content" id="tab-1">
-          <button class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-1').innerText)">Copy</button>
-          <pre id="code-tab-1"><code># Google SRE Multiwindow Burn-Rate Alert (14.4x consumption)
+          <!-- Tab 1 -->
+          <div class="tab-content" id="tab-1" role="tabpanel" aria-labelledby="tab-btn-1">
+            <button type="button" class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-1').innerText)">Copy</button>
+            <pre id="code-tab-1"><code># Google SRE Multiwindow Burn-Rate Alert (14.4x consumption)
 # deploy/kubernetes/alerts/slo-alerts.yaml
 - alert: ServiceErrorBudgetBurnRateHigh1h
   expr: |
     (
-      job:http_requests:error_rate_1h{job="demo-app"} > (1 - 0.999) * 14.4
+      job:http_requests:error_rate_1h{job="demo-app"} &gt; (1 - 0.999) * 14.4
     )
     and
     (
-      job:http_requests:error_rate_5m{job="demo-app"} > (1 - 0.999) * 14.4
+      job:http_requests:error_rate_5m{job="demo-app"} &gt; (1 - 0.999) * 14.4
     )
   for: 2m
   labels:
@@ -1217,12 +1335,12 @@ or vector(0)</code></pre>
     summary: "High error budget burn rate (14.4x) on {{ $labels.service }}"
     description: "Service {{ $labels.service }} is consuming 2% of its monthly error budget in 1 hour."
     runbook_url: "https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md#serviceerrorbudgetburnratehigh1h"</code></pre>
-        </div>
+          </div>
 
-        <!-- Tab 2 -->
-        <div class="tab-content" id="tab-2">
-          <button class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-2').innerText)">Copy</button>
-          <pre id="code-tab-2"><code># OpenTelemetry Collector Pipeline Configuration
+          <!-- Tab 2 -->
+          <div class="tab-content" id="tab-2" role="tabpanel" aria-labelledby="tab-btn-2">
+            <button type="button" class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-2').innerText)">Copy</button>
+            <pre id="code-tab-2"><code># OpenTelemetry Collector Pipeline Configuration
 # deploy/docker-compose/otel-collector/otel-collector-config.yaml
 receivers:
   otlp:
@@ -1276,12 +1394,12 @@ service:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [otlphttp/loki]</code></pre>
-        </div>
+          </div>
 
-        <!-- Tab 3 -->
-        <div class="tab-content" id="tab-3">
-          <button class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-3').innerText)">Copy</button>
-          <pre id="code-tab-3"><code># Alertmanager Multi-Tier Routing Configuration
+          <!-- Tab 3 -->
+          <div class="tab-content" id="tab-3" role="tabpanel" aria-labelledby="tab-btn-3">
+            <button type="button" class="copy-btn tab-copy-btn" onclick="copySnippet(this, document.getElementById('code-tab-3').innerText)">Copy</button>
+            <pre id="code-tab-3"><code># Alertmanager Multi-Tier Routing Configuration
 # deploy/kubernetes/alerts/alertmanager.yaml
 global:
   resolve_timeout: 5m
@@ -1293,13 +1411,13 @@ route:
   repeat_interval: 4h
   receiver: 'slack-notifications'
   routes:
-    # Critical Tier -> PagerDuty Immediate Page
+    # Critical Tier -&gt; PagerDuty Immediate Page
     - match:
         severity: critical
       receiver: 'pagerduty-critical'
       continue: true
 
-    # Warning Tier -> Slack Monitoring Channel
+    # Warning Tier -&gt; Slack Monitoring Channel
     - match:
         severity: warning
       receiver: 'slack-notifications'
@@ -1311,86 +1429,86 @@ inhibit_rules:
     target_match_re:
       alertname: 'HighErrorRate|HighLatencyP99'
     equal: ['service', 'namespace']</code></pre>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Documentation Links Section -->
-  <section id="docs">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">Guides & SOPs</span>
-        <h2 class="section-title">Architecture & Operations Library</h2>
-        <p class="section-desc">
-          Comprehensive operational documentation, incident runbooks, and cloud infrastructure guides.
-        </p>
+    <!-- Documentation Links Section -->
+    <section id="docs">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Architecture &amp; Operations Library</h2>
+          <p class="section-desc">
+            Comprehensive operational documentation, incident runbooks, and cloud infrastructure guides.
+          </p>
+        </div>
+
+        <div class="docs-grid">
+          <!-- Runbooks -->
+          <div class="doc-card">
+            <div>
+              <h3 class="doc-card-title">Incident Runbooks</h3>
+              <p class="doc-card-desc">Actionable SOPs for on-call engineers covering Multi-Burn-Rate breaches, pod crash looping, worker pool exhaustion, and circuit breaker trip events.</p>
+            </div>
+            <a href="RUNBOOKS.md" class="doc-link">Read docs/RUNBOOKS.md →</a>
+          </div>
+
+          <!-- SLO Design -->
+          <div class="doc-card">
+            <div>
+              <h3 class="doc-card-title">SLO &amp; Error Budget Design</h3>
+              <p class="doc-card-desc">Theoretical derivations, rolling multi-window alerting mathematics, and the canonical availability SLI specification.</p>
+            </div>
+            <a href="SLO_DESIGN.md" class="doc-link">Read docs/SLO_DESIGN.md →</a>
+          </div>
+
+          <!-- Clustered Observability -->
+          <div class="doc-card">
+            <div>
+              <h3 class="doc-card-title">Clustered Observability</h3>
+              <p class="doc-card-desc">Production topologies for multi-tenant, high-volume metrics, logs, and distributed trace architectures at enterprise scale.</p>
+            </div>
+            <a href="CLUSTERED_OBSERVABILITY.md" class="doc-link">Read docs/CLUSTERED_OBSERVABILITY.md →</a>
+          </div>
+
+          <!-- Terraform Guide -->
+          <div class="doc-card">
+            <div>
+              <h3 class="doc-card-title">Terraform IaC Guide</h3>
+              <p class="doc-card-desc">Automated provisioning workflows for AWS EKS clusters, Helm monitoring releases, and Grafana alert rule synchronization.</p>
+            </div>
+            <a href="TERRAFORM_GUIDE.md" class="doc-link">Read docs/TERRAFORM_GUIDE.md →</a>
+          </div>
+
+          <!-- Integration Guide -->
+          <div class="doc-card">
+            <div>
+              <h3 class="doc-card-title">Integration Guide</h3>
+              <p class="doc-card-desc">Step-by-step instrumentations for Go, Python, and Java services exporting OTLP traces and Prometheus golden signals.</p>
+            </div>
+            <a href="INTEGRATION_GUIDE.md" class="doc-link">Read docs/INTEGRATION_GUIDE.md →</a>
+          </div>
+
+          <!-- Sampling Strategies -->
+          <div class="doc-card">
+            <div>
+              <h3 class="doc-card-title">Sampling Strategies</h3>
+              <p class="doc-card-desc">Head-based and tail-based distributed tracing sampling algorithms to preserve critical error spans while containing storage costs.</p>
+            </div>
+            <a href="SAMPLING_STRATEGIES.md" class="doc-link">Read docs/SAMPLING_STRATEGIES.md →</a>
+          </div>
+        </div>
       </div>
-
-      <div class="docs-grid">
-        <!-- Runbooks -->
-        <div class="doc-card">
-          <div>
-            <div class="doc-card-title">Incident Runbooks</div>
-            <div class="doc-card-desc">Actionable SOPs for on-call engineers covering Multi-Burn-Rate breaches, pod crash looping, worker pool exhaustion, and circuit breaker trip events.</div>
-          </div>
-          <a href="RUNBOOKS.md" class="doc-link">Read docs/RUNBOOKS.md →</a>
-        </div>
-
-        <!-- SLO Design -->
-        <div class="doc-card">
-          <div>
-            <div class="doc-card-title">SLO & Error Budget Design</div>
-            <div class="doc-card-desc">Theoretical derivations, rolling multi-window alerting mathematics, and the canonical availability SLI specification.</div>
-          </div>
-          <a href="SLO_DESIGN.md" class="doc-link">Read docs/SLO_DESIGN.md →</a>
-        </div>
-
-        <!-- Clustered Observability -->
-        <div class="doc-card">
-          <div>
-            <div class="doc-card-title">Clustered Observability</div>
-            <div class="doc-card-desc">Production topologies for multi-tenant, high-volume metrics, logs, and distributed trace architectures at enterprise scale.</div>
-          </div>
-          <a href="CLUSTERED_OBSERVABILITY.md" class="doc-link">Read docs/CLUSTERED_OBSERVABILITY.md →</a>
-        </div>
-
-        <!-- Terraform Guide -->
-        <div class="doc-card">
-          <div>
-            <div class="doc-card-title">Terraform IaC Guide</div>
-            <div class="doc-card-desc">Automated provisioning workflows for AWS EKS clusters, Helm monitoring releases, and Grafana alert rule synchronization.</div>
-          </div>
-          <a href="TERRAFORM_GUIDE.md" class="doc-link">Read docs/TERRAFORM_GUIDE.md →</a>
-        </div>
-
-        <!-- Integration Guide -->
-        <div class="doc-card">
-          <div>
-            <div class="doc-card-title">Integration Guide</div>
-            <div class="doc-card-desc">Step-by-step instrumentations for Go, Python, and Java services exporting OTLP traces and Prometheus golden signals.</div>
-          </div>
-          <a href="INTEGRATION_GUIDE.md" class="doc-link">Read docs/INTEGRATION_GUIDE.md →</a>
-        </div>
-
-        <!-- Sampling Strategies -->
-        <div class="doc-card">
-          <div>
-            <div class="doc-card-title">Sampling Strategies</div>
-            <div class="doc-card-desc">Head-based and tail-based distributed tracing sampling algorithms to preserve critical error spans while containing storage costs.</div>
-          </div>
-          <a href="SAMPLING_STRATEGIES.md" class="doc-link">Read docs/SAMPLING_STRATEGIES.md →</a>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
   <!-- Footer -->
   <footer>
     <div class="container footer-content">
       <div>
         <p><strong>cloud-native-observability</strong> · Production-Grade Telemetry Architecture</p>
-        <p style="margin-top: 0.25rem;">Released under the MIT License · Synchronized to v0.3.0</p>
+        <p class="footer-meta">Released under the MIT License · Synchronized to v0.3.0</p>
       </div>
       <div class="footer-links">
         <a href="https://github.com/abeta-dev/cloud-native-observability" target="_blank" rel="noreferrer">GitHub Repository</a>
@@ -1417,23 +1535,39 @@ inhibit_rules:
       });
     }
 
-    function switchTab(index) {
+    function switchTab(index, focusTab) {
       var buttons = document.querySelectorAll(".tab-btn");
       var contents = document.querySelectorAll(".tab-content");
       buttons.forEach(function(btn, i) {
-        if (i === index) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
+        var isSelected = i === index;
+        btn.classList.toggle("active", isSelected);
+        btn.setAttribute("aria-selected", isSelected ? "true" : "false");
+        btn.setAttribute("tabindex", isSelected ? "0" : "-1");
+        if (isSelected && focusTab) {
+          btn.focus();
         }
       });
       contents.forEach(function(content, i) {
-        if (i === index) {
-          content.classList.add("active");
-        } else {
-          content.classList.remove("active");
-        }
+        content.classList.toggle("active", i === index);
       });
+    }
+
+    function handleTabKeydown(event, index) {
+      var total = 4;
+      var nextIndex = null;
+      if (event.key === "ArrowRight") {
+        nextIndex = (index + 1) % total;
+      } else if (event.key === "ArrowLeft") {
+        nextIndex = (index - 1 + total) % total;
+      } else if (event.key === "Home") {
+        nextIndex = 0;
+      } else if (event.key === "End") {
+        nextIndex = total - 1;
+      }
+      if (nextIndex !== null) {
+        event.preventDefault();
+        switchTab(nextIndex, true);
+      }
     }
 
     function calculateBurnRate() {
@@ -1441,30 +1575,31 @@ inhibit_rules:
       var err1h = parseFloat(document.getElementById("error-1h-input").value) || 0.0;
       var err5m = parseFloat(document.getElementById("error-5m-input").value) || 0.0;
 
-      var allowedUnreliability = (100.0 - slo) / 100.0; // e.g. 0.001 for 99.9%
+      var allowedUnreliability = (100.0 - slo) / 100.0;
       if (allowedUnreliability <= 0) allowedUnreliability = 0.00001;
 
       var burnRate1h = (err1h / 100.0) / allowedUnreliability;
       var burnRate5m = (err5m / 100.0) / allowedUnreliability;
 
-      var speedPerHour = (burnRate1h / 720.0) * 100.0; // % monthly budget per hour
+      var speedPerHour = (burnRate1h / 720.0) * 100.0;
 
       document.getElementById("calc-burn-rate").innerText = burnRate1h.toFixed(1) + "x";
       document.getElementById("calc-budget-speed").innerText = speedPerHour.toFixed(2) + "% / hr";
 
       var statusElem = document.getElementById("calc-alert-status");
+      statusElem.className = "calc-stat-val";
       if (burnRate1h >= 14.4 && burnRate5m >= 14.4) {
         statusElem.innerText = "FIRING (Critical Pager - 14.4x)";
-        statusElem.style.color = "var(--accent-rose)";
+        statusElem.classList.add("stat-rose");
       } else if (burnRate1h >= 6.0 && burnRate5m >= 6.0) {
         statusElem.innerText = "FIRING (Critical Pager - 6.0x)";
-        statusElem.style.color = "var(--accent-rose)";
+        statusElem.classList.add("stat-rose");
       } else if (burnRate1h >= 1.0) {
         statusElem.innerText = "EVALUATING (Warning / Ticket - 1.0x)";
-        statusElem.style.color = "var(--accent-amber)";
+        statusElem.classList.add("stat-amber");
       } else {
         statusElem.innerText = "OK (Within Error Budget)";
-        statusElem.style.color = "var(--accent-emerald)";
+        statusElem.classList.add("stat-emerald");
       }
     }
   </script>
