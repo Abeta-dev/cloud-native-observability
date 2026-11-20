@@ -1,11 +1,11 @@
-# cloud-native-observability (github.com/abeta-dev/cloud-native-observability@v0.3.0)
+# cloud-native-observability (github.com/abeta-dev/cloud-native-observability@v0.4.0)
 
 > GitOps-ready Cloud-Native Observability Platform implementing the LGTM Stack (Loki, Grafana, Tempo, Prometheus / Thanos) unified with OpenTelemetry (OTel Collector spanmetrics & Loki log pipelines), Google SRE multi-window multi-burn-rate SLO alerting, ArgoCD App-of-Apps GitOps, Terraform IaC modules, and a 100.0%-tested Go reference service (demo-app).
 
 - **Repository**: https://github.com/abeta-dev/cloud-native-observability
 - **Documentation Portal**: https://abeta-dev.github.io/cloud-native-observability/
 - **Go Reference**: https://pkg.go.dev/github.com/abeta-dev/cloud-native-observability
-- **Version**: v0.3.0 (Go 1.26.0, 100.0% `demo-app` statement coverage)
+- **Version**: v0.4.0 (Go 1.26.0, 100.0% `demo-app` statement coverage)
 - **License**: MIT
 
 ## Quick Start & Verification Commands

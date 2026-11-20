@@ -1,9 +1,9 @@
 ---
 name: cno-gitops-terraform
-description: Kubernetes Helm value profiles, cloud overlays (EKS, GKE), ArgoCD App-of-Apps GitOps deployment, and Terraform Observability-as-Code provisioning for github.com/abeta-dev/cloud-native-observability (v0.3.0).
+description: Kubernetes Helm value profiles, cloud overlays (EKS, GKE), ArgoCD App-of-Apps GitOps deployment, and Terraform Observability-as-Code provisioning for github.com/abeta-dev/cloud-native-observability (v0.4.0).
 ---
 
-# `cno-gitops-terraform` Subskill (`v0.3.0`)
+# `cno-gitops-terraform` Subskill (`v0.4.0`)
 
 Key paths:
 - `deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml`
@@ -28,7 +28,7 @@ Key paths:
 ## 2. ArgoCD GitOps App-of-Apps (`deploy/kubernetes/argocd/`)
 
 - `deploy/kubernetes/argocd/app-of-apps.yaml` bootstraps child `Application` manifests in `deploy/kubernetes/argocd/apps/` (`secrets.yaml`, `kube-prometheus-stack.yaml`, `loki-stack.yaml`, `tempo-stack.yaml`, `otel-collector.yaml`) ordered by `argocd.argoproj.io/sync-wave`.
-- Every `targetRevision` and raw GitHub `valueFiles` URL in `deploy/kubernetes/argocd/` must match the canonical release version (`v0.3.0`), enforced by `./scripts/check_version.sh`.
+- Every `targetRevision` and raw GitHub `valueFiles` URL in `deploy/kubernetes/argocd/` must match the canonical release version (`v0.4.0`), enforced by `./scripts/check_version.sh`.
 
 ## 3. Terraform Observability-as-Code (`deploy/terraform/`)
 

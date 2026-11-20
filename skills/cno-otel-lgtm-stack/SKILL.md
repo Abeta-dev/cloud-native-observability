@@ -1,9 +1,9 @@
 ---
 name: cno-otel-lgtm-stack
-description: OpenTelemetry Collector spanmetrics, Prometheus, Loki TSDB v13, Tempo, and Grafana dashboard configuration patterns for github.com/abeta-dev/cloud-native-observability (v0.3.0).
+description: OpenTelemetry Collector spanmetrics, Prometheus, Loki TSDB v13, Tempo, and Grafana dashboard configuration patterns for github.com/abeta-dev/cloud-native-observability (v0.4.0).
 ---
 
-# `cno-otel-lgtm-stack` Subskill (`v0.3.0`)
+# `cno-otel-lgtm-stack` Subskill (`v0.4.0`)
 
 Key configuration paths:
 - `compose.yaml` & `deploy/docker-compose/docker-compose.yml`

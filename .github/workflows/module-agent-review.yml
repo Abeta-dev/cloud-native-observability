@@ -1,0 +1,156 @@
+name: Module Code-Owner Agent Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  checks: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  module-agent-review:
+    name: Module Code-Owner Agent Audit & Sign-Off
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      checks: write
+    steps:
+      - name: Checkout Repository (Full History)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go 1.26.0
+        uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version: '1.26.0'
+          cache: false
+
+      - name: Install TruffleHog Secret Scanner & PyYAML
+        run: |
+          curl -fsSL "https://github.com/trufflesecurity/trufflehog/releases/download/v3.88.14/trufflehog_3.88.14_linux_amd64.tar.gz" | tar -xz -C /tmp trufflehog
+          echo "/tmp" >> "$GITHUB_PATH"
+          python3 -c "import yaml" 2>/dev/null || pip install pyyaml
+
+      - name: Stage Module Code-Owner Agent Engine
+        run: |
+          cp scripts/module_agent_review.sh /tmp/module_agent_review.sh
+          chmod +x /tmp/module_agent_review.sh
+          cp .github/module-agents.json /tmp/module-agents.json
+          git fetch origin --prune
+
+      - name: Run Module Code-Owner Agent Review Across Open Pull Requests
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_PR_NUMBER: ${{ github.event.pull_request.number }}
+          CURRENT_BASE_REF: ${{ github.event.pull_request.base.ref }}
+          CURRENT_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          upsert_pr_review() {
+            local pr_num="$1"
+            local base_ref="$2"
+            local head_ref="$3"
+            local report_file="/tmp/module-agent-report-${pr_num}.md"
+            local rc=0
+
+            echo "========================================================"
+            echo "🔍 Auditing PR #${pr_num} (origin/${base_ref}...origin/${head_ref})"
+            echo "========================================================"
+
+            /tmp/module_agent_review.sh \
+              --base "origin/${base_ref}" \
+              --head "origin/${head_ref}" \
+              --pr-number "${pr_num}" \
+              --config "/tmp/module-agents.json" \
+              --output "${report_file}" || rc=$?
+
+            # 1. Delete any existing duplicate issue comments containing <!-- abeta-module-agent-review -->
+            local existing_comment_ids=""
+            existing_comment_ids="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${pr_num}/comments" \
+              --jq '.[] | select(.body | contains("<!-- abeta-module-agent-review -->")) | .id' || true)"
+            if [ -n "${existing_comment_ids}" ]; then
+              for cid in ${existing_comment_ids}; do
+                echo "Deleting duplicate issue comment #${cid} on PR #${pr_num}..."
+                gh api --method DELETE "repos/${GITHUB_REPOSITORY}/issues/comments/${cid}" >/dev/null 2>&1 || true
+              done
+            fi
+
+            # 2. Deduplicate PR Reviews (update existing APPROVED review in-place or create single review)
+            if [ "${rc}" -eq 0 ]; then
+              local approved_ids=""
+              approved_ids="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${pr_num}/reviews" \
+                --jq '.[] | select(.user.login == "github-actions[bot]" and .state == "APPROVED") | .id' || true)"
+              if [ -n "${approved_ids}" ]; then
+                local latest_rev_id=""
+                latest_rev_id="$(echo "${approved_ids}" | tail -n1)"
+                echo "Updating existing APPROVED review #${latest_rev_id} in-place on PR #${pr_num}..."
+                jq -Rs '{body: .}' "${report_file}" | gh api \
+                  --method PUT \
+                  "repos/${GITHUB_REPOSITORY}/pulls/${pr_num}/reviews/${latest_rev_id}" \
+                  --input - >/dev/null
+                for rid in ${approved_ids}; do
+                  if [ "${rid}" != "${latest_rev_id}" ]; then
+                    echo "Collapsing older superseded review #${rid} on PR #${pr_num}..."
+                    jq -n '{body: "_Superseded by latest Module Code-Owner Agent review._"}' | gh api \
+                      --method PUT \
+                      "repos/${GITHUB_REPOSITORY}/pulls/${pr_num}/reviews/${rid}" \
+                      --input - >/dev/null 2>&1 || true
+                  fi
+                done
+              else
+                echo "Submitting single formal APPROVAL review on PR #${pr_num}..."
+                gh pr review "${pr_num}" --approve --body-file "${report_file}" || \
+                  gh pr review "${pr_num}" --comment --body-file "${report_file}" || true
+              fi
+            else
+              echo "Submitting formal CHANGES_REQUESTED review on PR #${pr_num}..."
+              gh pr review "${pr_num}" --request-changes --body-file "${report_file}" || \
+                gh pr review "${pr_num}" --comment --body-file "${report_file}" || true
+            fi
+
+            return "${rc}"
+          }
+
+          CURRENT_RC=0
+          EVALUATED_CURRENT=0
+
+          OPEN_PRS=$(gh pr list --state open --json number,baseRefName,headRefName \
+            --jq '.[] | "\(.number)|\(.baseRefName)|\(.headRefName)"' || true)
+
+          if [ -n "${OPEN_PRS}" ]; then
+            while IFS='|' read -r pr_num base_ref head_ref; do
+              [ -z "${pr_num}" ] && continue
+              pr_rc=0
+              upsert_pr_review "${pr_num}" "${base_ref}" "${head_ref}" || pr_rc=$?
+              if [ -n "${CURRENT_PR_NUMBER}" ] && [ "${pr_num}" = "${CURRENT_PR_NUMBER}" ]; then
+                CURRENT_RC="${pr_rc}"
+                EVALUATED_CURRENT=1
+                cat "/tmp/module-agent-report-${pr_num}.md" >> "$GITHUB_STEP_SUMMARY"
+              fi
+            done <<< "${OPEN_PRS}"
+          fi
+
+          if [ -n "${CURRENT_PR_NUMBER}" ] && [ "${EVALUATED_CURRENT}" -eq 0 ]; then
+            upsert_pr_review "${CURRENT_PR_NUMBER}" "${CURRENT_BASE_REF}" "${CURRENT_HEAD_REF}" || CURRENT_RC=$?
+            cat "/tmp/module-agent-report-${CURRENT_PR_NUMBER}.md" >> "$GITHUB_STEP_SUMMARY"
+          elif [ -z "${CURRENT_PR_NUMBER}" ]; then
+            /tmp/module_agent_review.sh \
+              --base "origin/main" \
+              --head "HEAD" \
+              --config "/tmp/module-agents.json" \
+              --output "/tmp/module-agent-report-dispatch.md" || CURRENT_RC=$?
+            cat "/tmp/module-agent-report-dispatch.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          exit "${CURRENT_RC}"

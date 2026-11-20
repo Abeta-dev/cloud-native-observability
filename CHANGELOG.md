@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-11-21
+
+Module Code-Owner Agent PR governance system (`.github/CODEOWNERS`, `.github/module-agents.json`, `scripts/module_agent_review.sh`, `.github/workflows/module-agent-review.yml`) with live Multi-Skill Quality & Architecture gates (`/impeccable`, `@uncle-bob-craft`, `@effective-agent-skills`, `@security-auditor`), SHA-pinned CodeQL, OpenSSF Scorecard, and Dependabot workflows, hardened GitHub Pages deployment, and `llms.txt` / `docs/llms.txt` AI discovery index.
+
+### Added
+- governance: Added `.github/CODEOWNERS`, `.github/module-agents.json`, `scripts/module_agent_review.sh` (Bash 3.2 compatible), and `.github/workflows/module-agent-review.yml` enforcing module-scoped review across `@cno-otel-lgtm-stack-agent`, `@cno-sre-slo-alerting-agent`, `@cno-gitops-terraform-agent`, and `@cno-platform-governance-agent` plus live `/impeccable`, `@uncle-bob-craft`, `@effective-agent-skills`, and `@security-auditor` checks.
+- security: Added SHA-pinned CodeQL SAST (`.github/workflows/codeql.yml`), OpenSSF Scorecard (`.github/workflows/scorecard.yml`), and grouped Dependabot (`.github/dependabot.yml`) workflows with `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true` and upgraded `.github/PULL_REQUEST_TEMPLATE.md`.
+- docs: Added `llms.txt` and `docs/llms.txt` AI discovery indexes, hardened `.github/workflows/pages.yml`, and documented the Abeta Go Ecosystem in `README.md`.
+
+### Changed
+- release: Synchronized `AGENTS.md`, `skills/*/SKILL.md`, `README.md`, `docs/index.html`, `docs/llms.txt`, `llms.txt`, `deploy/kubernetes/argocd/` manifests, and `scripts/check_version.sh` to `v0.4.0`, and bumped SHA-pinned GitHub Actions dependencies across `.github/workflows/*.yml`.
+
 ## [0.3.0] - 2026-11-05
 
 Complete lowercase `github.com/abeta-dev/cloud-native-observability` module and documentation migration, Kubernetes OTel Collector Loki log pipeline parity, `AGENTS.md` / `skills/` path & architecture truthfulness alignment, TruffleHog + `scripts/check_secrets.sh` security gate, polished `docs/index.html` documentation portal, and `100.0%` statement coverage across `deploy/docker-compose/demo-app`.

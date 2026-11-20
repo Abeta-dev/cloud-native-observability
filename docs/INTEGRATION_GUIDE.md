@@ -36,7 +36,7 @@ func initTracer(ctx context.Context) (*telemetry.TracerProvider, func(context.Co
     // Create an instance-scoped TracerProvider configured with service metadata
     tp, cleanup, err := telemetry.NewTracerProvider(
         telemetry.WithServiceName("order-service"),
-        telemetry.WithServiceVersion("0.3.0"),
+        telemetry.WithServiceVersion("0.4.0"),
         telemetry.WithEnvironment("production"),
         telemetry.WithSampleRate(1.0),
     )
