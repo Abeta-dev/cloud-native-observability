@@ -1,50 +1,29 @@
 ## Summary
+<!-- Briefly describe the observability, SLO, GitOps, or IaC changes proposed in this Pull Request. -->
 
-<!-- Briefly describe the changes proposed in this Pull Request and their architectural justification. -->
+## Related Issue
+<!-- Fixes #(issue) or Relates to #(issue) -->
+
+## Type of Change
+- [ ] `feat`: New telemetry pipeline, dashboard, SLO alert rule, or Terraform/Helm capability
+- [ ] `fix`: PromQL/Alertmanager fix, Collector config fix, or manifest remediation
+- [ ] `docs` / `skills`: Documentation, `docs/index.html`, `llms.txt`, `RUNBOOKS.md`, or `skills/*/SKILL.md` update
+- [ ] `ci` / `chore`: Workflow hardening, verification gate, or dependency update
 
 ## Affected Components
+- [ ] **Reference Service**: `deploy/docker-compose/demo-app/` (Go OTel instrumentation & unit tests)
+- [ ] **Docker Compose LGTM Sandbox**: `deploy/docker-compose/` (Prometheus, Mimir, Loki, Tempo, Grafana, OTel Collector)
+- [ ] **Kubernetes & Helm**: `deploy/kubernetes/` (Charts, values, `PrometheusRule` manifests)
+- [ ] **ArgoCD GitOps**: `deploy/kubernetes/argocd/` (App-of-Apps & application manifests)
+- [ ] **Terraform IaC**: `deploy/terraform/` (AWS/Kubernetes stack & Grafana provisioning modules)
+- [ ] **SLO & Alerting**: `deploy/slo/canonical_sli.promql` · `deploy/*/alerts/` (Google SRE multi-window burn-rate alerts)
+- [ ] **Docs, Portal & AI Skills**: `docs/` · `docs/index.html` · `llms.txt` · `AGENTS.md` · `skills/` · `.github/workflows/`
 
-- [ ] Docker Compose Local Sandbox (`deploy/docker-compose/`)
-- [ ] Kubernetes Manifests / Helm Charts (`deploy/kubernetes/`)
-- [ ] ArgoCD GitOps Definitions (`deploy/kubernetes/argocd/`)
-- [ ] Terraform Infrastructure as Code (`deploy/terraform/`)
-- [ ] Prometheus Alert Rules & SLO Definitions (`deploy/*/alerts/`, `deploy/slo/`)
-- [ ] Grafana Dashboards (`deploy/*/grafana/dashboards/`)
-- [ ] OpenTelemetry Collector Pipeline (`deploy/*/otel-collector/`)
-- [ ] Incident Runbooks & Architecture Docs (`docs/`, `README.md`)
-
----
-
-## Strict Quality & Truth-Gate Checklist
-
-Before requesting maintainer review, please verify that all automated verification gates pass locally:
-
-- [ ] **Version Synchronization**: `./scripts/check_version.sh` passes with exit code 0 (validating version tags, ArgoCD sync, and truthfulness gates).
-- [ ] **Promtool Alert Unit Tests**: `bash ./scripts/test_alerts.sh` passes with exit code 0 (all test fixtures succeed).
-- [ ] **Alertmanager Config Lint**: `amtool check-config deploy/kubernetes/alerts/alertmanager.yaml` passes without syntax or route errors.
-- [ ] **Terraform Formatting & Validation**: `terraform -chdir=deploy/terraform fmt -check -recursive` and `terraform -chdir=deploy/terraform validate` succeed.
-- [ ] **Terraform Linting**: `tflint --recursive` passes inside `deploy/terraform` with zero rule violations.
-- [ ] **Canonical Availability SLI AST Equivalence**: Any new or updated availability error-rate expression matches `deploy/slo/canonical_sli.promql` and strictly excludes 4xx client status codes (`status=~"5.."`).
-- [ ] **Runbook Coverage**: All new or modified alerts have a dedicated triage and mitigation SOP documented in [docs/RUNBOOKS.md](file:///Users/umesh/Documents/go-backend-libraries/cloud-native-observability/docs/RUNBOOKS.md).
-- [ ] **Zero Hardcoded Credentials**: No secrets, tokens, or plaintext credentials exist in manifests or configuration files.
-
----
-
-## Verification Evidence
-
-<!-- Paste terminal output or test logs demonstrating that the verification suite passed locally. -->
-
-```shell
-# Paste output of:
-# ./scripts/check_version.sh
-# bash ./scripts/test_alerts.sh
-# terraform -chdir=deploy/terraform fmt -check -recursive
-# cd deploy/terraform && tflint --recursive
-```
-
----
-
-## Related Issues
-
-<!-- Closes #123 / Fixes #456 -->
-Fixes #
+## Mandatory Quality, Telemetry & Security Gates
+- [ ] `./scripts/check_secrets.sh` passed with **0 leaked credentials or verified TruffleHog findings**.
+- [ ] `./scripts/check_version.sh` passed (`vMAJOR.MINOR.PATCH` parity, ArgoCD revision sync, PromQL dashboard catalog verification, Alertmanager parity, Canonical SLI AST equivalence, and truthfulness gate).
+- [ ] `bash ./scripts/test_alerts.sh` passed (Kubeconform schema validation + `promtool` rule & unit tests).
+- [ ] `(cd deploy/docker-compose/demo-app && go test -race -cover ./...)` passed with **100.0% statement coverage** and **0 data races**.
+- [ ] **Terraform & Alertmanager Lint** (when touched): `amtool check-config deploy/kubernetes/alerts/alertmanager.yaml`, `terraform -chdir=deploy/terraform fmt -check -recursive`, `terraform validate`, and `tflint --recursive` pass cleanly.
+- [ ] **Canonical Availability SLI AST Equivalence**: Availability error-rate queries strictly match `deploy/slo/canonical_sli.promql` (`status=~"5.."`, excluding 4xx client errors).
+- [ ] **Runbook & AI Context Sync**: All modified alerts have an incident SOP in `docs/RUNBOOKS.md`, and `README.md`, `CHANGELOG.md`, `docs/index.html`, `docs/llms.txt` (`llms.txt`), `AGENTS.md`, and `skills/*/SKILL.md` remain synchronized.

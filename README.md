@@ -3,6 +3,7 @@
 > **Note on Repository History**: History reconstructed on 2026-09-11; see [CHANGELOG.md](CHANGELOG.md) for the real feature timeline.
 
 [![CI](https://github.com/abeta-dev/cloud-native-observability/actions/workflows/ci.yml/badge.svg)](https://github.com/abeta-dev/cloud-native-observability/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/abeta-dev/cloud-native-observability/badge)](https://scorecard.dev/viewer/?uri=github.com/abeta-dev/cloud-native-observability)
 [![Docs Portal](https://img.shields.io/badge/docs-abeta--dev.github.io%2Fcloud--native--observability-00ADD8?logo=read-the-docs&logoColor=white)](https://abeta-dev.github.io/cloud-native-observability/)
 [![demo-app Coverage](https://img.shields.io/badge/demo--app%20coverage-100.0%25-brightgreen)](deploy/docker-compose/demo-app)
 [![llms.txt](https://img.shields.io/badge/llms.txt-AI--Ready-7C3AED)](https://abeta-dev.github.io/cloud-native-observability/llms.txt)

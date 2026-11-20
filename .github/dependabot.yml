@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/deploy/docker-compose/demo-app"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+    groups:
+      go-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "go"
+
+  - package-ecosystem: "terraform"
+    directory: "/deploy/terraform"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 1
+    groups:
+      terraform-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "terraform"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 1
+    groups:
+      actions-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "actions"
