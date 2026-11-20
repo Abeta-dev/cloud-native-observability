@@ -3,6 +3,9 @@
 > **Note on Repository History**: History reconstructed on 2026-09-11; see [CHANGELOG.md](CHANGELOG.md) for the real feature timeline.
 
 [![CI](https://github.com/abeta-dev/cloud-native-observability/actions/workflows/ci.yml/badge.svg)](https://github.com/abeta-dev/cloud-native-observability/actions/workflows/ci.yml)
+[![Docs Portal](https://img.shields.io/badge/docs-abeta--dev.github.io%2Fcloud--native--observability-00ADD8?logo=read-the-docs&logoColor=white)](https://abeta-dev.github.io/cloud-native-observability/)
+[![demo-app Coverage](https://img.shields.io/badge/demo--app%20coverage-100.0%25-brightgreen)](deploy/docker-compose/demo-app)
+[![llms.txt](https://img.shields.io/badge/llms.txt-AI--Ready-7C3AED)](https://abeta-dev.github.io/cloud-native-observability/llms.txt)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.28+-326ce5.svg?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![Prometheus](https://img.shields.io/badge/Prometheus-v2.51+-e6522c.svg?logo=prometheus&logoColor=white)](https://prometheus.io)
@@ -266,7 +269,7 @@ Read the full [Terraform Observability Guide](docs/TERRAFORM_GUIDE.md) for archi
 
 ---
 
-## 🤝 Integration with `go-libs`
+## 🤝 Integration with `go-libs` & the Abeta Go Ecosystem
 
 Microservices built on [`github.com/abeta-dev/go-libs`](https://github.com/abeta-dev/go-libs) connect natively:
 1. **Metrics**: Scraped automatically via `ServiceMonitor` on `/metrics`.
@@ -274,6 +277,15 @@ Microservices built on [`github.com/abeta-dev/go-libs`](https://github.com/abeta
 3. **Logs**: Structured JSON with `trace_id` fields auto-correlated in Grafana.
 
 See the full [Integration Guide](docs/INTEGRATION_GUIDE.md) for copy-paste recipes.
+
+### 🌐 Abeta Go Ecosystem
+
+| Repository | Role in Ecosystem | Documentation Portal | Go Reference |
+| :--- | :--- | :--- | :--- |
+| **[`github.com/abeta-dev/go-libs`](https://github.com/abeta-dev/go-libs)** | 35 foundational Go infrastructure packages (HTTP/Gin middleware, resilience, RBAC, JWKS, `pgxpool` DB, OTel telemetry, structured `slog`) | [abeta-dev.github.io/go-libs](https://abeta-dev.github.io/go-libs/) | [pkg.go.dev/github.com/abeta-dev/go-libs](https://pkg.go.dev/github.com/abeta-dev/go-libs) |
+| **[`github.com/abeta-dev/go-fintech-india`](https://github.com/abeta-dev/go-fintech-india)** | 19 India FinTech & statutory compliance packages (exact Paise money math, GST/TDS/TCS, PAN/GSTIN/Aadhaar Verhoeff KYC, IFSC/UPI/BBPS) | [abeta-dev.github.io/go-fintech-india](https://abeta-dev.github.io/go-fintech-india/) | [pkg.go.dev/github.com/abeta-dev/go-fintech-india](https://pkg.go.dev/github.com/abeta-dev/go-fintech-india) |
+| **[`github.com/abeta-dev/go-app-kit`](https://github.com/abeta-dev/go-app-kit)** | 5 higher-order application workflow engines (transactional outbox, multi-channel notifications, audit trails, streaming CSV/JSONL export, PDF generation) | [abeta-dev.github.io/go-app-kit](https://abeta-dev.github.io/go-app-kit/) | [pkg.go.dev/github.com/abeta-dev/go-app-kit](https://pkg.go.dev/github.com/abeta-dev/go-app-kit) |
+| **[`github.com/abeta-dev/cloud-native-observability`](https://github.com/abeta-dev/cloud-native-observability)** | Production OpenTelemetry + LGTM (`Loki`, `Grafana`, `Tempo`, `Prometheus`) platform, Google SRE burn-rate SLO alerts, ArgoCD GitOps & Terraform IaC | [abeta-dev.github.io/cloud-native-observability](https://abeta-dev.github.io/cloud-native-observability/) | [pkg.go.dev/github.com/abeta-dev/cloud-native-observability](https://pkg.go.dev/github.com/abeta-dev/cloud-native-observability) |
 
 ---
 
