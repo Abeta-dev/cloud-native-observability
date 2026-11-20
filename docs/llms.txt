@@ -1,0 +1,52 @@
+# cloud-native-observability (github.com/abeta-dev/cloud-native-observability@v0.3.0)
+
+> GitOps-ready Cloud-Native Observability Platform implementing the LGTM Stack (Loki, Grafana, Tempo, Prometheus / Thanos) unified with OpenTelemetry (OTel Collector spanmetrics & Loki log pipelines), Google SRE multi-window multi-burn-rate SLO alerting, ArgoCD App-of-Apps GitOps, Terraform IaC modules, and a 100.0%-tested Go reference service (demo-app).
+
+- **Repository**: https://github.com/abeta-dev/cloud-native-observability
+- **Documentation Portal**: https://abeta-dev.github.io/cloud-native-observability/
+- **Go Reference**: https://pkg.go.dev/github.com/abeta-dev/cloud-native-observability
+- **Version**: v0.3.0 (Go 1.26.0, 100.0% `demo-app` statement coverage)
+- **License**: MIT
+
+## Quick Start & Verification Commands
+
+```bash
+# Launch local 1-click LGTM + OpenTelemetry sandbox (Prometheus, Loki, Tempo, OTel Collector, Grafana, Alertmanager, Demo App, Traffic Generator)
+make up
+
+# Install Agent Skills for AI coding assistants (Claude Code, Gemini CLI, Cursor, Codex, Antigravity)
+npx skills add abeta-dev/cloud-native-observability
+
+# Run repository truth gates, PromQL AST equivalence checks, and demo-app 100.0% coverage gate
+./scripts/check_secrets.sh
+./scripts/check_version.sh
+./scripts/test_alerts.sh
+(cd deploy/docker-compose/demo-app && go test -race -cover ./...)
+```
+
+## AI Agent Guidance & Skill Routing
+
+- [AGENTS.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/AGENTS.md): Root AI agent router, architectural invariants, and mandatory verification gates.
+- [skills/cloud-native-observability/SKILL.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/skills/cloud-native-observability/SKILL.md): Umbrella skill for OpenTelemetry + LGTM stack instrumentation, SLO alerting, and truth-gate verification.
+- [skills/cno-otel-lgtm-stack/SKILL.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/skills/cno-otel-lgtm-stack/SKILL.md): OpenTelemetry Collector pipeline (`:4317`/`:4318`), `spanmetrics` connector (`traces_spanmetrics_calls_total`, `traces_spanmetrics_duration_milliseconds_bucket` on `:8889`), Prometheus scraping, Loki TSDB `v13` structured metadata, Tempo traces, and Grafana dashboards.
+- [skills/cno-sre-slo-alerting/SKILL.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/skills/cno-sre-slo-alerting/SKILL.md): Google SRE multi-window multi-burn-rate alerts (`14.4x` 1h/5m, `6.0x` 6h/30m, `1.0x` 3d/6h), precomputed recording rules (`job:http_requests:error_rate_*`), Alertmanager parity, and PromQL AST equivalence gates.
+- [skills/cno-gitops-terraform/SKILL.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/skills/cno-gitops-terraform/SKILL.md): Kubernetes Helm value profiles (`deploy/kubernetes/helm/`), cloud overlays (`values-eks.yaml`, `values-gke.yaml`), ArgoCD App-of-Apps manifests (`deploy/kubernetes/argocd/`), and Terraform Observability-as-Code (`deploy/terraform/`).
+
+## Documentation & Architecture Guides
+
+- [Interactive Documentation Portal](https://abeta-dev.github.io/cloud-native-observability/): Live architectural walkthrough, PromQL SLO simulator, and deployment blueprints.
+- [ARCHITECTURE.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/ARCHITECTURE.md): End-to-end telemetry ingestion, storage, correlation, and GitOps architecture specification.
+- [docs/INTEGRATION_GUIDE.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/INTEGRATION_GUIDE.md): Step-by-step guide for connecting Go microservices built with `go-libs` and `go-app-kit` to OTel Collector, Prometheus, Loki, and Tempo.
+- [docs/SLO_DESIGN.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/SLO_DESIGN.md): Mathematical derivation of error budgets, multi-window multi-burn-rate thresholds (`14.4x`, `6.0x`, `1.0x`), and recording rule optimizations.
+- [docs/RUNBOOKS.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md): Actionable SRE incident triage and mitigation runbooks for availability, latency, saturation, and burn-rate alerts.
+- [docs/TERRAFORM_GUIDE.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/TERRAFORM_GUIDE.md): Observability-as-Code (OaC) guide covering cloud object storage, Helm release provisioning, and Grafana alerting/dashboard state management.
+- [docs/SAMPLING_STRATEGIES.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/SAMPLING_STRATEGIES.md): OpenTelemetry head vs. tail-based trace sampling strategies, latency/error retention policies, and cost optimization.
+
+## Abeta Go Ecosystem
+
+| Repository | Role in Ecosystem | Documentation Portal | Go Reference / Stack |
+| :--- | :--- | :--- | :--- |
+| **[`github.com/abeta-dev/go-libs`](https://github.com/abeta-dev/go-libs)** | 35 foundational Go infrastructure packages (HTTP/Gin middleware, resilience, RBAC, JWKS, pgxpool DB, OTel telemetry, structured slog) | [abeta-dev.github.io/go-libs](https://abeta-dev.github.io/go-libs/) | [pkg.go.dev/github.com/abeta-dev/go-libs](https://pkg.go.dev/github.com/abeta-dev/go-libs) |
+| **[`github.com/abeta-dev/go-fintech-india`](https://github.com/abeta-dev/go-fintech-india)** | 19 India FinTech & statutory compliance packages (exact Paise money math, GST/TDS/TCS, PAN/GSTIN/Aadhaar Verhoeff KYC, IFSC/UPI/BBPS) | [abeta-dev.github.io/go-fintech-india](https://abeta-dev.github.io/go-fintech-india/) | [pkg.go.dev/github.com/abeta-dev/go-fintech-india](https://pkg.go.dev/github.com/abeta-dev/go-fintech-india) |
+| **[`github.com/abeta-dev/go-app-kit`](https://github.com/abeta-dev/go-app-kit)** | 5 higher-order application workflow engines (transactional outbox, multi-channel notifications, audit trails, streaming CSV/JSONL export, PDF generation) | [abeta-dev.github.io/go-app-kit](https://abeta-dev.github.io/go-app-kit/) | [pkg.go.dev/github.com/abeta-dev/go-app-kit](https://pkg.go.dev/github.com/abeta-dev/go-app-kit) |
+| **[`github.com/abeta-dev/cloud-native-observability`](https://github.com/abeta-dev/cloud-native-observability)** | Production OpenTelemetry + LGTM (Loki, Grafana, Tempo, Prometheus) platform, Google SRE burn-rate SLO alerts, ArgoCD GitOps & Terraform IaC | [abeta-dev.github.io/cloud-native-observability](https://abeta-dev.github.io/cloud-native-observability/) | [pkg.go.dev/github.com/abeta-dev/cloud-native-observability](https://pkg.go.dev/github.com/abeta-dev/cloud-native-observability) |
