@@ -1,0 +1,67 @@
+# ==============================================================================
+# cloud-native-observability — Module-by-Module Code Ownership & Agent Routing
+# ==============================================================================
+# Each module group is paired with a dedicated Module Code-Owner Agent and
+# companion agent skill under skills/*/SKILL.md, enforced on every Pull Request
+# by .github/workflows/module-agent-review.yml and scripts/module_agent_review.sh.
+
+# Default fallback owner
+* @umesh0492
+
+# ------------------------------------------------------------------------------
+# 1. @cno-otel-lgtm-stack-agent (Companion Skill: skills/cno-otel-lgtm-stack/SKILL.md)
+#    OpenTelemetry Collector, Prometheus, Loki TSDB v13, Tempo, Grafana & Demo App
+# ------------------------------------------------------------------------------
+/compose.yaml                          @umesh0492
+/deploy/docker-compose/                @umesh0492
+/docs/SAMPLING_STRATEGIES.md           @umesh0492
+/docs/INTEGRATION_GUIDE.md             @umesh0492
+/docs/CLUSTERED_OBSERVABILITY.md       @umesh0492
+
+# ------------------------------------------------------------------------------
+# 2. @cno-sre-slo-alerting-agent (Companion Skill: skills/cno-sre-slo-alerting/SKILL.md)
+#    Canonical Availability SLI, Google SRE Multi-Window Burn-Rate Alerts & Runbooks
+# ------------------------------------------------------------------------------
+/deploy/slo/                           @umesh0492
+/deploy/kubernetes/alerts/             @umesh0492
+/docs/SLO_DESIGN.md                    @umesh0492
+/docs/RUNBOOKS.md                      @umesh0492
+/scripts/test_alerts.sh                @umesh0492
+
+# ------------------------------------------------------------------------------
+# 3. @cno-gitops-terraform-agent (Companion Skill: skills/cno-gitops-terraform/SKILL.md)
+#    Kubernetes Helm Profiles, Overlays, ArgoCD App-of-Apps & Terraform IaC
+# ------------------------------------------------------------------------------
+/deploy/kubernetes/argocd/             @umesh0492
+/deploy/kubernetes/helm-values/        @umesh0492
+/deploy/kubernetes/helm/               @umesh0492
+/deploy/kubernetes/examples/           @umesh0492
+/deploy/kubernetes/overlays/           @umesh0492
+/deploy/kubernetes/secrets/            @umesh0492
+/deploy/kubernetes/network-policies/   @umesh0492
+/deploy/kubernetes/otel-operator/      @umesh0492
+/deploy/terraform/                     @umesh0492
+/docs/TERRAFORM_GUIDE.md               @umesh0492
+
+# ------------------------------------------------------------------------------
+# 4. @cno-platform-governance-agent (Companion Skill: skills/cloud-native-observability/SKILL.md)
+#    Repository Governance, CI/CD Workflows, Verification Gates, Docs Portal & Skills
+# ------------------------------------------------------------------------------
+/.github/                              @umesh0492
+/scripts/                              @umesh0492
+/docs/index.html                       @umesh0492
+/docs/llms.txt                         @umesh0492
+/docs/adr/                             @umesh0492
+/skills/                               @umesh0492
+/AGENTS.md                             @umesh0492
+/ARCHITECTURE.md                       @umesh0492
+/README.md                             @umesh0492
+/CHANGELOG.md                          @umesh0492
+/CONTRIBUTING.md                       @umesh0492
+/SECURITY.md                           @umesh0492
+/CODE_OF_CONDUCT.md                    @umesh0492
+/LICENSE                               @umesh0492
+/llms.txt                              @umesh0492
+/Makefile                              @umesh0492
+/.yamllint                             @umesh0492
+/.gitignore                            @umesh0492

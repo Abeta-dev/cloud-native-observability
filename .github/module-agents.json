@@ -1,0 +1,122 @@
+{
+  "repository": "github.com/abeta-dev/cloud-native-observability",
+  "version": "v0.3.0",
+  "go_version": "1.26.0",
+  "coverage_requirement": 100.0,
+  "default_owner": "@umesh0492",
+  "agents": [
+    {
+      "id": "cno-otel-lgtm-stack",
+      "name": "OTel Collector & LGTM Telemetry Pipeline Code-Owner Agent",
+      "handle": "@cno-otel-lgtm-stack-agent",
+      "skill": "skills/cno-otel-lgtm-stack/SKILL.md",
+      "owner": "@umesh0492",
+      "paths": [
+        "compose.yaml",
+        "deploy/docker-compose/**",
+        "docs/SAMPLING_STRATEGIES.md",
+        "docs/INTEGRATION_GUIDE.md",
+        "docs/CLUSTERED_OBSERVABILITY.md",
+        "skills/cno-otel-lgtm-stack/**"
+      ],
+      "packages": [
+        "deploy/docker-compose/demo-app"
+      ],
+      "rules": [
+        "Enforce 100.0% statement coverage and zero data races (go test -race -cover ./...) on deploy/docker-compose/demo-app",
+        "Keep memory_limiter first in every OpenTelemetry Collector pipeline (traces, metrics, logs) and expose spanmetrics on :8889 (traces_spanmetrics_calls_total, traces_spanmetrics_duration_milliseconds_bucket)",
+        "Enforce Loki TSDB v13 structured metadata guardrails (trace_id, span_id, request_id stored in structured metadata, never as high-cardinality stream labels)",
+        "Validate all Grafana dashboard PromQL queries against the exported metrics catalog via ./scripts/check_version.sh"
+      ]
+    },
+    {
+      "id": "cno-sre-slo-alerting",
+      "name": "Google SRE Multi-Window Burn-Rate SLO & Alerting Code-Owner Agent",
+      "handle": "@cno-sre-slo-alerting-agent",
+      "skill": "skills/cno-sre-slo-alerting/SKILL.md",
+      "owner": "@umesh0492",
+      "paths": [
+        "deploy/slo/**",
+        "deploy/kubernetes/alerts/**",
+        "docs/SLO_DESIGN.md",
+        "docs/RUNBOOKS.md",
+        "scripts/test_alerts.sh",
+        "skills/cno-sre-slo-alerting/**"
+      ],
+      "packages": [
+        "deploy/docker-compose/demo-app"
+      ],
+      "rules": [
+        "Preserve Canonical Availability SLI PromQL AST equivalence across deploy/slo/canonical_sli.promql, deploy/docker-compose/prometheus/alerts.yml, deploy/kubernetes/alerts/slo-alerts.yaml, and deploy/terraform/modules/grafana_provisioning/alerts.tf",
+        "Enforce Google SRE multi-window multi-burn-rate alert tiers (14.4x 5m/1h critical, 6.0x 30m/6h critical, 1.0x 6h/3d warning) and 5 pre-computed recording rules (job:http_requests:error_rate_*)",
+        "Maintain strict Alertmanager configuration parity between deploy/kubernetes/alerts/alertmanager.yaml and deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml",
+        "Keep incident runbooks in docs/RUNBOOKS.md synchronized with all firing alert names"
+      ]
+    },
+    {
+      "id": "cno-gitops-terraform",
+      "name": "Kubernetes Helm, ArgoCD GitOps & Terraform IaC Code-Owner Agent",
+      "handle": "@cno-gitops-terraform-agent",
+      "skill": "skills/cno-gitops-terraform/SKILL.md",
+      "owner": "@umesh0492",
+      "paths": [
+        "deploy/kubernetes/argocd/**",
+        "deploy/kubernetes/helm-values/**",
+        "deploy/kubernetes/helm/**",
+        "deploy/kubernetes/examples/**",
+        "deploy/kubernetes/overlays/**",
+        "deploy/kubernetes/secrets/**",
+        "deploy/kubernetes/network-policies/**",
+        "deploy/kubernetes/otel-operator/**",
+        "deploy/terraform/**",
+        "docs/TERRAFORM_GUIDE.md",
+        "skills/cno-gitops-terraform/**"
+      ],
+      "packages": [
+        "deploy/docker-compose/demo-app"
+      ],
+      "rules": [
+        "Synchronize all ArgoCD Application targetRevision fields and raw valueFiles URLs in deploy/kubernetes/argocd/ to canonical release v0.3.0",
+        "Maintain Kubernetes Helm base values (deploy/kubernetes/helm/) and cloud provider overlays (values-eks.yaml, values-gke.yaml) schema validity",
+        "Enforce Terraform module formatting, validation, and Canonical SLI AST equivalence in deploy/terraform/modules/grafana_provisioning/alerts.tf",
+        "Never commit plaintext credentials or live cloud secrets in Kubernetes manifests or Terraform state/vars"
+      ]
+    },
+    {
+      "id": "cno-platform-governance",
+      "name": "Platform Governance, Truth Gates & AI Discovery Code-Owner Agent",
+      "handle": "@cno-platform-governance-agent",
+      "skill": "skills/cloud-native-observability/SKILL.md",
+      "owner": "@umesh0492",
+      "paths": [
+        ".github/**",
+        "scripts/**",
+        "docs/index.html",
+        "docs/llms.txt",
+        "docs/adr/**",
+        "skills/**",
+        "AGENTS.md",
+        "ARCHITECTURE.md",
+        "README.md",
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        "LICENSE",
+        "llms.txt",
+        "Makefile",
+        ".yamllint",
+        ".gitignore"
+      ],
+      "packages": [
+        "deploy/docker-compose/demo-app"
+      ],
+      "rules": [
+        "Pass ./scripts/check_secrets.sh and ./scripts/check_version.sh with zero leaked credentials, version drift, or unverified documentation claims",
+        "Enforce SHA-pinned GitHub Actions with explicit least-privilege permissions and FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true across .github/workflows/",
+        "Keep AGENTS.md, skills/*/SKILL.md, README.md, CHANGELOG.md, docs/index.html, and llms.txt (docs/llms.txt) synchronized at v0.3.0",
+        "Ensure all YAML files pass python3 -m yamllint . and all shell scripts remain Bash 3.2 compatible"
+      ]
+    }
+  ]
+}
