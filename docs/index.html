@@ -829,6 +829,17 @@
       color: var(--text-primary);
     }
 
+    .footer-ecosystem {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
     @media (max-width: 768px) {
       .hero h1 { font-size: 2.2rem; }
       .nav-container { flex-direction: column; align-items: flex-start; }
@@ -873,6 +884,7 @@
           <li><a href="#ast-table">AST Equivalence</a></li>
           <li><a href="#snippets">Code Snippets</a></li>
           <li><a href="#docs">Documentation</a></li>
+          <li><a href="llms.txt">llms.txt</a></li>
           <li><span class="nav-badge">v0.4.0</span></li>
         </ul>
       </nav>
@@ -921,15 +933,15 @@
             <div class="endpoints-grid">
               <div class="endpoint-item">
                 <span>Grafana UI (admin/admin)</span>
-                <a href="http://localhost:3000" target="_blank" rel="noreferrer">localhost:3000</a>
+                <a href="#matrix">localhost:3000</a>
               </div>
               <div class="endpoint-item">
                 <span>Prometheus Web</span>
-                <a href="http://localhost:9090" target="_blank" rel="noreferrer">localhost:9090</a>
+                <a href="#burn-rate">localhost:9090</a>
               </div>
               <div class="endpoint-item">
                 <span>Tempo Tracing</span>
-                <a href="http://localhost:3200" target="_blank" rel="noreferrer">localhost:3200</a>
+                <a href="#architecture">localhost:3200</a>
               </div>
               <div class="endpoint-item">
                 <span>OTel OTLP Endpoints</span>
@@ -1505,16 +1517,29 @@ inhibit_rules:
 
   <!-- Footer -->
   <footer>
-    <div class="container footer-content">
-      <div>
-        <p><strong>cloud-native-observability</strong> · Production-Grade Telemetry Architecture</p>
-        <p class="footer-meta">Released under the MIT License · Synchronized to v0.4.0</p>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <p><strong>cloud-native-observability</strong> · Production-Grade Telemetry Architecture</p>
+          <p class="footer-meta">Released under the MIT License · Synchronized to v0.4.0</p>
+        </div>
+        <div class="footer-links">
+          <a href="https://github.com/abeta-dev/cloud-native-observability" target="_blank" rel="noreferrer">GitHub Repository</a>
+          <a href="RUNBOOKS.md">Runbooks</a>
+          <a href="SLO_DESIGN.md">SLO Design</a>
+          <a href="llms.txt">llms.txt</a>
+          <a href="https://github.com/abeta-dev/cloud-native-observability/blob/main/CONTRIBUTING.md">Contributing</a>
+        </div>
       </div>
-      <div class="footer-links">
-        <a href="https://github.com/abeta-dev/cloud-native-observability" target="_blank" rel="noreferrer">GitHub Repository</a>
-        <a href="RUNBOOKS.md">Runbooks</a>
-        <a href="SLO_DESIGN.md">SLO Design</a>
-        <a href="https://github.com/abeta-dev/cloud-native-observability/blob/main/CONTRIBUTING.md">Contributing</a>
+      <div class="footer-ecosystem">
+        <span><strong>Abeta Go Ecosystem</strong></span>
+        <div class="footer-links">
+          <a href="https://abeta-dev.github.io/go-libs/" target="_blank" rel="noreferrer">go-libs v0.5.0 (36 packages)</a>
+          <a href="https://abeta-dev.github.io/go-fintech-india/" target="_blank" rel="noreferrer">go-fintech-india v0.4.0</a>
+          <a href="https://abeta-dev.github.io/go-app-kit/" target="_blank" rel="noreferrer">go-app-kit v0.6.0</a>
+          <a href="https://abeta-dev.github.io/cloud-native-observability/">cloud-native-observability v0.4.0</a>
+          <a href="llms.txt">llms.txt</a>
+        </div>
       </div>
     </div>
   </footer>

@@ -33,13 +33,11 @@
 #    Kubernetes Helm Profiles, Overlays, ArgoCD App-of-Apps & Terraform IaC
 # ------------------------------------------------------------------------------
 /deploy/kubernetes/argocd/             @umesh0492
-/deploy/kubernetes/helm-values/        @umesh0492
 /deploy/kubernetes/helm/               @umesh0492
 /deploy/kubernetes/examples/           @umesh0492
 /deploy/kubernetes/overlays/           @umesh0492
 /deploy/kubernetes/secrets/            @umesh0492
 /deploy/kubernetes/network-policies/   @umesh0492
-/deploy/kubernetes/otel-operator/      @umesh0492
 /deploy/terraform/                     @umesh0492
 /docs/TERRAFORM_GUIDE.md               @umesh0492
 

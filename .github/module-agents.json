@@ -61,13 +61,11 @@
       "owner": "@umesh0492",
       "paths": [
         "deploy/kubernetes/argocd/**",
-        "deploy/kubernetes/helm-values/**",
         "deploy/kubernetes/helm/**",
         "deploy/kubernetes/examples/**",
         "deploy/kubernetes/overlays/**",
         "deploy/kubernetes/secrets/**",
         "deploy/kubernetes/network-policies/**",
-        "deploy/kubernetes/otel-operator/**",
         "deploy/terraform/**",
         "docs/TERRAFORM_GUIDE.md",
         "skills/cno-gitops-terraform/**"

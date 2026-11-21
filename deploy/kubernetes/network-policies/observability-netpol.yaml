@@ -1,0 +1,60 @@
+# ==============================================================================
+# Kubernetes NetworkPolicy: Observability Telemetry Plane Isolation
+# ==============================================================================
+# Restricts ingress and egress in the monitoring namespace so Prometheus,
+# Grafana, Alertmanager, Loki, Tempo, and OpenTelemetry Collector communicate
+# over explicitly permitted telemetry ports (4317/4318 OTLP, 8889 spanmetrics,
+# 9090 Prometheus, 9093 Alertmanager, 3000 Grafana, 3100 Loki, 3200 Tempo).
+# ==============================================================================
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: observability-telemetry-plane
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/part-of: cloud-native-observability
+    tier: observability
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow intra-namespace communication between Prometheus, Grafana, Alertmanager, and OTel Collector
+    - from:
+        - podSelector: {}
+    # Allow application namespaces to push OTLP telemetry (4317 gRPC / 4318 HTTP) and scrape metrics
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3100
+        - protocol: TCP
+          port: 3200
+        - protocol: TCP
+          port: 4317
+        - protocol: TCP
+          port: 4318
+        - protocol: TCP
+          port: 8889
+        - protocol: TCP
+          port: 9090
+        - protocol: TCP
+          port: 9093
+  egress:
+    # Allow DNS resolution via kube-dns / CoreDNS
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow intra-cluster telemetry scraping and forwarding to logging/tracing namespaces and Kubernetes API
+    - to:
+        - namespaceSelector: {}
+    # Allow outbound HTTPS for Alertmanager webhook receivers (PagerDuty / Slack) and cloud object storage (S3 / GCS)
+    - ports:
+        - protocol: TCP
+          port: 443
