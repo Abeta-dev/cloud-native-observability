@@ -18,6 +18,11 @@ output "loki_release_name" {
   description = "Helm release name for Loki"
 }
 
+output "otel_collector_release_name" {
+  value       = helm_release.otel_collector.name
+  description = "Helm release name for OpenTelemetry Collector"
+}
+
 output "grafana_admin_password" {
   value       = local.grafana_password
   description = "Initial admin password configured in the grafana-admin-credentials secret"

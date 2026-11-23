@@ -117,6 +117,8 @@ The platform automatically provisions production-grade Grafana dashboards with z
 3. **Logs Explorer & Error Streams** (`logs-explorer.json`):
    - Centralized container log stream viewer.
    - Real-time error filter isolating 5xx events and stack traces.
+4. **Microservice Golden Signals & RED Metrics** (`microservice-golden-signals.json`):
+   - Request rate (RPS), HTTP 5xx error ratio, P50/P95/P99 latency distributions, and worker pool saturation.
 
 ---
 
@@ -204,10 +206,12 @@ kubectl apply -f deploy/kubernetes/argocd/app-of-apps.yaml
 ```
 
 ArgoCD automatically reconciles and manages:
-- `kube-prometheus-stack` (Prometheus Operator, Alertmanager, Node Exporter)
-- `loki` (Scalable TSDB log storage with S3/GCS)
-- `tempo-distributed` (Scalable trace storage with S3/GCS)
-- `opentelemetry-collector` (DaemonSet with `k8sattributes` processor)
+- `observability-secrets` (Sync-Wave `-1`: namespace & credential bootstrap)
+- `kube-prometheus-stack` (Sync-Wave `0`: Prometheus Operator, Alertmanager, Node Exporter)
+- `loki` (Sync-Wave `0`: Scalable TSDB log storage with S3/GCS)
+- `tempo-distributed` (Sync-Wave `0`: Scalable trace storage with S3/GCS)
+- `opentelemetry-collector` (Sync-Wave `1`: DaemonSet with `k8sattributes` processor)
+- `observability-alerts` (Sync-Wave `1`: Google SRE multi-window burn-rate & Kubernetes node `PrometheusRule` CRDs)
 
 Cloud provider overlay templates are available in [`deploy/kubernetes/examples/overlays/`](deploy/kubernetes/examples/overlays/) for AWS EKS (`values-eks.yaml` with gp3 & IRSA) and GCP GKE (`values-gke.yaml` with Workload Identity).
 
@@ -220,7 +224,7 @@ Manage telemetry infrastructure, long-term cloud storage, and Grafana configurat
 | Pillar | When to Use | Where to Use | Why Terraform |
 |---|---|---|---|
 | **Cloud Storage** | Long-term trace & log retention | AWS S3 / GCS / Azure Blob | Enforces AES-256 SSE encryption, public access block, and automated lifecycle migration to Infrequent Access. |
-| **Workloads** | Kubernetes monitoring provisioning | AWS EKS / GCP GKE / Minikube | Orchestrates `kube-prometheus-stack`, `tempo`, and `loki` Helm releases via declarative state. |
+| **Workloads** | Kubernetes monitoring provisioning | AWS EKS / GCP GKE / Minikube | Orchestrates `kube-prometheus-stack`, `tempo-distributed`, `loki`, and `opentelemetry-collector` Helm releases via declarative state. |
 | **OaC (Dashboards & Alerts)** | Multi-environment promotion | Grafana Cloud / Self-hosted Grafana | Eliminates ClickOps drift; peer-reviews P1/P2 alert rules, SLO thresholds, and PagerDuty/Slack routing via Git PRs. |
 
 ```bash
@@ -265,7 +269,8 @@ Read the full [Terraform Observability Guide](docs/TERRAFORM_GUIDE.md) for archi
     ├── RUNBOOKS.md                  # SRE incident response runbooks
     ├── SAMPLING_STRATEGIES.md       # OpenTelemetry trace sampling strategies guide
     ├── SLO_DESIGN.md                # Mathematical error budget calculation guide
-    └── TERRAFORM_GUIDE.md           # Observability as Code architecture & drift runbook
+    ├── TERRAFORM_GUIDE.md           # Observability as Code architecture & drift runbook
+    └── VERSIONING.md                # SemVer stability matrix & N+2 deprecation policy
 ```
 
 ---
@@ -284,8 +289,8 @@ See the full [Integration Guide](docs/INTEGRATION_GUIDE.md) for copy-paste recip
 | Repository | Role in Ecosystem | Documentation Portal | Go Reference |
 | :--- | :--- | :--- | :--- |
 | **[`github.com/abeta-dev/go-libs`](https://github.com/abeta-dev/go-libs)** | 36 foundational Go infrastructure packages (v0.5.0) (`compress` Brotli/Gzip, `ginmw`, `circuitbreaker`, `retry`, `ratelimit`, `workerpool`, `cache`, `telemetry`, `logger`, `db`, `rbac`, `jwks`) | [abeta-dev.github.io/go-libs](https://abeta-dev.github.io/go-libs/) | [pkg.go.dev/github.com/abeta-dev/go-libs](https://pkg.go.dev/github.com/abeta-dev/go-libs) |
-| **[`github.com/abeta-dev/go-fintech-india`](https://github.com/abeta-dev/go-fintech-india)** | Zero-dependency India FinTech & statutory compliance engine (127 exported symbols across 15 domain files, v0.4.0: exact int64 paise Money, GSTIN, PAN, Aadhaar, IFSC, UPI, webhooks) | [abeta-dev.github.io/go-fintech-india](https://abeta-dev.github.io/go-fintech-india/) | [pkg.go.dev/github.com/abeta-dev/go-fintech-india](https://pkg.go.dev/github.com/abeta-dev/go-fintech-india) |
-| **[`github.com/abeta-dev/go-app-kit`](https://github.com/abeta-dev/go-app-kit)** | 5 higher-order application workflow engines (v0.6.0: transactional outbox, multi-channel notifications, audit trails, streaming CSV/JSONL export, PDF generation) | [abeta-dev.github.io/go-app-kit](https://abeta-dev.github.io/go-app-kit/) | [pkg.go.dev/github.com/abeta-dev/go-app-kit](https://pkg.go.dev/github.com/abeta-dev/go-app-kit) |
+| **[`github.com/abeta-dev/go-fintech-india`](https://github.com/abeta-dev/go-fintech-india)** | Zero-dependency India FinTech & statutory compliance engine (v0.5.0: exact int64 paise Money, GST Tax-Split & Statutory TDS, GSTIN, PAN, Aadhaar, IFSC, UPI, webhooks) | [abeta-dev.github.io/go-fintech-india](https://abeta-dev.github.io/go-fintech-india/) | [pkg.go.dev/github.com/abeta-dev/go-fintech-india](https://pkg.go.dev/github.com/abeta-dev/go-fintech-india) |
+| **[`github.com/abeta-dev/go-app-kit`](https://github.com/abeta-dev/go-app-kit)** | 7 higher-order enterprise application workflow engines (v0.7.0: transactional outbox, multi-channel notifications, audit trails, streaming CSV/JSONL export, PDF generation, storage, scheduler) | [abeta-dev.github.io/go-app-kit](https://abeta-dev.github.io/go-app-kit/) | [pkg.go.dev/github.com/abeta-dev/go-app-kit](https://pkg.go.dev/github.com/abeta-dev/go-app-kit) |
 | **[`github.com/abeta-dev/cloud-native-observability`](https://github.com/abeta-dev/cloud-native-observability)** | Production OpenTelemetry + LGTM (`Loki`, `Grafana`, `Tempo`, `Prometheus`) platform (v0.4.0), Google SRE burn-rate SLO alerts, ArgoCD GitOps & Terraform IaC | [abeta-dev.github.io/cloud-native-observability](https://abeta-dev.github.io/cloud-native-observability/) | [pkg.go.dev/github.com/abeta-dev/cloud-native-observability](https://pkg.go.dev/github.com/abeta-dev/cloud-native-observability) |
 
 ---

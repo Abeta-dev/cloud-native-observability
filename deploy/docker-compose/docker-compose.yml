@@ -23,6 +23,8 @@ services:
       - cno-network
 
   # 2. Loki - Centralized Log Aggregator
+  # Note: Upstream grafana/loki:3.0.0 is a distroless container without shell/wget/curl;
+  # readiness is verified externally against http://localhost:3100/ready by scripts/smoke_test.sh.
   loki:
     image: grafana/loki:3.0.0
     container_name: cno-loki
@@ -36,6 +38,8 @@ services:
       - cno-network
 
   # 3. Tempo - Distributed Tracing Backend
+  # Note: Upstream grafana/tempo:2.4.1 is a distroless container without shell/wget/curl;
+  # readiness is verified externally against http://localhost:3200/ready by scripts/smoke_test.sh.
   tempo:
     image: grafana/tempo:2.4.1
     container_name: cno-tempo
@@ -50,6 +54,8 @@ services:
       - cno-network
 
   # 4. OpenTelemetry Collector - Unified Telemetry Gateway
+  # Note: Upstream otel/opentelemetry-collector-contrib:0.98.0 is a distroless scratch image
+  # without shell/wget/curl; readiness is verified externally against :13133 by scripts/smoke_test.sh.
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.98.0
     container_name: cno-otel-collector

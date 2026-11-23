@@ -682,6 +682,14 @@ if command -v go >/dev/null 2>&1 && [ -f "deploy/docker-compose/demo-app/go.mod"
   echo "   - demo-app unit tests passed with 100.0% statement coverage ✅"
 fi
 
+if [ -x "${SCRIPT_DIR}/check_leaf_imports.sh" ]; then
+  "${SCRIPT_DIR}/check_leaf_imports.sh"
+fi
+
+if [ -x "${SCRIPT_DIR}/check_deprecation.sh" ]; then
+  "${SCRIPT_DIR}/check_deprecation.sh"
+fi
+
 if [ -x "${SCRIPT_DIR}/check_secrets.sh" ]; then
   "${SCRIPT_DIR}/check_secrets.sh"
 fi

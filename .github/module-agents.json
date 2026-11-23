@@ -91,6 +91,7 @@
         "scripts/**",
         "docs/index.html",
         "docs/llms.txt",
+        "docs/VERSIONING.md",
         "docs/adr/**",
         "skills/**",
         "AGENTS.md",

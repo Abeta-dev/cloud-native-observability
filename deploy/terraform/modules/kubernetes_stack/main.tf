@@ -168,3 +168,18 @@ resource "helm_release" "loki" {
     })
   ]
 }
+
+# -----------------------------------------------------------------------------
+# Helm: OpenTelemetry Collector (OTLP ingestion, memory_limiter, spanmetrics)
+# -----------------------------------------------------------------------------
+resource "helm_release" "otel_collector" {
+  name       = "opentelemetry-collector"
+  repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
+  chart      = "opentelemetry-collector"
+  version    = "0.88.0"
+  namespace  = kubernetes_namespace.monitoring.metadata[0].name
+
+  values = [
+    file("${path.module}/../../../kubernetes/helm/otel-collector/values.yaml")
+  ]
+}

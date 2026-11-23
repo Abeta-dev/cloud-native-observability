@@ -22,7 +22,7 @@ Every path in `cloud-native-observability` (`v0.4.0`) is mapped via [`.github/CO
 | **`@cno-otel-lgtm-stack-agent`** | [`skills/cno-otel-lgtm-stack/SKILL.md`](skills/cno-otel-lgtm-stack/SKILL.md) | `/compose.yaml`, `/deploy/docker-compose/`, `/docs/SAMPLING_STRATEGIES.md`, `/docs/INTEGRATION_GUIDE.md`, `/docs/CLUSTERED_OBSERVABILITY.md` | `demo-app` unit & race tests (`100.0%` coverage), OTel Collector `memory_limiter` + `spanmetrics` (`:8889`), Loki TSDB `v13` structured metadata, Grafana dashboard metric catalog validation |
 | **`@cno-sre-slo-alerting-agent`** | [`skills/cno-sre-slo-alerting/SKILL.md`](skills/cno-sre-slo-alerting/SKILL.md) | `/deploy/slo/`, `/deploy/kubernetes/alerts/`, `/docs/SLO_DESIGN.md`, `/docs/RUNBOOKS.md`, `/scripts/test_alerts.sh` | Canonical Availability SLI PromQL AST equivalence, Google SRE multi-window burn-rate alerts (`14.4x`, `6.0x`, `1.0x`), Alertmanager standalone/Helm parity, runbook synchronization |
 | **`@cno-gitops-terraform-agent`** | [`skills/cno-gitops-terraform/SKILL.md`](skills/cno-gitops-terraform/SKILL.md) | `/deploy/kubernetes/argocd/`, `/deploy/kubernetes/helm/`, `/deploy/kubernetes/examples/`, `/deploy/kubernetes/overlays/`, `/deploy/kubernetes/secrets/`, `/deploy/kubernetes/network-policies/`, `/deploy/terraform/`, `/docs/TERRAFORM_GUIDE.md` | ArgoCD `v0.4.0` revision parity, Helm values & cloud overlays (`values-eks.yaml`, `values-gke.yaml`), Terraform module & Canonical SLI AST equivalence |
-| **`@cno-platform-governance-agent`** | [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) | `/.github/`, `/scripts/`, `/docs/index.html`, `/docs/llms.txt`, `/docs/adr/`, `/skills/`, `/AGENTS.md`, `/ARCHITECTURE.md`, `/README.md`, `/CHANGELOG.md`, `/llms.txt`, `/Makefile`, `/.yamllint` | `./scripts/check_secrets.sh`, `./scripts/check_version.sh`, SHA-pinned GitHub Actions (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`), Bash 3.2 syntax, and `yamllint` verification |
+| **`@cno-platform-governance-agent`** | [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) | `/.github/`, `/scripts/`, `/docs/index.html`, `/docs/llms.txt`, `/docs/VERSIONING.md`, `/docs/adr/`, `/skills/`, `/AGENTS.md`, `/ARCHITECTURE.md`, `/README.md`, `/CHANGELOG.md`, `/llms.txt`, `/Makefile`, `/.yamllint` | `./scripts/check_secrets.sh`, `./scripts/check_leaf_imports.sh`, `./scripts/check_deprecation.sh`, `./scripts/check_version.sh`, SHA-pinned GitHub Actions (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`), Bash 3.2 syntax, and `yamllint` verification |
 
 Run the local Module Code-Owner Agent review before pushing:
 
@@ -36,12 +36,16 @@ Before committing or opening a PR in this repository, always run:
 
 ```bash
 ./scripts/check_secrets.sh
+./scripts/check_leaf_imports.sh
+./scripts/check_deprecation.sh
 ./scripts/check_version.sh
 ./scripts/test_alerts.sh
 (cd deploy/docker-compose/demo-app && go test -race -cover ./...)
 ```
 
 - **Secret & Credential Scanning Gate (`./scripts/check_secrets.sh`)**: Enforces zero tracked key/`.env` files, PEM private key headers, cloud/API tokens, embedded DSN credentials, and verified git history secrets via TruffleHog.
+- **Zero-Dependency Standard-Library Isolation Gate (`./scripts/check_leaf_imports.sh`)**: Enforces that `deploy/docker-compose/demo-app` remains 100% pure Go standard library (`0` external third-party dependencies).
+- **Strict `N + 2` Deprecation Window Gate (`./scripts/check_deprecation.sh`)**: Enforces `// Deprecated: Since vX.Y.Z (remove in >= vA.B.C). Use <Replacement> instead.` with at least a 2-minor-release (`N + 2`) deprecation window.
 - **Demo App Coverage Gate**: `deploy/docker-compose/demo-app` unit tests must pass `go test -race -cover ./...` with `100.0%` statement coverage.
 - **Alertmanager Parity Gate**: `deploy/kubernetes/alerts/alertmanager.yaml` and the `alertmanager.config` section in `deploy/kubernetes/helm/kube-prometheus-stack/values-base.yaml` must remain semantically identical.
 - **Canonical Availability SLI Gate**: Canonical SLI (`deploy/slo/canonical_sli.promql`), Docker Compose Golden Signals (`deploy/docker-compose/prometheus/alerts.yml`), Kubernetes recording rules (`deploy/kubernetes/alerts/slo-alerts.yaml`), and Terraform SLO modules (`deploy/terraform/modules/grafana_provisioning/alerts.tf`) must use the exact same PromQL AST for HTTP error ratio (`status=~"5.."` over total `http_requests_total`).

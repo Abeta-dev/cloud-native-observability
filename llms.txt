@@ -19,6 +19,8 @@ npx skills add abeta-dev/cloud-native-observability
 
 # Run repository truth gates, PromQL AST equivalence checks, and demo-app 100.0% coverage gate
 ./scripts/check_secrets.sh
+./scripts/check_leaf_imports.sh
+./scripts/check_deprecation.sh
 ./scripts/check_version.sh
 ./scripts/test_alerts.sh
 (cd deploy/docker-compose/demo-app && go test -race -cover ./...)
@@ -41,12 +43,13 @@ npx skills add abeta-dev/cloud-native-observability
 - [docs/RUNBOOKS.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md): Actionable SRE incident triage and mitigation runbooks for availability, latency, saturation, and burn-rate alerts.
 - [docs/TERRAFORM_GUIDE.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/TERRAFORM_GUIDE.md): Observability-as-Code (OaC) guide covering cloud object storage, Helm release provisioning, and Grafana alerting/dashboard state management.
 - [docs/SAMPLING_STRATEGIES.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/SAMPLING_STRATEGIES.md): OpenTelemetry head vs. tail-based trace sampling strategies, latency/error retention policies, and cost optimization.
+- [docs/VERSIONING.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/VERSIONING.md): Semantic Versioning stability matrix, component maturity tiers, and strict N+2 deprecation window contract.
 
 ## Abeta Go Ecosystem
 
 | Repository | Role in Ecosystem | Documentation Portal | Go Reference / Stack |
 | :--- | :--- | :--- | :--- |
 | **[`github.com/abeta-dev/go-libs`](https://github.com/abeta-dev/go-libs)** | 36 foundational Go infrastructure packages (v0.5.0) (`compress` Brotli/Gzip, `ginmw`, `circuitbreaker`, `retry`, `ratelimit`, `workerpool`, `cache`, `telemetry`, `logger`, `db`, `rbac`, `jwks`) | [abeta-dev.github.io/go-libs](https://abeta-dev.github.io/go-libs/) | [pkg.go.dev/github.com/abeta-dev/go-libs](https://pkg.go.dev/github.com/abeta-dev/go-libs) |
-| **[`github.com/abeta-dev/go-fintech-india`](https://github.com/abeta-dev/go-fintech-india)** | Zero-dependency India FinTech & statutory compliance engine (127 exported symbols across 15 domain files, v0.4.0: exact int64 paise Money, GSTIN, PAN, Aadhaar, IFSC, UPI, webhooks) | [abeta-dev.github.io/go-fintech-india](https://abeta-dev.github.io/go-fintech-india/) | [pkg.go.dev/github.com/abeta-dev/go-fintech-india](https://pkg.go.dev/github.com/abeta-dev/go-fintech-india) |
-| **[`github.com/abeta-dev/go-app-kit`](https://github.com/abeta-dev/go-app-kit)** | 5 higher-order application workflow engines (v0.6.0: transactional outbox, multi-channel notifications, audit trails, streaming CSV/JSONL export, PDF generation) | [abeta-dev.github.io/go-app-kit](https://abeta-dev.github.io/go-app-kit/) | [pkg.go.dev/github.com/abeta-dev/go-app-kit](https://pkg.go.dev/github.com/abeta-dev/go-app-kit) |
+| **[`github.com/abeta-dev/go-fintech-india`](https://github.com/abeta-dev/go-fintech-india)** | Zero-dependency India FinTech & statutory compliance engine (v0.5.0: exact int64 paise Money, GST Tax-Split & Statutory TDS, GSTIN, PAN, Aadhaar, IFSC, UPI, webhooks) | [abeta-dev.github.io/go-fintech-india](https://abeta-dev.github.io/go-fintech-india/) | [pkg.go.dev/github.com/abeta-dev/go-fintech-india](https://pkg.go.dev/github.com/abeta-dev/go-fintech-india) |
+| **[`github.com/abeta-dev/go-app-kit`](https://github.com/abeta-dev/go-app-kit)** | 7 higher-order enterprise application workflow engines (v0.7.0: transactional outbox, multi-channel notifications, audit trails, streaming CSV/JSONL export, PDF generation, storage, scheduler) | [abeta-dev.github.io/go-app-kit](https://abeta-dev.github.io/go-app-kit/) | [pkg.go.dev/github.com/abeta-dev/go-app-kit](https://pkg.go.dev/github.com/abeta-dev/go-app-kit) |
 | **[`github.com/abeta-dev/cloud-native-observability`](https://github.com/abeta-dev/cloud-native-observability)** | Production OpenTelemetry + LGTM (Loki, Grafana, Tempo, Prometheus) platform (v0.4.0), Google SRE burn-rate SLO alerts, ArgoCD GitOps & Terraform IaC | [abeta-dev.github.io/cloud-native-observability](https://abeta-dev.github.io/cloud-native-observability/) | [pkg.go.dev/github.com/abeta-dev/cloud-native-observability](https://pkg.go.dev/github.com/abeta-dev/cloud-native-observability) |
