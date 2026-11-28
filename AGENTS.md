@@ -2,6 +2,17 @@
 
 Production-grade OpenTelemetry + LGTM (`Loki` + `Grafana` + `Tempo` + `Prometheus`) observability blueprint (`v0.4.0`, `Go 1.26.0`) with Google SRE multi-window burn-rate alerting, Kubernetes ArgoCD GitOps overlays, and Terraform Observability-as-Code.
 
+## Mandatory Grounding Before Generation (Fixed Analysis Order)
+
+Before generating, modifying, or reviewing any code, alert rule, dashboard, Helm chart, or Terraform module in this repository, **follow this exact 6-step analysis order**:
+
+1. **`AGENTS.md`** *(this file)* — Identify the matching domain subskill, Module Code-Owner Agent, telemetry/SLO invariants, and verification gates.
+2. **Architecture Docs** — Read [`ARCHITECTURE.md`](ARCHITECTURE.md), [`docs/SLO_DESIGN.md`](docs/SLO_DESIGN.md), and [`docs/adr/`](docs/adr/) to understand LGTM + OTel Collector topology and cardinality guardrails.
+3. **Flow Docs** — Read [`docs/FLOWS.md`](docs/FLOWS.md) to trace OTel ingestion (`memory_limiter` -> `spanmetrics` -> LGTM), Canonical SLI -> multi-window burn-rate alerting, ArgoCD GitOps delivery, and 3-layer Terraform provisioning.
+4. **Pattern Docs (Domain Subskills)** — Load the narrowest matching `skills/<domain>/SKILL.md` from the Skill Routing Table below (single source of truth for PromQL, collector, Helm, and Terraform patterns).
+5. **CodeGraph & Artifact Symbol Index** — Consult [`docs/CODEGRAPH.md`](docs/CODEGRAPH.md) (cross-artifact dependency map, `demo-app` Go AST `file:line` coordinates, dashboard metric catalog, ArgoCD/Terraform index) and [`llms.txt`](llms.txt) — plus local `graphify-out/GRAPH_REPORT.md` when available.
+6. **Source Reads Only for Verification** — Open raw `.go`, `.yaml`, `.promql`, `.json`, or `.tf` files **only** to verify exact fields, line coordinates, and tests for the specific targets identified in Steps 1–5 before editing.
+
 ## Skill Routing Table
 
 Load the smallest subskill that matches your task:
@@ -22,7 +33,7 @@ Every path in `cloud-native-observability` (`v0.4.0`) is mapped via [`.github/CO
 | **`@cno-otel-lgtm-stack-agent`** | [`skills/cno-otel-lgtm-stack/SKILL.md`](skills/cno-otel-lgtm-stack/SKILL.md) | `/compose.yaml`, `/deploy/docker-compose/`, `/docs/SAMPLING_STRATEGIES.md`, `/docs/INTEGRATION_GUIDE.md`, `/docs/CLUSTERED_OBSERVABILITY.md` | `demo-app` unit & race tests (`100.0%` coverage), OTel Collector `memory_limiter` + `spanmetrics` (`:8889`), Loki TSDB `v13` structured metadata, Grafana dashboard metric catalog validation |
 | **`@cno-sre-slo-alerting-agent`** | [`skills/cno-sre-slo-alerting/SKILL.md`](skills/cno-sre-slo-alerting/SKILL.md) | `/deploy/slo/`, `/deploy/kubernetes/alerts/`, `/docs/SLO_DESIGN.md`, `/docs/RUNBOOKS.md`, `/scripts/test_alerts.sh` | Canonical Availability SLI PromQL AST equivalence, Google SRE multi-window burn-rate alerts (`14.4x`, `6.0x`, `1.0x`), Alertmanager standalone/Helm parity, runbook synchronization |
 | **`@cno-gitops-terraform-agent`** | [`skills/cno-gitops-terraform/SKILL.md`](skills/cno-gitops-terraform/SKILL.md) | `/deploy/kubernetes/argocd/`, `/deploy/kubernetes/helm/`, `/deploy/kubernetes/examples/`, `/deploy/kubernetes/overlays/`, `/deploy/kubernetes/secrets/`, `/deploy/kubernetes/network-policies/`, `/deploy/terraform/`, `/docs/TERRAFORM_GUIDE.md` | ArgoCD `v0.4.0` revision parity, Helm values & cloud overlays (`values-eks.yaml`, `values-gke.yaml`), Terraform module & Canonical SLI AST equivalence |
-| **`@cno-platform-governance-agent`** | [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) | `/.github/`, `/scripts/`, `/docs/index.html`, `/docs/llms.txt`, `/docs/VERSIONING.md`, `/docs/adr/`, `/skills/`, `/AGENTS.md`, `/ARCHITECTURE.md`, `/README.md`, `/CHANGELOG.md`, `/llms.txt`, `/Makefile`, `/.yamllint` | `./scripts/check_secrets.sh`, `./scripts/check_leaf_imports.sh`, `./scripts/check_deprecation.sh`, `./scripts/check_version.sh`, SHA-pinned GitHub Actions (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`), Bash 3.2 syntax, and `yamllint` verification |
+| **`@cno-platform-governance-agent`** | [`skills/cloud-native-observability/SKILL.md`](skills/cloud-native-observability/SKILL.md) | `/.github/`, `/scripts/`, `/docs/index.html`, `/docs/llms.txt`, `/docs/FLOWS.md`, `/docs/CODEGRAPH.md`, `/docs/VERSIONING.md`, `/docs/adr/`, `/skills/`, `/AGENTS.md`, `/ARCHITECTURE.md`, `/README.md`, `/CHANGELOG.md`, `/llms.txt`, `/Makefile`, `/.yamllint` | `./scripts/check_secrets.sh`, `./scripts/check_leaf_imports.sh`, `./scripts/check_deprecation.sh`, `./scripts/check_version.sh`, SHA-pinned GitHub Actions (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`), Bash 3.2 syntax, and `yamllint` verification |
 
 Run the local Module Code-Owner Agent review before pushing:
 

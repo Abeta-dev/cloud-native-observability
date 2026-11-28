@@ -49,6 +49,8 @@
 /scripts/                              @umesh0492
 /docs/index.html                       @umesh0492
 /docs/llms.txt                         @umesh0492
+/docs/FLOWS.md                         @umesh0492
+/docs/CODEGRAPH.md                     @umesh0492
 /docs/VERSIONING.md                    @umesh0492
 /docs/adr/                             @umesh0492
 /skills/                               @umesh0492

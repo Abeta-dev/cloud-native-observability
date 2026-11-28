@@ -28,7 +28,7 @@ npx skills add abeta-dev/cloud-native-observability
 
 ## AI Agent Guidance & Skill Routing
 
-- [AGENTS.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/AGENTS.md): Root AI agent router, architectural invariants, and mandatory verification gates.
+- [AGENTS.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/AGENTS.md): Mandatory 6-step grounding order, root AI agent router, architectural invariants, and verification gates.
 - [skills/cloud-native-observability/SKILL.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/skills/cloud-native-observability/SKILL.md): Umbrella skill for OpenTelemetry + LGTM stack instrumentation, SLO alerting, and truth-gate verification.
 - [skills/cno-otel-lgtm-stack/SKILL.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/skills/cno-otel-lgtm-stack/SKILL.md): OpenTelemetry Collector pipeline (`:4317`/`:4318`), `spanmetrics` connector (`traces_spanmetrics_calls_total`, `traces_spanmetrics_duration_milliseconds_bucket` on `:8889`), Prometheus scraping, Loki TSDB `v13` structured metadata, Tempo traces, and Grafana dashboards.
 - [skills/cno-sre-slo-alerting/SKILL.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/skills/cno-sre-slo-alerting/SKILL.md): Google SRE multi-window multi-burn-rate alerts (`14.4x` 1h/5m, `6.0x` 6h/30m, `1.0x` 3d/6h), precomputed recording rules (`job:http_requests:error_rate_*`), Alertmanager parity, and PromQL AST equivalence gates.
@@ -38,6 +38,8 @@ npx skills add abeta-dev/cloud-native-observability
 
 - [Interactive Documentation Portal](https://abeta-dev.github.io/cloud-native-observability/): Live architectural walkthrough, PromQL SLO simulator, and deployment blueprints.
 - [ARCHITECTURE.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/ARCHITECTURE.md): End-to-end telemetry ingestion, storage, correlation, and GitOps architecture specification.
+- [docs/FLOWS.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/FLOWS.md): Telemetry ingestion, Canonical SLI -> multi-window burn-rate alerting, ArgoCD GitOps delivery, and 3-layer Terraform flows.
+- [docs/CODEGRAPH.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/CODEGRAPH.md): Deterministic cross-artifact dependency map, `demo-app` Go AST `file:line` coordinates, dashboard metric catalog, and ArgoCD/Terraform index.
 - [docs/INTEGRATION_GUIDE.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/INTEGRATION_GUIDE.md): Step-by-step guide for connecting Go microservices built with `go-libs` and `go-app-kit` to OTel Collector, Prometheus, Loki, and Tempo.
 - [docs/SLO_DESIGN.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/SLO_DESIGN.md): Mathematical derivation of error budgets, multi-window multi-burn-rate thresholds (`14.4x`, `6.0x`, `1.0x`), and recording rule optimizations.
 - [docs/RUNBOOKS.md](https://github.com/abeta-dev/cloud-native-observability/blob/main/docs/RUNBOOKS.md): Actionable SRE incident triage and mitigation runbooks for availability, latency, saturation, and burn-rate alerts.
